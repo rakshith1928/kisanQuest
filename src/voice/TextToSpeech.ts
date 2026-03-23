@@ -7,7 +7,7 @@ import * as Speech from 'expo-speech';
  */
 
 const GOOGLE_TTS_ENDPOINT = 'https://texttospeech.googleapis.com/v1/text:synthesize';
-const API_KEY: string | null = process.env.EXPO_PUBLIC_GOOGLE_API_KEY || null;
+const API_KEY: string | null = null;
 
 export interface VoiceConfig {
     languageCode: string;
