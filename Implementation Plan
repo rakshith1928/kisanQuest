@@ -1,0 +1,292 @@
+# KisanQuest — Voice-Powered Agricultural Financial RPG
+
+A gamified financial literacy platform for Indian farmers, built as an offline-first RPG with voice-driven gameplay in 15+ Indic languages.
+
+---
+
+## Proposed Changes
+
+### Phase 1: Project Foundation
+
+#### [NEW] Project Initialization
+
+```bash
+npx -y create-expo-app@latest ./ --template blank
+```
+
+**Project structure:**
+```
+KisanQuest/
+├── src/
+│   ├── components/       # Reusable UI components
+│   ├── screens/          # App screens (Onboarding, Farm, Gameplay, Dashboard)
+│   ├── engine/           # Core game engine
+│   │   ├── GameEngine.js         # Main engine orchestrator
+│   │   ├── DecisionTree.js       # JSON decision-tree processor
+│   │   ├── StateMachine.js       # Game flow state machine
+│   │   ├── OutcomeCalculator.js  # Probabilistic outcome engine
+│   │   └── scenarios/            # JSON scenario data files
+│   ├── voice/            # Voice system
+│   │   ├── VoiceManager.js       # Voice input/output orchestrator
+│   │   ├── SpeechToText.js       # Google Cloud STT wrapper
+│   │   ├── TextToSpeech.js       # Google Cloud TTS wrapper
+│   │   └── VoiceCommands.js      # Command mapping
+│   ├── storage/          # Offline storage layer
+│   │   ├── GameStateDB.js        # SQLite / AsyncStorage wrapper
+│   │   └── SyncManager.js        # Online sync handler
+│   ├── localization/     # i18n setup
+│   │   ├── i18n.js               # i18next config
+│   │   └── locales/              # Language JSON files (hi, mr, ta, te, etc.)
+│   ├── navigation/       # React Navigation setup
+│   ├── services/         # API service layer
+│   ├── utils/            # Helpers, constants
+│   └── assets/           # Images, icons, audio
+├── server/               # Node.js backend
+│   ├── routes/
+│   ├── models/
+│   ├── controllers/
+│   ├── middleware/
+│   └── server.js
+├── App.js
+├── app.json
+└── package.json
+```
+
+#### [NEW] Core Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `expo` | React Native framework |
+| `react-navigation` | Screen navigation |
+| `@react-native-async-storage/async-storage` | Offline key-value storage |
+| `expo-sqlite` | Structured offline DB |
+| `expo-speech` | TTS fallback |
+| `expo-av` | Audio recording for STT |
+| `i18next` + `react-i18next` | Localization |
+| `react-native-reanimated` | Smooth animations |
+| `lottie-react-native` | Animated illustrations |
+
+---
+
+### Phase 2: Core Game Engine
+
+#### [NEW] `src/engine/StateMachine.js`
+State machine implementing the 6-step game cycle:
+
+```
+ONBOARDING → FARM_CREATION → SEASON_START → FINANCIAL_EVENT → DECISION_POINT → HARVEST_REVIEW → (next season)
+```
+
+Each state defines: `enter()`, `update()`, `exit()`, allowed transitions, and voice prompts.
+
+#### [NEW] `src/engine/DecisionTree.js`
+Processes JSON scenario files. Each scenario node has:
+- `id` — unique node ID
+- `prompt` — text displayed/spoken to player
+- `voicePrompt` — localized voice script
+- `options[]` — array of choices, each with `label`, `voiceKeywords[]`, `outcome`, `financialImpact`
+- `nextNode` — next node for linear progression
+
+#### [NEW] `src/engine/OutcomeCalculator.js`
+Probabilistic engine that factors in:
+- Player's current financial state (cash, debt, insurance status)
+- Season weather randomness (weighted by real Indian monsoon data)
+- Crop type yield curves
+- Decision quality score → financial health impact
+
+#### [NEW] `src/engine/scenarios/*.json`
+Initial scenario packs:
+
+| Scenario | Financial Themes | Season |
+|----------|-----------------|--------|
+| `monsoon_crisis.json` | Insurance, credit, risk | Kharif |
+| `market_price.json` | Budgeting, negotiation | Rabi |
+| `digital_payment.json` | Digital finance, fraud | Any |
+| `savings_challenge.json` | Savings, planning | Multi-season |
+| `loan_trap.json` | Credit, debt management | Kharif |
+
+---
+
+### Phase 3: Voice System
+
+#### [NEW] `src/voice/VoiceManager.js`
+Orchestrates voice I/O:
+- **Input**: Records audio → sends to Google Cloud STT → extracts intent → maps to game action
+- **Output**: Takes game text → sends to Google Cloud TTS → plays audio
+
+**Offline fallback**: For basic STT, use keyword matching from pre-recorded command patterns. For TTS, use `expo-speech` with device voices.
+
+#### [NEW] `src/voice/VoiceCommands.js`
+Maps spoken words (in multiple languages) to game actions:
+```json
+{
+  "hi": { "बीमा": "CHOOSE_INSURANCE", "कर्ज़": "TAKE_LOAN", "बचत": "SAVE" },
+  "en": { "insurance": "CHOOSE_INSURANCE", "loan": "TAKE_LOAN", "save": "SAVE" }
+}
+```
+
+---
+
+### Phase 4: Game UI & Screens
+
+All screens prioritize **visual storytelling** — large icons, animated illustrations, minimal text.
+
+#### [NEW] `src/screens/OnboardingScreen.js`
+- Animated welcome with Lottie farmer character
+- Language selection via large flag/region cards
+- Voice-guided tutorial ("Tap to speak, say your choice")
+- Auto-plays voice greeting in selected language
+
+#### [NEW] `src/screens/FarmCreationScreen.js`
+- Visual crop selection (Rice, Wheat, Cotton, Sugarcane) with illustrated cards
+- Budget goal slider with visual feedback
+- Farm naming with voice input
+- Animated farm preview
+
+#### [NEW] `src/screens/GameplayScreen.js`
+- Isometric/top-down farm view with seasonal visual changes
+- Animated weather effects (rain, sun, drought)
+- Financial status bar (cash, debt, insurance, savings)
+- Event notification with voice announcement
+- Decision cards with 3 options — tap or speak to choose
+- Timer for urgency (optional)
+
+#### [NEW] `src/screens/HarvestScreen.js`
+- Animated harvest results (crops growing/failing)
+- Financial summary with visual comparison
+- Lesson cards explaining the financial principle behind outcomes
+- Star rating for the season
+- "Next Season" or "Review Details" navigation
+
+#### [NEW] `src/screens/DashboardScreen.js`
+- Financial health score (circular progress)
+- Literacy milestones with badge icons
+- Season history timeline
+- Skills unlocked chart
+- Leaderboard (when online)
+
+---
+
+### Phase 5: Financial Scenario Content
+
+Each scenario pack teaches through **consequence-driven** branching:
+
+**Example: Monsoon Crisis (`monsoon_crisis.json`)**
+
+```
+Node 1: "Heavy rains are coming. Your crops need protection."
+  ├─ Option A: "Take high-interest loan from moneylender"
+  │   → Impact: +₹5000 cash, +₹8000 debt → Crop saved, but debt trap begins
+  ├─ Option B: "Use crop insurance (if purchased)"
+  │   → Impact: ₹0 cost, insurance covers 80% → Best outcome, teaches insurance value
+  └─ Option C: "Try homemade remedy"
+      → Impact: 40% chance crop survives → Risky, teaches risk assessment
+```
+
+Financial themes woven per scenario:
+1. **Budgeting** — seasonal expense planning
+2. **Savings** — emergency fund mechanics
+3. **Insurance** — crop/health insurance decisions
+4. **Credit** — loan types, interest rates, debt traps
+5. **Digital Payments** — UPI, mobile banking
+6. **Fraud Prevention** — fake scheme detection
+
+---
+
+### Phase 6: Backend & APIs
+
+#### [NEW] `server/server.js`
+Express server with routes:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auth/register` | POST | Player registration |
+| `/api/auth/login` | POST | JWT login |
+| `/api/game/sync` | POST | Sync offline game state |
+| `/api/game/leaderboard` | GET | Regional leaderboards |
+| `/api/voice/stt` | POST | Proxy to Google Cloud STT |
+| `/api/voice/tts` | POST | Proxy to Google Cloud TTS |
+| `/api/analytics/event` | POST | Track player analytics |
+
+#### [NEW] `server/models/Player.js`
+MongoDB schema: `name`, `language`, `region`, `farmState`, `financialScore`, `completedScenarios`, `badges`, `lastSyncAt`
+
+#### [NEW] `server/models/GameState.js`
+MongoDB schema: `playerId`, `currentSeason`, `cash`, `debt`, `insurance`, `crops`, `decisions[]`, `seasonHistory[]`
+
+---
+
+### Phase 7: Localization
+
+#### [NEW] `src/localization/locales/*.json`
+Initial languages with full voice support:
+
+| Priority | Languages |
+|----------|-----------|
+| P0 (launch) | Hindi (`hi`), English (`en`) |
+| P1 (month 1) | Marathi (`mr`), Tamil (`ta`), Telugu (`te`), Kannada (`kn`) |
+| P2 (month 2) | Bengali (`bn`), Gujarati (`gu`), Punjabi (`pa`), Odia (`or`) |
+
+Each locale file contains:
+- UI strings (buttons, labels)
+- Game prompts and option text
+- Financial terminology glossary
+- Voice command keyword mappings
+
+---
+
+### Phase 8: Offline-First Architecture
+
+#### [NEW] `src/storage/GameStateDB.js`
+- Stores all game state in SQLite
+- Queues API calls when offline
+- Auto-syncs when connectivity returns
+- Conflict resolution: last-write-wins with timestamp
+
+#### [NEW] `src/storage/SyncManager.js`
+- Network status listener
+- Background sync with exponential backoff
+- Delta sync (only changed data)
+- Bandwidth-aware: compresses payloads on 2G
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Build Target**: This plan creates a **mobile app** using React Native + Expo. For hackathon demo purposes, we can also build a **web version** using Expo Web. Which would you prefer to demo first?
+
+> [!IMPORTANT]
+> **Voice API Keys**: Google Cloud Speech-to-Text and Text-to-Speech require API keys. Do you already have Google Cloud credentials, or should we use device-native speech APIs (free, lower quality) for the hackathon?
+
+> [!IMPORTANT]
+> **Backend Scope**: For a hackathon MVP, we can run the entire game **client-side only** (no backend server needed — all game logic and storage is on-device). The backend would only be needed for leaderboards and cloud sync. Should we skip the backend for now?
+
+> [!IMPORTANT]
+> **Art Assets**: The game needs farm/crop illustrations. Options:
+> 1. Generate with AI image tools (I can do this)
+> 2. Use free illustration libraries (undraw, etc.)
+> 3. Simple emoji/icon-based UI
+> Which approach?
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- **Game Engine unit tests**: Run with `npx jest` — test decision tree traversal, outcome calculations, state transitions
+- **Voice command mapping tests**: Verify keyword → action mapping for all supported languages
+- **Offline storage tests**: Verify save/load/sync lifecycle
+
+### Browser-Based Demo Verification
+- Build Expo Web version: `npx expo start --web`
+- Walk through complete game cycle in browser
+- Verify voice input/output works in Chrome (Web Speech API)
+- Test all 5 scenario packs end-to-end
+
+### Manual Verification
+1. **User**: Install Expo Go on Android phone, scan QR code
+2. **User**: Complete one full Kharif season cycle
+3. **User**: Test voice commands in Hindi
+4. **User**: Toggle airplane mode and verify game continues offline
+5. **User**: Reconnect and verify sync works
