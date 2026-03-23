@@ -1,14 +1,56 @@
 /**
- * GameEngine.js — Main engine orchestrator
+ * GameEngine.ts — Main engine orchestrator
  * Coordinates StateMachine, DecisionTree, and OutcomeCalculator
  * to drive the game loop.
  */
 
-import { StateMachine } from './StateMachine';
-import { DecisionTree } from './DecisionTree';
-import { OutcomeCalculator } from './OutcomeCalculator';
+import { StateMachine, GameStateName } from './StateMachine';
+import { DecisionTree, Scenario } from './DecisionTree';
+import { OutcomeCalculator, OutcomeResult } from './OutcomeCalculator';
 
-const INITIAL_PLAYER_STATE = {
+export interface PlayerFarm {
+    name: string;
+    crop: string | null;
+    season: number;
+}
+
+export interface PlayerFinances {
+    cash: number;
+    debt: number;
+    savings: number;
+    insurance: boolean;
+}
+
+export interface PlayerScore {
+    financialHealth: number;
+    literacyPoints: number;
+    badges: string[];
+}
+
+export interface PlayerState {
+    name: string;
+    language: string;
+    region: string;
+    farm: PlayerFarm;
+    finances: PlayerFinances;
+    score: PlayerScore;
+    completedScenarios: string[];
+    seasonHistory: SeasonRecord[];
+}
+
+export interface SeasonRecord {
+    season: number;
+    finances: PlayerFinances;
+    score: number;
+}
+
+export interface GameState {
+    phase: GameStateName | null;
+    player: PlayerState;
+    scenario: Scenario | null;
+}
+
+const INITIAL_PLAYER_STATE: PlayerState = {
     name: '',
     language: 'hi',
     region: '',
@@ -33,6 +75,12 @@ const INITIAL_PLAYER_STATE = {
 };
 
 export class GameEngine {
+    private stateMachine: StateMachine;
+    private decisionTree: DecisionTree;
+    private outcomeCalculator: OutcomeCalculator;
+    private playerState: PlayerState;
+    private currentScenario: Scenario | null;
+
     constructor() {
         this.stateMachine = new StateMachine();
         this.decisionTree = new DecisionTree();
@@ -44,7 +92,7 @@ export class GameEngine {
     /**
      * Initialize a new game with player info
      */
-    initGame(playerInfo = {}) {
+    initGame(playerInfo: Partial<PlayerState> = {}): PlayerState {
         this.playerState = {
             ...INITIAL_PLAYER_STATE,
             ...playerInfo,
@@ -56,7 +104,7 @@ export class GameEngine {
     /**
      * Get the current game state
      */
-    getState() {
+    getState(): GameState {
         return {
             phase: this.stateMachine.getCurrentState(),
             player: this.playerState,
@@ -67,24 +115,26 @@ export class GameEngine {
     /**
      * Process a player decision
      */
-    processDecision(optionId) {
+    processDecision(optionId: string): OutcomeResult | null {
         if (!this.currentScenario) return null;
 
         const outcome = this.outcomeCalculator.calculate(
             optionId,
-            this.playerState,
-            this.currentScenario
+            this.playerState as Parameters<OutcomeCalculator['calculate']>[1],
+            this.currentScenario as Parameters<OutcomeCalculator['calculate']>[2]
         );
 
         // Apply financial impact
-        this.playerState.finances = {
-            ...this.playerState.finances,
-            ...outcome.financialChanges,
-        };
+        if (outcome.financialChanges) {
+            this.playerState.finances = {
+                ...this.playerState.finances,
+                ...outcome.financialChanges,
+            };
+        }
 
         // Update score
-        this.playerState.score.financialHealth += outcome.healthDelta;
-        this.playerState.score.literacyPoints += outcome.literacyPoints;
+        this.playerState.score.financialHealth += outcome.healthDelta || 0;
+        this.playerState.score.literacyPoints += outcome.literacyPoints || 0;
 
         return outcome;
     }
@@ -92,7 +142,7 @@ export class GameEngine {
     /**
      * Advance to next season
      */
-    advanceSeason() {
+    advanceSeason(): void {
         this.playerState.seasonHistory.push({
             season: this.playerState.farm.season,
             finances: { ...this.playerState.finances },
@@ -105,7 +155,7 @@ export class GameEngine {
     /**
      * Load a scenario by name
      */
-    async loadScenario(scenarioName) {
+    async loadScenario(scenarioName: string): Promise<Scenario> {
         this.currentScenario = await this.decisionTree.loadScenario(scenarioName);
         return this.currentScenario;
     }
@@ -113,7 +163,7 @@ export class GameEngine {
     /**
      * Reset game to initial state
      */
-    reset() {
+    reset(): void {
         this.playerState = { ...INITIAL_PLAYER_STATE };
         this.currentScenario = null;
         this.stateMachine.transition('ONBOARDING');

@@ -1,5 +1,5 @@
 /**
- * DecisionTree.js — JSON decision-tree processor
+ * DecisionTree.ts — JSON decision-tree processor
  * Loads and traverses scenario JSON files.
  * Each node has: id, prompt, voicePrompt, options[], nextNode
  */
@@ -7,19 +7,70 @@
 // Static scenario imports (bundled with the app for offline use)
 import monsoonCrisis from './scenarios/monsoon_crisis.json';
 import marketPrice from './scenarios/market_price.json';
-import digitalPayment from './scenarios/digital_payment.json';
+// import digitalPayment from './scenarios/digital_payment.json';
 import savingsChallenge from './scenarios/savings_challenge.json';
-import loanTrap from './scenarios/loan_trap.json';
+// import loanTrap from './scenarios/loan_trap.json';
 
-const SCENARIO_MAP = {
-    monsoon_crisis: monsoonCrisis,
-    market_price: marketPrice,
-    digital_payment: digitalPayment,
-    savings_challenge: savingsChallenge,
-    loan_trap: loanTrap,
+export interface ScenarioOption {
+    id?: string;
+    label: string;
+    voiceKeywords?: Record<string, string[]>;
+    outcome?: string;
+    lesson?: string;
+    financialImpact?: {
+        cash?: number;
+        debt?: number;
+        savings?: number;
+        insurance?: boolean;
+    };
+    nextNode?: string;
+}
+
+export interface ScenarioNode {
+    id: string;
+    prompt: string;
+    voicePrompt?: string;
+    options?: ScenarioOption[];
+    nextNode?: string;
+}
+
+export interface Scenario {
+    id: string;
+    title: string;
+    description?: string;
+    season?: string;
+    startNode?: string;
+    nodes: ScenarioNode[];
+}
+
+export interface DecisionResult {
+    chosenOption: ScenarioOption;
+    nextNode: ScenarioNode | null;
+    isEnd: boolean;
+}
+
+interface DecisionHistoryEntry {
+    nodeId: string;
+    chosenOption: number;
+    label: string;
+    timestamp: number;
+}
+
+type ScenarioName = string;
+
+const SCENARIO_MAP: Record<ScenarioName, Scenario> = {
+    monsoon_crisis: monsoonCrisis as unknown as Scenario,
+    market_price: marketPrice as unknown as Scenario,
+    // digital_payment: digitalPayment as unknown as Scenario,
+    savings_challenge: savingsChallenge as unknown as Scenario,
+    // loan_trap: loanTrap as unknown as Scenario,
 };
 
 export class DecisionTree {
+    private currentScenario: Scenario | null;
+    private currentNode: ScenarioNode | null;
+    private decisionHistory: DecisionHistoryEntry[];
+
     constructor() {
         this.currentScenario = null;
         this.currentNode = null;
@@ -29,7 +80,7 @@ export class DecisionTree {
     /**
      * Load a scenario by name
      */
-    async loadScenario(scenarioName) {
+    async loadScenario(scenarioName: string): Promise<Scenario> {
         const scenario = SCENARIO_MAP[scenarioName];
         if (!scenario) {
             throw new Error(`Unknown scenario: ${scenarioName}`);
@@ -45,14 +96,14 @@ export class DecisionTree {
     /**
      * Get current decision node
      */
-    getCurrentNode() {
+    getCurrentNode(): ScenarioNode | null {
         return this.currentNode;
     }
 
     /**
      * Find a node by ID
      */
-    findNode(nodeId) {
+    findNode(nodeId: string): ScenarioNode | null {
         if (!this.currentScenario) return null;
         return this.currentScenario.nodes.find(n => n.id === nodeId) || null;
     }
@@ -60,7 +111,7 @@ export class DecisionTree {
     /**
      * Choose an option and advance to next node
      */
-    chooseOption(optionIndex) {
+    chooseOption(optionIndex: number): DecisionResult | null {
         if (!this.currentNode || !this.currentNode.options) return null;
 
         const option = this.currentNode.options[optionIndex];
@@ -93,7 +144,7 @@ export class DecisionTree {
     /**
      * Match a voice keyword to an option
      */
-    matchVoiceKeyword(keyword, language = 'hi') {
+    matchVoiceKeyword(keyword: string, language: string = 'hi'): number {
         if (!this.currentNode || !this.currentNode.options) return -1;
 
         const normalizedKeyword = keyword.toLowerCase().trim();
@@ -106,14 +157,14 @@ export class DecisionTree {
     /**
      * Get decision history
      */
-    getHistory() {
+    getHistory(): DecisionHistoryEntry[] {
         return [...this.decisionHistory];
     }
 
     /**
      * Get available scenario names
      */
-    static getAvailableScenarios() {
+    static getAvailableScenarios(): string[] {
         return Object.keys(SCENARIO_MAP);
     }
 }

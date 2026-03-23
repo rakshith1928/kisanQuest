@@ -1,10 +1,35 @@
 /**
- * StateMachine.js — Game flow state machine
+ * StateMachine.ts — Game flow state machine
  * Implements the 6-step game cycle:
  * ONBOARDING → FARM_CREATION → SEASON_START → FINANCIAL_EVENT → DECISION_POINT → HARVEST_REVIEW
  */
 
-const GAME_STATES = {
+export type GameStateName =
+    | 'ONBOARDING'
+    | 'FARM_CREATION'
+    | 'SEASON_START'
+    | 'FINANCIAL_EVENT'
+    | 'DECISION_POINT'
+    | 'HARVEST_REVIEW';
+
+interface GameStateConfig {
+    name: GameStateName;
+    allowedTransitions: GameStateName[];
+    voicePrompt: string;
+}
+
+interface StateTransition {
+    from: GameStateName | null;
+    to: GameStateName;
+    timestamp: number;
+}
+
+export type StateChangeListener = (
+    newState: GameStateConfig,
+    previousState: GameStateConfig | null
+) => void;
+
+const GAME_STATES: Record<GameStateName, GameStateConfig> = {
     ONBOARDING: {
         name: 'ONBOARDING',
         allowedTransitions: ['FARM_CREATION'],
@@ -38,6 +63,10 @@ const GAME_STATES = {
 };
 
 export class StateMachine {
+    private currentState: GameStateConfig | null;
+    private stateHistory: StateTransition[];
+    private listeners: StateChangeListener[];
+
     constructor() {
         this.currentState = null;
         this.stateHistory = [];
@@ -47,14 +76,14 @@ export class StateMachine {
     /**
      * Get the current state name
      */
-    getCurrentState() {
+    getCurrentState(): GameStateName | null {
         return this.currentState?.name || null;
     }
 
     /**
      * Get allowed transitions from current state
      */
-    getAllowedTransitions() {
+    getAllowedTransitions(): GameStateName[] | string[] {
         if (!this.currentState) return Object.keys(GAME_STATES);
         return this.currentState.allowedTransitions;
     }
@@ -62,7 +91,7 @@ export class StateMachine {
     /**
      * Transition to a new state
      */
-    transition(stateName) {
+    transition(stateName: GameStateName): GameStateConfig {
         const newState = GAME_STATES[stateName];
         if (!newState) {
             throw new Error(`Invalid state: ${stateName}`);
@@ -98,7 +127,7 @@ export class StateMachine {
     /**
      * Subscribe to state changes
      */
-    onStateChange(listener) {
+    onStateChange(listener: StateChangeListener): () => void {
         this.listeners.push(listener);
         return () => {
             this.listeners = this.listeners.filter(l => l !== listener);
@@ -108,21 +137,21 @@ export class StateMachine {
     /**
      * Get the voice prompt key for the current state
      */
-    getVoicePrompt() {
+    getVoicePrompt(): string | null {
         return this.currentState?.voicePrompt || null;
     }
 
     /**
      * Get full state history
      */
-    getHistory() {
+    getHistory(): StateTransition[] {
         return [...this.stateHistory];
     }
 
     /**
      * Reset the state machine
      */
-    reset() {
+    reset(): void {
         this.currentState = null;
         this.stateHistory = [];
     }

@@ -1,0 +1,93 @@
+{
+  "id": "monsoon_crisis",
+  "title": "Monsoon Crisis",
+  "season": "Kharif",
+  "theme": "Insurance & Credit",
+  "nodes": [
+    {
+      "id": "mc_1",
+      "prompt": "Heavy rains are expected in 3 days. Your rice crop needs protection.",
+      "voicePrompt": "तीन दिन में भारी बारिश आने वाली है। आप क्या करेंगे?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Take crop insurance (₹3,000 premium)",
+          "voiceKeywords": [
+            "insurance",
+            "bima",
+            "बीमा"
+          ],
+          "nextNode": "mc_2a",
+          "financialImpact": {
+            "cash": -3000,
+            "insurance": true
+          }
+        },
+        {
+          "id": "B",
+          "label": "Borrow from moneylender",
+          "voiceKeywords": [
+            "loan",
+            "karj",
+            "कर्ज़",
+            "borrow"
+          ],
+          "nextNode": "mc_2b",
+          "financialImpact": {
+            "cash": 5000,
+            "debt": 8000
+          }
+        },
+        {
+          "id": "C",
+          "label": "Try homemade remedy (40% success)",
+          "voiceKeywords": [
+            "remedy",
+            "gharelu",
+            "घरेलू",
+            "try"
+          ],
+          "nextNode": "mc_2c",
+          "financialImpact": {
+            "cash": 0
+          },
+          "successProbability": 0.4
+        }
+      ]
+    },
+    {
+      "id": "mc_2a",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "The rains came but your insurance covered 80% of the damage. Great decision!",
+      "voicePrompt": "बीमे ने 80% नुकसान कवर कर लिया। शानदार फैसला!",
+      "financialImpact": {
+        "cash": 18000
+      },
+      "financialScoreDelta": 10,
+      "lesson": "Crop insurance costs a small premium but protects you from losses 10x larger."
+    },
+    {
+      "id": "mc_2b",
+      "type": "outcome",
+      "result": "debt_trap",
+      "prompt": "Your crop survived but now you owe ₹8,000 at 30% interest to the moneylender.",
+      "voicePrompt": "फसल बच गई लेकिन साहूकार को 30% ब्याज पर ₹8,000 देने होंगे।",
+      "financialImpact": {},
+      "financialScoreDelta": -5,
+      "lesson": "Moneylenders charge 25-30% interest. Formal bank loans are only 7%. Always choose formal credit."
+    },
+    {
+      "id": "mc_2c",
+      "type": "outcome",
+      "result": "failure",
+      "prompt": "The rains destroyed 60% of your crop. Without insurance, you have no fallback.",
+      "voicePrompt": "बारिश ने 60% फसल नष्ट की। बीमा न होने से भारी नुकसान।",
+      "financialImpact": {
+        "cash": -15000
+      },
+      "financialScoreDelta": -15,
+      "lesson": "Without savings or insurance, one bad season can push a family into poverty."
+    }
+  ]
+}

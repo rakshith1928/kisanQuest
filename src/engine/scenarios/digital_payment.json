@@ -1,0 +1,82 @@
+{
+  "id": "digital_payment",
+  "title": "Digital Payment Challenge",
+  "season": "Any",
+  "theme": "Digital Finance & Fraud Prevention",
+  "nodes": [
+    {
+      "id": "dp_1",
+      "prompt": "You receive an SMS: 'Your Kisan Credit card is blocked. Share your OTP to reactivate.' What do you do?",
+      "voicePrompt": "SMS आया: 'किसान क्रेडिट कार्ड बंद हो गया। OTP शेयर करें।' आप क्या करेंगे?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Share the OTP immediately",
+          "voiceKeywords": [
+            "share",
+            "batao",
+            "बताओ",
+            "dedo"
+          ],
+          "nextNode": "dp_2a",
+          "financialImpact": {
+            "cash": -20000
+          }
+        },
+        {
+          "id": "B",
+          "label": "Ignore the SMS — call your bank directly",
+          "voiceKeywords": [
+            "ignore",
+            "call",
+            "bank",
+            "bank call",
+            "nahi"
+          ],
+          "nextNode": "dp_2b",
+          "financialImpact": {}
+        },
+        {
+          "id": "C",
+          "label": "Ask a family member for advice first",
+          "voiceKeywords": [
+            "family",
+            "ghar",
+            "घर",
+            "ask",
+            "puchna"
+          ],
+          "nextNode": "dp_2c",
+          "financialImpact": {}
+        }
+      ]
+    },
+    {
+      "id": "dp_2a",
+      "type": "outcome",
+      "result": "failure",
+      "prompt": "You were scammed! ₹20,000 was withdrawn from your account. Banks never ask for OTPs.",
+      "financialImpact": {},
+      "financialScoreDelta": -20,
+      "lesson": "NEVER share your OTP, PIN, or password. Banks and government schemes will NEVER ask for these. Report fraud to 1930 (National Cybercrime Helpline)."
+    },
+    {
+      "id": "dp_2b",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "Smart! The bank confirmed it was a fraud attempt. Your account is safe.",
+      "financialImpact": {},
+      "financialScoreDelta": 15,
+      "lesson": "Always verify by calling your bank's official number (back of debit card). Real banks NEVER ask for OTP via SMS or calls."
+    },
+    {
+      "id": "dp_2c",
+      "type": "outcome",
+      "result": "neutral",
+      "prompt": "Your family member recognized it as a scam. Good thinking to ask!",
+      "financialImpact": {},
+      "financialScoreDelta": 8,
+      "lesson": "When in doubt, consult trusted people before acting. Community knowledge is a powerful shield against fraud."
+    }
+  ]
+}

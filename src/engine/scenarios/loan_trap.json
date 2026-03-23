@@ -1,0 +1,97 @@
+{
+  "id": "loan_trap",
+  "title": "The Loan Trap",
+  "season": "Kharif",
+  "theme": "Credit & Debt Management",
+  "nodes": [
+    {
+      "id": "lt_1",
+      "prompt": "You need ₹30,000 to buy seeds and fertilizer for the season. Where do you borrow?",
+      "voicePrompt": "बीज और खाद के लिए ₹30,000 चाहिए। आप कहाँ से उधार लेंगे?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Kisan Credit Card (bank, 7% interest)",
+          "voiceKeywords": [
+            "bank",
+            "kcc",
+            "kisan",
+            "किसान",
+            "formal"
+          ],
+          "nextNode": "lt_2a",
+          "financialImpact": {
+            "cash": 30000,
+            "debt": 32100
+          }
+        },
+        {
+          "id": "B",
+          "label": "Village moneylender (30% interest, instant)",
+          "voiceKeywords": [
+            "moneylender",
+            "sahukar",
+            "साहूकार",
+            "instant"
+          ],
+          "nextNode": "lt_2b",
+          "financialImpact": {
+            "cash": 30000,
+            "debt": 39000
+          }
+        },
+        {
+          "id": "C",
+          "label": "Self-Help Group (SHG) loan (12% interest)",
+          "voiceKeywords": [
+            "shg",
+            "group",
+            "samuh",
+            "समूह",
+            "women"
+          ],
+          "nextNode": "lt_2c",
+          "financialImpact": {
+            "cash": 30000,
+            "debt": 33600
+          }
+        }
+      ]
+    },
+    {
+      "id": "lt_2a",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "You repaid ₹32,100 (7% interest after 1 year). Formal credit costs least!",
+      "financialImpact": {
+        "cash": -32100,
+        "debt": 0
+      },
+      "financialScoreDelta": 12,
+      "lesson": "Kisan Credit Card offers loans at 7% p.a. (4% with subsidy). It is the cheapest and most farmer-friendly credit option in India."
+    },
+    {
+      "id": "lt_2b",
+      "type": "followup",
+      "prompt": "After a bad harvest, you can't repay ₹39,000. Interest compounds. Two seasons later you owe ₹65,000.",
+      "financialImpact": {
+        "cash": -20000,
+        "debt": 45000
+      },
+      "financialScoreDelta": -20,
+      "lesson": "Informal moneylender debt often traps families for generations. Always opt for formal banking credit, even if it takes longer to process."
+    },
+    {
+      "id": "lt_2c",
+      "type": "outcome",
+      "result": "neutral",
+      "prompt": "SHG loan at 12% was manageable. You repaid ₹33,600. Better than a moneylender!",
+      "financialImpact": {
+        "cash": -33600,
+        "debt": 0
+      },
+      "financialScoreDelta": 5,
+      "lesson": "Self-Help Groups are a great community-based alternative to moneylenders. Join or form a local SHG to access collective credit."
+    }
+  ]
+}

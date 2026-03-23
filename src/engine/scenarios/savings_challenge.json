@@ -1,0 +1,63 @@
+{
+  "id": "savings_challenge",
+  "title": "Savings Challenge",
+  "season": "Multi-season",
+  "theme": "Savings & Emergency Fund",
+  "nodes": [
+    {
+      "id": "sc_1",
+      "prompt": "The season ends with ₹12,000 profit. A new phone costs ₹8,000. Your emergency fund is ₹0. What do you do?",
+      "voicePrompt": "मौसम में ₹12,000 का मुनाफ़ा हुआ। नया फोन ₹8,000 का है। आपातकालीन फंड ₹0 है। क्या करेंगे?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Buy the phone now (₹8,000)",
+          "voiceKeywords": ["phone", "buy", "khreedo", "खरीदो"],
+          "nextNode": "sc_2a",
+          "financialImpact": { "cash": -8000 }
+        },
+        {
+          "id": "B",
+          "label": "Save all ₹12,000 as emergency fund",
+          "voiceKeywords": ["save", "bachao", "बचाओ", "emergency"],
+          "nextNode": "sc_2b",
+          "financialImpact": { "savings": 12000 }
+        },
+        {
+          "id": "C",
+          "label": "Save ₹10,000, spend ₹2,000 on family",
+          "voicePrompt": "₹10,000 बचाएं, ₹2,000 परिवार पर खर्च करें",
+          "voiceKeywords": ["balance", "split", "family", "both"],
+          "nextNode": "sc_2c",
+          "financialImpact": { "savings": 10000, "cash": -2000 }
+        }
+      ]
+    },
+    {
+      "id": "sc_2a",
+      "type": "followup",
+      "prompt": "Next season your child needed medicine costing ₹5,000. With only ₹4,000 left, you had to borrow.",
+      "financialImpact": { "debt": 5000 },
+      "financialScoreDelta": -10,
+      "lesson": "An emergency fund of 3-6 months of expenses prevents taking loans during crises. Save before you spend."
+    },
+    {
+      "id": "sc_2b",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "Next season your child needed medicine. Your emergency fund covered it. No debt needed!",
+      "financialImpact": { "savings": -5000 },
+      "financialScoreDelta": 15,
+      "lesson": "A healthy emergency fund (₹10,000-₹50,000) is the single most powerful financial protection for farming families."
+    },
+    {
+      "id": "sc_2c",
+      "type": "outcome",
+      "result": "neutral",
+      "prompt": "Good balance! Your savings covered 80% of the emergency. Only a small loan was needed.",
+      "financialImpact": { "savings": -5000, "debt": 1000 },
+      "financialScoreDelta": 8,
+      "lesson": "Balancing savings and family needs is wise. Even partial savings significantly reduce crisis impact."
+    }
+  ]
+}

@@ -1,10 +1,68 @@
 /**
- * OutcomeCalculator.js — Probabilistic outcome engine
+ * OutcomeCalculator.ts — Probabilistic outcome engine
  * Factors in: player finances, weather randomness, crop yields, decision quality
  */
 
+export type SeasonType = 'kharif' | 'rabi';
+export type CropType = 'rice' | 'wheat' | 'cotton' | 'sugarcane';
+
+export interface WeatherResult {
+    type: string;
+    seasonType: SeasonType;
+    probability: number;
+}
+
+export interface FinancialImpact {
+    cash?: number;
+    debt?: number;
+    savings?: number;
+    insurance?: boolean;
+}
+
+export interface FinancialState {
+    cash: number;
+    debt: number;
+    savings: number;
+    insurance: boolean;
+}
+
+export interface OutcomeResult {
+    success: boolean;
+    financialChanges?: FinancialState;
+    weather?: WeatherResult;
+    yieldMultiplier?: number;
+    healthDelta?: number;
+    literacyPoints?: number;
+    message: string;
+    lesson?: string | null;
+}
+
+interface ScenarioOption {
+    id?: string;
+    financialImpact?: FinancialImpact;
+    outcome?: string;
+    lesson?: string;
+}
+
+interface ScenarioNode {
+    id: string;
+    options?: ScenarioOption[];
+}
+
+interface Scenario {
+    nodes: ScenarioNode[];
+}
+
+interface PlayerState {
+    farm?: {
+        season?: number;
+        crop?: string;
+    };
+    finances: FinancialState;
+}
+
 // Weather probability weights based on Indian monsoon patterns
-const WEATHER_PATTERNS = {
+const WEATHER_PATTERNS: Record<SeasonType, Record<string, number>> = {
     kharif: {
         good_monsoon: 0.4,
         normal: 0.35,
@@ -20,7 +78,7 @@ const WEATHER_PATTERNS = {
 };
 
 // Crop yield multipliers based on weather
-const CROP_YIELDS = {
+const CROP_YIELDS: Record<string, Record<string, number>> = {
     rice: { good_monsoon: 1.3, normal: 1.0, drought: 0.3, flood: 0.5 },
     wheat: { good_winter: 1.2, normal: 1.0, cold_wave: 0.6, unseasonal_rain: 0.4 },
     cotton: { good_monsoon: 1.4, normal: 1.0, drought: 0.2, flood: 0.4 },
@@ -28,6 +86,9 @@ const CROP_YIELDS = {
 };
 
 export class OutcomeCalculator {
+    private lastWeather: WeatherResult | null;
+    private lastYield: number | null;
+
     constructor() {
         this.lastWeather = null;
         this.lastYield = null;
@@ -36,7 +97,7 @@ export class OutcomeCalculator {
     /**
      * Calculate outcome of a player decision
      */
-    calculate(optionId, playerState, scenario) {
+    calculate(optionId: string, playerState: PlayerState, scenario: Scenario): OutcomeResult {
         const option = this._findOption(optionId, scenario);
         if (!option) {
             return { success: false, message: 'Invalid option' };
@@ -54,7 +115,7 @@ export class OutcomeCalculator {
         const debtChange = impact.debt || 0;
         const savingsChange = impact.savings || 0;
 
-        const financialChanges = {
+        const financialChanges: FinancialState = {
             cash: Math.round(playerState.finances.cash + cashChange),
             debt: Math.max(0, playerState.finances.debt + debtChange),
             savings: Math.max(0, playerState.finances.savings + savingsChange),
@@ -81,8 +142,8 @@ export class OutcomeCalculator {
     /**
      * Generate random weather based on season
      */
-    generateWeather(seasonNumber) {
-        const seasonType = seasonNumber % 2 === 1 ? 'kharif' : 'rabi';
+    generateWeather(seasonNumber: number): WeatherResult {
+        const seasonType: SeasonType = seasonNumber % 2 === 1 ? 'kharif' : 'rabi';
         const patterns = WEATHER_PATTERNS[seasonType];
         const random = Math.random();
 
@@ -104,7 +165,7 @@ export class OutcomeCalculator {
     /**
      * Get crop yield multiplier based on weather
      */
-    getCropYield(cropType, weatherType) {
+    getCropYield(cropType: string, weatherType: string): number {
         const yields = CROP_YIELDS[cropType?.toLowerCase()];
         if (!yields) return 1.0;
         this.lastYield = yields[weatherType] || 1.0;
@@ -114,18 +175,18 @@ export class OutcomeCalculator {
     /**
      * Assess decision quality (returns -10 to +10 health score delta)
      */
-    _assessDecisionQuality(option, playerState) {
+    private _assessDecisionQuality(option: ScenarioOption, playerState: PlayerState): number {
         let score = 0;
         const impact = option.financialImpact || {};
 
         // Positive: savings, insurance, low debt
-        if (impact.savings > 0) score += 3;
+        if ((impact.savings || 0) > 0) score += 3;
         if (impact.insurance === true) score += 4;
-        if (impact.debt < 0) score += 2; // paying off debt
+        if ((impact.debt || 0) < 0) score += 2; // paying off debt
 
         // Negative: high debt, no insurance
-        if (impact.debt > 5000) score -= 3;
-        if (impact.debt > 0 && playerState.finances.debt > 10000) score -= 4;
+        if ((impact.debt || 0) > 5000) score -= 3;
+        if ((impact.debt || 0) > 0 && playerState.finances.debt > 10000) score -= 4;
 
         // Clamp to range
         return Math.max(-10, Math.min(10, score));
@@ -134,7 +195,7 @@ export class OutcomeCalculator {
     /**
      * Find option in scenario by ID
      */
-    _findOption(optionId, scenario) {
+    private _findOption(optionId: string, scenario: Scenario): ScenarioOption | null {
         if (!scenario || !scenario.nodes) return null;
         for (const node of scenario.nodes) {
             if (node.options) {

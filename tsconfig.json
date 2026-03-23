@@ -1,0 +1,29 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-native",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@engine/*": ["src/engine/*"],
+      "@voice/*": ["src/voice/*"],
+      "@screens/*": ["src/screens/*"],
+      "@storage/*": ["src/storage/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

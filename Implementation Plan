@@ -21,21 +21,21 @@ KisanQuest/
 │   ├── components/       # Reusable UI components
 │   ├── screens/          # App screens (Onboarding, Farm, Gameplay, Dashboard)
 │   ├── engine/           # Core game engine
-│   │   ├── GameEngine.js         # Main engine orchestrator
-│   │   ├── DecisionTree.js       # JSON decision-tree processor
-│   │   ├── StateMachine.js       # Game flow state machine
-│   │   ├── OutcomeCalculator.js  # Probabilistic outcome engine
+│   │   ├── GameEngine.ts         # Main engine orchestrator
+│   │   ├── DecisionTree.ts       # JSON decision-tree processor
+│   │   ├── StateMachine.ts       # Game flow state machine
+│   │   ├── OutcomeCalculator.ts  # Probabilistic outcome engine
 │   │   └── scenarios/            # JSON scenario data files
 │   ├── voice/            # Voice system
-│   │   ├── VoiceManager.js       # Voice input/output orchestrator
-│   │   ├── SpeechToText.js       # Google Cloud STT wrapper
-│   │   ├── TextToSpeech.js       # Google Cloud TTS wrapper
-│   │   └── VoiceCommands.js      # Command mapping
+│   │   ├── VoiceManager.ts       # Voice input/output orchestrator
+│   │   ├── SpeechToText.ts       # Google Cloud STT wrapper
+│   │   ├── TextToSpeech.ts       # Google Cloud TTS wrapper
+│   │   └── VoiceCommands.ts      # Command mapping
 │   ├── storage/          # Offline storage layer
-│   │   ├── GameStateDB.js        # SQLite / AsyncStorage wrapper
-│   │   └── SyncManager.js        # Online sync handler
+│   │   ├── GameStateDB.ts        # SQLite / AsyncStorage wrapper
+│   │   └── SyncManager.ts        # Online sync handler
 │   ├── localization/     # i18n setup
-│   │   ├── i18n.js               # i18next config
+│   │   ├── i18n.ts               # i18next config
 │   │   └── locales/              # Language JSON files (hi, mr, ta, te, etc.)
 │   ├── navigation/       # React Navigation setup
 │   ├── services/         # API service layer
@@ -46,9 +46,10 @@ KisanQuest/
 │   ├── models/
 │   ├── controllers/
 │   ├── middleware/
-│   └── server.js
-├── App.js
+│   └── server.ts
+├── App.tsx
 ├── app.json
+├── tsconfig.json
 └── package.json
 ```
 
@@ -65,12 +66,15 @@ KisanQuest/
 | `i18next` + `react-i18next` | Localization |
 | `react-native-reanimated` | Smooth animations |
 | `lottie-react-native` | Animated illustrations |
+| `typescript` | TypeScript compiler |
+| `@types/react` | React type definitions |
+| `@types/react-native` | React Native type definitions |
 
 ---
 
 ### Phase 2: Core Game Engine
 
-#### [NEW] `src/engine/StateMachine.js`
+#### [NEW] `src/engine/StateMachine.ts`
 State machine implementing the 6-step game cycle:
 
 ```
@@ -79,7 +83,7 @@ ONBOARDING → FARM_CREATION → SEASON_START → FINANCIAL_EVENT → DECISION_P
 
 Each state defines: `enter()`, `update()`, `exit()`, allowed transitions, and voice prompts.
 
-#### [NEW] `src/engine/DecisionTree.js`
+#### [NEW] `src/engine/DecisionTree.ts`
 Processes JSON scenario files. Each scenario node has:
 - `id` — unique node ID
 - `prompt` — text displayed/spoken to player
@@ -87,7 +91,7 @@ Processes JSON scenario files. Each scenario node has:
 - `options[]` — array of choices, each with `label`, `voiceKeywords[]`, `outcome`, `financialImpact`
 - `nextNode` — next node for linear progression
 
-#### [NEW] `src/engine/OutcomeCalculator.js`
+#### [NEW] `src/engine/OutcomeCalculator.ts`
 Probabilistic engine that factors in:
 - Player's current financial state (cash, debt, insurance status)
 - Season weather randomness (weighted by real Indian monsoon data)
@@ -109,14 +113,14 @@ Initial scenario packs:
 
 ### Phase 3: Voice System
 
-#### [NEW] `src/voice/VoiceManager.js`
+#### [NEW] `src/voice/VoiceManager.ts`
 Orchestrates voice I/O:
 - **Input**: Records audio → sends to Google Cloud STT → extracts intent → maps to game action
 - **Output**: Takes game text → sends to Google Cloud TTS → plays audio
 
 **Offline fallback**: For basic STT, use keyword matching from pre-recorded command patterns. For TTS, use `expo-speech` with device voices.
 
-#### [NEW] `src/voice/VoiceCommands.js`
+#### [NEW] `src/voice/VoiceCommands.ts`
 Maps spoken words (in multiple languages) to game actions:
 ```json
 {
@@ -131,19 +135,19 @@ Maps spoken words (in multiple languages) to game actions:
 
 All screens prioritize **visual storytelling** — large icons, animated illustrations, minimal text.
 
-#### [NEW] `src/screens/OnboardingScreen.js`
+#### [NEW] `src/screens/OnboardingScreen.tsx`
 - Animated welcome with Lottie farmer character
 - Language selection via large flag/region cards
 - Voice-guided tutorial ("Tap to speak, say your choice")
 - Auto-plays voice greeting in selected language
 
-#### [NEW] `src/screens/FarmCreationScreen.js`
+#### [NEW] `src/screens/FarmCreationScreen.tsx`
 - Visual crop selection (Rice, Wheat, Cotton, Sugarcane) with illustrated cards
 - Budget goal slider with visual feedback
 - Farm naming with voice input
 - Animated farm preview
 
-#### [NEW] `src/screens/GameplayScreen.js`
+#### [NEW] `src/screens/GameplayScreen.tsx`
 - Isometric/top-down farm view with seasonal visual changes
 - Animated weather effects (rain, sun, drought)
 - Financial status bar (cash, debt, insurance, savings)
@@ -151,14 +155,14 @@ All screens prioritize **visual storytelling** — large icons, animated illustr
 - Decision cards with 3 options — tap or speak to choose
 - Timer for urgency (optional)
 
-#### [NEW] `src/screens/HarvestScreen.js`
+#### [NEW] `src/screens/HarvestScreen.tsx`
 - Animated harvest results (crops growing/failing)
 - Financial summary with visual comparison
 - Lesson cards explaining the financial principle behind outcomes
 - Star rating for the season
 - "Next Season" or "Review Details" navigation
 
-#### [NEW] `src/screens/DashboardScreen.js`
+#### [NEW] `src/screens/DashboardScreen.tsx`
 - Financial health score (circular progress)
 - Literacy milestones with badge icons
 - Season history timeline
@@ -195,7 +199,7 @@ Financial themes woven per scenario:
 
 ### Phase 6: Backend & APIs
 
-#### [NEW] `server/server.js`
+#### [NEW] `server/server.ts`
 Express server with routes:
 
 | Endpoint | Method | Purpose |
@@ -208,10 +212,10 @@ Express server with routes:
 | `/api/voice/tts` | POST | Proxy to Google Cloud TTS |
 | `/api/analytics/event` | POST | Track player analytics |
 
-#### [NEW] `server/models/Player.js`
+#### [NEW] `server/models/Player.ts`
 MongoDB schema: `name`, `language`, `region`, `farmState`, `financialScore`, `completedScenarios`, `badges`, `lastSyncAt`
 
-#### [NEW] `server/models/GameState.js`
+#### [NEW] `server/models/GameState.ts`
 MongoDB schema: `playerId`, `currentSeason`, `cash`, `debt`, `insurance`, `crops`, `decisions[]`, `seasonHistory[]`
 
 ---
@@ -237,13 +241,13 @@ Each locale file contains:
 
 ### Phase 8: Offline-First Architecture
 
-#### [NEW] `src/storage/GameStateDB.js`
+#### [NEW] `src/storage/GameStateDB.ts`
 - Stores all game state in SQLite
 - Queues API calls when offline
 - Auto-syncs when connectivity returns
 - Conflict resolution: last-write-wins with timestamp
 
-#### [NEW] `src/storage/SyncManager.js`
+#### [NEW] `src/storage/SyncManager.ts`
 - Network status listener
 - Background sync with exponential backoff
 - Delta sync (only changed data)
