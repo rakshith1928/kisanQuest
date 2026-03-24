@@ -5,8 +5,8 @@
  * Falls back to offline keyword matching when no connectivity.
  */
 
-const GOOGLE_STT_ENDPOINT = 'https://speech.googleapis.com/v1/speech:recognize';
-const API_KEY: string | null = null;
+const HF_STT_ENDPOINT = 'https://api-inference.huggingface.co/models/openai/whisper-large-v3';
+const HF_API_KEY = process.env.EXPO_PUBLIC_HF_API_KEY || null;
 
 interface RecordingInstance {
     stopAndUnloadAsync: () => Promise<void>;
@@ -59,48 +59,39 @@ const SpeechToText = {
      * Returns null if offline or if API key is not configured.
      */
     async transcribe(audioUri: string, langCode: string = 'hi'): Promise<string | null> {
-        if (!API_KEY) {
-            console.warn('[STT] No API key configured, cannot transcribe.');
+        if (!HF_API_KEY) {
+            console.warn('[STT] No HF API key configured.');
             return null;
         }
-
         try {
-            // Read audio file as base64
             const { FileSystem } = require('expo-file-system');
+
+            // Read as base64, convert to binary blob
             const audioBase64 = await FileSystem.readAsStringAsync(audioUri, {
                 encoding: FileSystem.EncodingType.Base64,
             });
+            const binaryStr = atob(audioBase64);
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+                bytes[i] = binaryStr.charCodeAt(i);
+            }
 
-            const languageMap: Record<string, string> = {
-                hi: 'hi-IN',
-                en: 'en-IN',
-                mr: 'mr-IN',
-                ta: 'ta-IN',
-                te: 'te-IN',
-                kn: 'kn-IN',
-            };
-
-            const res = await fetch(`${GOOGLE_STT_ENDPOINT}?key=${API_KEY}`, {
+            const res = await fetch(HF_STT_ENDPOINT, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    config: {
-                        encoding: 'LINEAR16',
-                        sampleRateHertz: 44100,
-                        languageCode: languageMap[langCode] || 'hi-IN',
-                    },
-                    audio: { content: audioBase64 },
-                }),
+                headers: {
+                    'Authorization': `Bearer ${HF_API_KEY}`,
+                    'Content-Type': 'audio/wav',      // expo records as WAV/m4a — use audio/wav
+                },
+                body: bytes.buffer,
             });
 
             const data = await res.json();
-            const transcript = data?.results?.[0]?.alternatives?.[0]?.transcript || null;
-            return transcript;
+            return data?.text || null;       // HF returns { text: "..." }
         } catch (err) {
-            console.warn('[STT] Transcription failed (possibly offline):', err);
+            console.warn('[STT] HF transcription failed:', err);
             return null;
         }
-    },
+    }
 };
 
 export default SpeechToText;

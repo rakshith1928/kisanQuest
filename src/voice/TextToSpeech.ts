@@ -6,8 +6,17 @@ import * as Speech from 'expo-speech';
  * Falls back to expo-speech when no API key is configured.
  */
 
-const GOOGLE_TTS_ENDPOINT = 'https://texttospeech.googleapis.com/v1/text:synthesize';
-const API_KEY: string | null = null;
+const HF_API_KEY = process.env.EXPO_PUBLIC_HF_API_KEY || null;
+
+// MMS-TTS has per-language models — best multilingual coverage for Indian langs
+const HF_TTS_MODEL: Record<string, string> = {
+    hi: 'facebook/mms-tts-hin',
+    en: 'facebook/mms-tts-eng',
+    mr: 'facebook/mms-tts-mar',
+    ta: 'facebook/mms-tts-tam',
+    te: 'facebook/mms-tts-tel',
+    kn: 'facebook/mms-tts-kan',
+};
 
 export interface VoiceConfig {
     languageCode: string;
@@ -21,16 +30,16 @@ export interface TTSOptions {
     onDone?: () => void;
 }
 
-type LanguageCode = 'hi' | 'en' | 'mr' | 'ta' | 'te' | 'kn';
+//type LanguageCode = 'hi' | 'en' | 'mr' | 'ta' | 'te' | 'kn';
 
-const VOICE_CONFIG: Record<LanguageCode, VoiceConfig> = {
+/*const VOICE_CONFIG: Record<LanguageCode, VoiceConfig> = {
     hi: { languageCode: 'hi-IN', name: 'hi-IN-Standard-A', ssmlGender: 'FEMALE' },
     en: { languageCode: 'en-IN', name: 'en-IN-Standard-A', ssmlGender: 'FEMALE' },
     mr: { languageCode: 'mr-IN', name: 'mr-IN-Standard-A', ssmlGender: 'FEMALE' },
     ta: { languageCode: 'ta-IN', name: 'ta-IN-Standard-A', ssmlGender: 'FEMALE' },
     te: { languageCode: 'te-IN', name: 'te-IN-Standard-A', ssmlGender: 'FEMALE' },
     kn: { languageCode: 'kn-IN', name: 'kn-IN-Standard-A', ssmlGender: 'FEMALE' },
-};
+};*/
 
 // Expo-speech locale fallback
 const EXPO_LOCALE_MAP: Record<string, string> = {
@@ -43,8 +52,8 @@ const TextToSpeech = {
      * Speak text. Uses Google Cloud TTS if API key available, else expo-speech.
      */
     async speak(text: string, langCode: string = 'hi', options: TTSOptions = {}): Promise<void> {
-        if (API_KEY) {
-            return this._speakGoogleCloud(text, langCode, options);
+        if (HF_API_KEY) {
+            return this._speakHuggingFace(text, langCode, options);  // changed
         }
         return this._speakDevice(text, langCode, options);
     },
@@ -65,35 +74,27 @@ const TextToSpeech = {
      * Google Cloud TTS (higher quality Wavenet voices).
      * Downloads audio and plays it via expo-av.
      */
-    async _speakGoogleCloud(text: string, langCode: string, options: TTSOptions = {}): Promise<void> {
+    async _speakHuggingFace(text: string, langCode: string, options: TTSOptions = {}): Promise<void> {
         try {
-            const voice = VOICE_CONFIG[langCode as LanguageCode] || VOICE_CONFIG['hi'];
-            const body = {
-                input: { text },
-                voice,
-                audioConfig: {
-                    audioEncoding: 'MP3',
-                    speakingRate: options.rate || 0.9,
-                    pitch: options.pitch || 0,
-                    effectsProfileId: ['handset-class-device'],
-                },
-            };
+            const model = HF_TTS_MODEL[langCode] || HF_TTS_MODEL['hi'];
+            const endpoint = `https://api-inference.huggingface.co/models/${model}`;
 
-            const res = await fetch(`${GOOGLE_TTS_ENDPOINT}?key=${API_KEY}`, {
+            const res = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                headers: {
+                    'Authorization': `Bearer ${HF_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ inputs: text }),
             });
 
-            const data = await res.json();
-            const audioContent = data?.audioContent;
+            // HF TTS returns raw audio bytes (WAV)
+            const arrayBuffer = await res.arrayBuffer();
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-            if (!audioContent) throw new Error('No audio content returned');
-
-            // Play base64 MP3 via expo-av
             const { Sound } = require('expo-av');
             const { sound } = await Sound.createAsync(
-                { uri: `data:audio/mp3;base64,${audioContent}` },
+                { uri: `data:audio/wav;base64,${base64}` },
                 { shouldPlay: true }
             );
             sound.setOnPlaybackStatusUpdate((status: { didJustFinish?: boolean }) => {
@@ -103,7 +104,7 @@ const TextToSpeech = {
                 }
             });
         } catch (err) {
-            console.warn('[TTS] Google Cloud failed, falling back to device TTS:', err);
+            console.warn('[TTS] HF failed, falling back to device TTS:', err);
             this._speakDevice(text, langCode, options);
         }
     },

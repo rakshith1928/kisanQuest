@@ -40,3 +40,29 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# IDE and Editor Settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.history/
+
+# Windows System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Application Logs
+logs/
+*.log
+_logs/
+
+# Testing and Coverage
+coverage/
+.nyc_output/
+jest-stare/
+junit.xml

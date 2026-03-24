@@ -1,0 +1,50 @@
+{
+  "name": "projects/4780950830881372135",
+  "projectId": "4780950830881372135",
+  "title": "KisanQuest",
+  "visibility": "PRIVATE",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "MOBILE",
+  "designTheme": {
+    "colorMode": "LIGHT",
+    "font": "INTER",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#388E3C",
+    "saturation": 3
+  },
+  "screens": {
+    "OnboardingScreen": {
+      "id": "0f3e9d636a5544589cd0400b01b94218",
+      "sourceScreen": "projects/4780950830881372135/screens/0f3e9d636a5544589cd0400b01b94218",
+      "x": 0,
+      "y": 0,
+      "width": 780,
+      "height": 2416
+    },
+    "GameplayScreen": {
+      "id": "321efd8423604973935566396b555d39",
+      "sourceScreen": "projects/4780950830881372135/screens/321efd8423604973935566396b555d39",
+      "x": 800,
+      "y": 0,
+      "width": 780,
+      "height": 2294
+    },
+    "HarvestScreen": {
+      "id": "b1d92879c5034c9f805f623d610ac3fc",
+      "sourceScreen": "projects/4780950830881372135/screens/b1d92879c5034c9f805f623d610ac3fc",
+      "x": 1600,
+      "y": 0,
+      "width": 780,
+      "height": 3046
+    },
+    "DashboardScreen": {
+      "id": "1503d5f6d7ca48ee8d27af7451427e94",
+      "sourceScreen": "projects/4780950830881372135/screens/1503d5f6d7ca48ee8d27af7451427e94",
+      "x": 2400,
+      "y": 0,
+      "width": 780,
+      "height": 2682
+    }
+  }
+}
