@@ -5,7 +5,8 @@ import gameEngine from '../engine/GameEngine';
 
 export default function HarvestScreen({ navigation, route }: any) {
   const [gameState, setGameState] = useState(gameEngine.getState());
-  
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     setGameState(gameEngine.getState());
   }, []);
@@ -21,15 +22,15 @@ export default function HarvestScreen({ navigation, route }: any) {
   const cash = gameState.player.finances.cash;
   const debt = gameState.player.finances.debt;
   const savings = gameState.player.finances.savings;
-  
+
   const previous = gameState.player.seasonHistory[gameState.player.seasonHistory.length - 1];
   const profit = previous ? cash - previous.finances.cash : cash;
-  
+
   const net = cash + savings - debt;
 
   const stars = score > 70 ? 3 : score > 40 ? 2 : 1;
   const yieldText = score > 70 ? "Excellent Yield!" : score > 40 ? "Average Yield!" : "Poor Yield";
-  
+
   const lastOutcome = route?.params?.lastOutcome;
 
   return (
@@ -91,14 +92,22 @@ export default function HarvestScreen({ navigation, route }: any) {
         </View>
 
         {/* Action Area */}
-        <TouchableOpacity 
-          style={styles.primaryButton}
+        <TouchableOpacity
+          style={[styles.primaryButton, loading && { opacity: 0.7 }]}
+          disabled={loading}
           onPress={() => {
+            if (loading) return;
+            setLoading(true);
+
             gameEngine.advanceSeason();
-            navigation.replace('Gameplay');
+
+            setTimeout(() => {
+              setLoading(false);
+              navigation.replace('Gameplay');
+            }, 300);
           }}
         >
-          <Text style={styles.primaryButtonText}>Next Season</Text>
+          <Text style={styles.primaryButtonText}>{loading ? 'Starting...' : 'Next Season'}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.secondaryButton}>
           <Text style={styles.secondaryButtonText}>Review Details</Text>
