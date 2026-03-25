@@ -1,43 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import gameEngine from '../engine/GameEngine';
+
+const badgeIcons: Record<string, string> = {
+  "First Sown": "🌱",
+  "Insured": "🛡️",
+  "Debt Free": "💰"
+};
 
 export default function DashboardScreen({ navigation }: any) {
+  const [gameState, setGameState] = useState(gameEngine.getState());
+
+  useEffect(() => {
+    setGameState(gameEngine.getState()); // sync once
+
+    const unsubscribe = gameEngine.getStateMachine().onStateChange(() => {
+      setGameState(gameEngine.getState());
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  const player = gameState.player;
+  const score = player.score.financialHealth;
+
+  const message =
+    score > 70 ? "Great job! You're managing risks well." :
+      score > 40 ? "You're doing okay, but can improve." :
+        "Warning: Your finances are unstable!";
+
+  const scoreColor =
+    score > 70 ? '#176a21' :
+      score > 40 ? '#f59e0b' :
+        '#b02500';
+
+  const netWorth = player.finances.cash + player.finances.savings - player.finances.debt;
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.title}>Player Profile</Text>
-          <View style={styles.avatarPlaceholder} />
+          <View>
+            <Text style={styles.title}>Player Profile</Text>
+            <Text style={{ fontSize: 18, color: '#4f5d67', marginTop: 4 }}>
+              {player.name || "Farmer"}
+            </Text>
+          </View>
+          <View style={[styles.avatarPlaceholder, { justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ fontSize: 24 }}>👨‍🌾</Text>
+          </View>
         </View>
 
         {/* Financial Health Score */}
         <View style={styles.scoreCard}>
           <Text style={styles.scoreTitle}>Financial Health</Text>
-          <View style={styles.circularScore}>
-            <Text style={styles.scoreValue}>85</Text>
+          <View style={[styles.circularScore, { borderColor: scoreColor }]}>
+            <Text style={[styles.scoreValue, { color: scoreColor }]}>{score}</Text>
             <Text style={styles.scoreMax}>/ 100</Text>
           </View>
-          <Text style={styles.scoreSubtitle}>Great job! You're managing risks well.</Text>
+          <View style={{ width: '100%', height: 8, backgroundColor: '#ddd', borderRadius: 4, marginTop: 10, marginBottom: 16 }}>
+            <View style={{ width: `${Math.min(100, Math.max(0, score))}%`, height: '100%', backgroundColor: scoreColor, borderRadius: 4 }} />
+          </View>
+          <Text style={styles.scoreSubtitle}>{message}</Text>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#233039', marginTop: 12 }}>
+            Net Worth: ₹{netWorth.toLocaleString('en-IN')}
+          </Text>
         </View>
 
         {/* Milestones & Badges */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Unlocked Badges</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgeScroll}>
-            <View style={styles.badgeItem}>
-              <View style={styles.badgeCircle}><Text>🌱</Text></View>
-              <Text style={styles.badgeText}>First Sown</Text>
-            </View>
-            <View style={styles.badgeItem}>
-              <View style={styles.badgeCircle}><Text>🛡️</Text></View>
-              <Text style={styles.badgeText}>Insured</Text>
-            </View>
-            <View style={styles.badgeItem}>
-              <View style={styles.badgeCircle}><Text>💰</Text></View>
-              <Text style={styles.badgeText}>Debt Free</Text>
-            </View>
+            {player.score.badges.length === 0 ? (
+              <Text style={[styles.badgeText, { color: '#4f5d67', fontStyle: 'italic' }]}>No badges yet</Text>
+            ) : (
+              player.score.badges.map((badge) => (
+                <View key={badge} style={styles.badgeItem}>
+                  <View style={styles.badgeCircle}><Text>{badgeIcons[badge] || "🏅"}</Text></View>
+                  <Text style={styles.badgeText}>{badge}</Text>
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
 
@@ -45,22 +92,39 @@ export default function DashboardScreen({ navigation }: any) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Season History</Text>
           <View style={styles.timelineCard}>
-            <View style={styles.timelineItem}>
-              <View style={styles.timelineDot} />
-              <View style={styles.timelineContent}>
-                <Text style={styles.timelineSeason}>Season 2: Rabi</Text>
-                <Text style={styles.timelineNetPositive}>+₹12,000</Text>
-              </View>
-            </View>
-            <View style={styles.timelineItem}>
-              <View style={[styles.timelineDot, { backgroundColor: '#a0afb9' }]} />
-              <View style={styles.timelineContent}>
-                <Text style={styles.timelineSeason}>Season 1: Kharif</Text>
-                <Text style={styles.timelineNetNegative}>-₹1,500</Text>
-              </View>
-            </View>
+            {player.seasonHistory.length === 0 ? (
+              <Text style={{ color: '#4f5d67', fontStyle: 'italic' }}>No seasons played yet</Text>
+            ) : (
+              player.seasonHistory.map((history, index) => {
+                const profit = history.finances.cash - history.finances.debt;
+                const isPositive = profit >= 0;
+                const seasonType = history.season % 2 === 1 ? 'Kharif' : 'Rabi';
+                return (
+                  <View key={`${history.season}-${index}`} style={styles.timelineItem}>
+                    <View style={[styles.timelineDot, !isPositive && { backgroundColor: '#b02500' }]} />
+                    <View style={styles.timelineContent}>
+                      <Text style={styles.timelineSeason}>Season {history.season} ({seasonType})</Text>
+                      <Text style={isPositive ? styles.timelineNetPositive : styles.timelineNetNegative}>
+                        {isPositive ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
+                      </Text>
+                      <Text style={{ color: '#4f5d67', fontSize: 12, marginTop: 2 }}>
+                        ₹{history.finances.cash.toLocaleString('en-IN')} | Debt: ₹{history.finances.debt.toLocaleString('en-IN')}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
           </View>
         </View>
+
+        {/* Continue Game Button */}
+        <TouchableOpacity
+          style={{ marginTop: 20, backgroundColor: '#176a21', padding: 16, borderRadius: 12, alignItems: 'center' }}
+          onPress={() => navigation.navigate('Gameplay')}
+        >
+          <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700' }}>Continue Game →</Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
@@ -85,7 +149,7 @@ const styles = StyleSheet.create({
   badgeItem: { alignItems: 'center', marginRight: 16 },
   badgeCircle: { width: 72, height: 72, backgroundColor: '#ffca4d', borderRadius: 36, justifyContent: 'center', alignItems: 'center', elevation: 4, marginBottom: 8 },
   badgeText: { fontSize: 14, fontWeight: '600', color: '#5c4400' },
-  timelineCard: { backgroundColor: '#ffffff', borderRadius: 24, padding: 24, elevation: 2 },
+  timelineCard: { backgroundColor: '#ffffff', borderRadius: 24, padding: 24, elevation: 4 },
   timelineItem: { flexDirection: 'row', marginBottom: 20 },
   timelineDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#176a21', marginRight: 16, marginTop: 4 },
   timelineContent: { flex: 1 },

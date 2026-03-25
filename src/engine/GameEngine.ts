@@ -113,6 +113,13 @@ export class GameEngine {
     }
 
     /**
+     * Get the state machine instance
+     */
+    getStateMachine(): StateMachine {
+        return this.stateMachine;
+    }
+
+    /**
      * Process a player decision
      */
     processDecision(optionId: string): OutcomeResult | null {
