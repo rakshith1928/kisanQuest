@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import gameEngine from '../engine/GameEngine';
 
-export default function HarvestScreen({ navigation }: any) {
+export default function HarvestScreen({ navigation, route }: any) {
+  const [gameState, setGameState] = useState(gameEngine.getState());
+  
+  useEffect(() => {
+    setGameState(gameEngine.getState());
+  }, []);
+
+  const score = gameState.player.score.financialHealth;
+
+  useEffect(() => {
+    if (score > 80 && !gameState.player.score.badges.includes("Pro Farmer")) {
+      gameState.player.score.badges.push("Pro Farmer");
+    }
+  }, [score, gameState.player.score.badges]);
+
+  const cash = gameState.player.finances.cash;
+  const debt = gameState.player.finances.debt;
+  const savings = gameState.player.finances.savings;
+  
+  const previous = gameState.player.seasonHistory[gameState.player.seasonHistory.length - 1];
+  const profit = previous ? cash - previous.finances.cash : cash;
+  
+  const net = cash + savings - debt;
+
+  const stars = score > 70 ? 3 : score > 40 ? 2 : 1;
+  const yieldText = score > 70 ? "Excellent Yield!" : score > 40 ? "Average Yield!" : "Poor Yield";
+  
+  const lastOutcome = route?.params?.lastOutcome;
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -10,32 +39,46 @@ export default function HarvestScreen({ navigation }: any) {
         <View style={styles.header}>
           <Text style={styles.title}>Season Harvest</Text>
           <View style={styles.starContainer}>
-            <Text style={styles.starFilled}>★</Text>
-            <Text style={styles.starFilled}>★</Text>
-            <Text style={styles.starEmpty}>☆</Text>
+            {[1, 2, 3].map(i => (
+              <Text key={i} style={i <= stars ? styles.starFilled : styles.starEmpty}>
+                {i <= stars ? '★' : '☆'}
+              </Text>
+            ))}
           </View>
         </View>
 
         {/* Visual Results */}
         <View style={styles.visualCard}>
           <View style={styles.harvestIllustration} />
-          <Text style={styles.harvestText}>Average Yield!</Text>
+          <Text style={styles.harvestText}>{yieldText}</Text>
+          {lastOutcome && (
+            <View style={{ marginTop: 12, alignItems: 'center' }}>
+              <Text style={{ fontSize: 16, color: '#65493f', fontWeight: '600' }}>
+                Weather: {lastOutcome.weather?.type || 'Sunny'}
+              </Text>
+              <Text style={{ fontSize: 16, color: lastOutcome.healthDelta >= 0 ? '#176a21' : '#b02500', fontWeight: '600', marginTop: 4 }}>
+                Health Impact: {lastOutcome.healthDelta > 0 ? '+' : ''}{lastOutcome.healthDelta || 0}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Financial Summary */}
         <View style={styles.financialCard}>
           <Text style={styles.summaryTitle}>Financial Overview</Text>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Income</Text>
-            <Text style={styles.summaryValuePositive}>+₹12,000</Text>
+            <Text style={styles.summaryLabel}>Season Profit</Text>
+            <Text style={styles.summaryValuePositive}>
+              {profit >= 0 ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Expenses & Debt</Text>
-            <Text style={styles.summaryValueNegative}>-₹4,000</Text>
+            <Text style={styles.summaryLabel}>End-of-Season Debt</Text>
+            <Text style={styles.summaryValueNegative}>₹{debt.toLocaleString('en-IN')}</Text>
           </View>
           <View style={[styles.summaryRow, styles.summaryTotalRow]}>
-            <Text style={styles.summaryLabelBold}>Net Cash</Text>
-            <Text style={styles.summaryValueBold}>₹23,000</Text>
+            <Text style={styles.summaryLabelBold}>Net Cash Balance</Text>
+            <Text style={styles.summaryValueBold}>₹{net.toLocaleString('en-IN')}</Text>
           </View>
         </View>
 
@@ -43,12 +86,18 @@ export default function HarvestScreen({ navigation }: any) {
         <View style={styles.lessonCard}>
           <Text style={styles.lessonTitle}>💡 Financial Lesson</Text>
           <Text style={styles.lessonBody}>
-            Taking a small loan at the right interest rate helped you buy better seeds. Managing the debt payments means you still made a profit this season!
+            {lastOutcome?.lesson || "You've completed the season! Making smart financial decisions is key to a thriving farm."}
           </Text>
         </View>
 
         {/* Action Area */}
-        <TouchableOpacity style={styles.primaryButton}>
+        <TouchableOpacity 
+          style={styles.primaryButton}
+          onPress={() => {
+            gameEngine.advanceSeason();
+            navigation.replace('Gameplay');
+          }}
+        >
           <Text style={styles.primaryButtonText}>Next Season</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.secondaryButton}>

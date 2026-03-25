@@ -200,7 +200,10 @@ Financial themes woven per scenario:
 ### Phase 6: Backend & APIs
 
 #### [NEW] `server/server.ts`
-Express server with routes:
+Express server entry point. Bootstraps the app, connects to MongoDB, and registers middleware/routes.
+
+#### [NEW] `server/routes/`
+Defines modular API endpoints to route traffic appropriately:
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
@@ -211,6 +214,12 @@ Express server with routes:
 | `/api/voice/stt` | POST | Proxy to Google Cloud STT |
 | `/api/voice/tts` | POST | Proxy to Google Cloud TTS |
 | `/api/analytics/event` | POST | Track player analytics |
+
+#### [NEW] `server/controllers/`
+Contains the business logic to handle incoming requests (e.g. syncing game state, retrieving leaderboards).
+
+#### [NEW] `server/middleware/`
+Reusable logic for checking incoming requests, like JWT verification before allowing a player to sync their offline game state.
 
 #### [NEW] `server/models/Player.ts`
 MongoDB schema: `name`, `language`, `region`, `farmState`, `financialScore`, `completedScenarios`, `badges`, `lastSyncAt`
