@@ -76,7 +76,7 @@ const INITIAL_PLAYER_STATE: PlayerState = {
 
 export class GameEngine {
     private stateMachine: StateMachine;
-    private decisionTree: DecisionTree;
+    public decisionTree: DecisionTree;
     private outcomeCalculator: OutcomeCalculator;
     private playerState: PlayerState;
     private currentScenario: Scenario | null;
@@ -110,6 +110,13 @@ export class GameEngine {
             player: this.playerState,
             scenario: this.currentScenario,
         };
+    }
+
+    /**
+     * Get current decision node
+     */
+    getCurrentNode() {
+        return this.decisionTree.getCurrentNode();
     }
 
     /**

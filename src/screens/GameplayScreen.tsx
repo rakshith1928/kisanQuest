@@ -1,16 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import gameEngine from '../engine/GameEngine';
+
+function getWeatherIcon(type: string | undefined) {
+  switch (type) {
+    case 'good_monsoon': return '🌧️';
+    case 'drought': return '☀️';
+    case 'flood': return '🌊';
+    default: return '☀️';
+  }
+}
 
 export default function GameplayScreen({ navigation }: any) {
+  const [gameState, setGameState] = useState(gameEngine.getState());
+  const [lastOutcome, setLastOutcome] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const node = gameEngine.getCurrentNode();
+
+  useEffect(() => {
+    const unsubscribe = gameEngine.getStateMachine().onStateChange(() => {
+      setGameState(gameEngine.getState());
+    });
+
+    return unsubscribe;
+  }, []);
+
+  if (!node) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.eventTitle}>Season Complete 🎉</Text>
+        <TouchableOpacity style={styles.primaryAction} onPress={() => navigation.navigate('Dashboard')}>
+          <Text style={styles.primaryActionText}>Go to Dashboard</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.seasonText}>Kharif Season</Text>
+          <Text style={styles.seasonText}>
+            {gameState.player.farm.season % 2 === 1 ? 'Kharif' : 'Rabi'} Season
+          </Text>
           <View style={styles.weatherBadge}>
-            <Text style={styles.weatherText}>☀️ Sunny</Text>
+            <Text style={styles.weatherText}>{getWeatherIcon(lastOutcome?.weather?.type)}</Text>
           </View>
         </View>
 
@@ -18,15 +54,15 @@ export default function GameplayScreen({ navigation }: any) {
         <View style={styles.statusBar}>
           <View style={[styles.statItem, { backgroundColor: '#d1ffc8' }]}>
             <Text style={[styles.statLabel, { color: '#006016' }]}>Cash</Text>
-            <Text style={[styles.statValue, { color: '#004b0f' }]}>₹15,000</Text>
+            <Text style={[styles.statValue, { color: '#004b0f' }]}>₹{gameState.player.finances.cash}</Text>
           </View>
           <View style={[styles.statItem, { backgroundColor: '#ffefec' }]}>
             <Text style={[styles.statLabel, { color: '#b92902' }]}>Debt</Text>
-            <Text style={[styles.statValue, { color: '#520c00' }]}>₹5,000</Text>
+            <Text style={[styles.statValue, { color: '#520c00' }]}>₹{gameState.player.finances.debt}</Text>
           </View>
           <View style={[styles.statItem, { backgroundColor: '#fff1db' }]}>
             <Text style={[styles.statLabel, { color: '#765600' }]}>Savings</Text>
-            <Text style={[styles.statValue, { color: '#453100' }]}>₹2,000</Text>
+            <Text style={[styles.statValue, { color: '#453100' }]}>₹{gameState.player.finances.savings}</Text>
           </View>
         </View>
 
@@ -38,21 +74,62 @@ export default function GameplayScreen({ navigation }: any) {
 
         {/* Event / Action Area */}
         <View style={styles.eventCard}>
-          <Text style={styles.eventTitle}>⚠️ Unexpected Rain Delay!</Text>
+          <Text style={styles.eventTitle}>Event</Text>
           <Text style={styles.eventDescription}>
-            Unseasonal rains are threatening your harvest. How do you want to protect your crops?
+            {node?.prompt}
           </Text>
 
+          {lastOutcome?.message && (
+            <View style={{ alignItems: 'center', marginBottom: 16, padding: 12, backgroundColor: '#ffffff', borderRadius: 16, elevation: 2 }}>
+              <Text style={{ fontSize: 16, color: '#0a6a1d', fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>
+                {lastOutcome.message}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 16 }}>
+                {lastOutcome.financialChanges?.cash !== undefined && (
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: lastOutcome.financialChanges.cash >= 0 ? '#0a6a1d' : '#b92902' }}>
+                    Cash: {lastOutcome.financialChanges.cash > 0 ? '+' : ''}{lastOutcome.financialChanges.cash}
+                  </Text>
+                )}
+                {lastOutcome.healthDelta !== undefined && (
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: lastOutcome.healthDelta >= 0 ? '#0a6a1d' : '#b92902' }}>
+                    Score: {lastOutcome.healthDelta > 0 ? '+' : ''}{lastOutcome.healthDelta}
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
+
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.primaryAction}>
-              <Text style={styles.primaryActionText}>Use Tarps (₹500)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryAction}>
-              <Text style={styles.secondaryActionText}>Wait it out (Free)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tertiaryAction}>
-              <Text style={styles.tertiaryActionText}>Claim Insurance</Text>
-            </TouchableOpacity>
+            {node?.options?.map((opt: any, index: number) => (
+              <TouchableOpacity
+                key={opt.id || index}
+                disabled={isProcessing}
+                style={[
+                  styles.primaryAction,
+                  index === 1 && styles.secondaryAction,
+                  index === 2 && styles.tertiaryAction,
+                  { opacity: isProcessing ? 0.7 : 1 }
+                ]}
+                onPress={() => {
+                  if (isProcessing) return;
+                  setIsProcessing(true);
+                  const outcome = gameEngine.processDecision(opt.id) || {};
+                  setLastOutcome(outcome);
+                  
+                  setTimeout(() => {
+                    gameEngine.decisionTree.chooseOption(index);
+                    setIsProcessing(false);
+                    setLastOutcome(null); // Clear message for next node
+                  }, 1500);
+                }}
+              >
+                <Text style={[
+                  styles.primaryActionText,
+                  index === 1 && styles.secondaryActionText,
+                  index === 2 && styles.tertiaryActionText
+                ]}>{isProcessing ? 'Processing...' : opt.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </ScrollView>
