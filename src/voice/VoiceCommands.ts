@@ -15,7 +15,10 @@ export type GameAction =
     | 'CANCEL'
     | 'NEXT'
     | 'BACK'
-    | 'HELP';
+    | 'HELP'
+    | 'SELECT_HINDI'
+    | 'SELECT_ENGLISH'
+    | 'SELECT_MARATHI';
 
 export type SupportedLanguage = 'hi' | 'en' | 'mr' | 'ta' | 'te' | 'kn';
 
@@ -40,6 +43,12 @@ const COMMAND_MAP: CommandMap = {
         'अगला': 'NEXT',
         'वापस': 'BACK',
         'मदद': 'HELP',
+        'हिंदी': 'SELECT_HINDI',
+        'hindi': 'SELECT_HINDI',
+        'english': 'SELECT_ENGLISH',
+        'अंग्रेजी': 'SELECT_ENGLISH',
+        'marathi': 'SELECT_MARATHI',
+        'मराठी': 'SELECT_MARATHI',
     },
     en: {
         'insurance': 'CHOOSE_INSURANCE',
@@ -59,6 +68,9 @@ const COMMAND_MAP: CommandMap = {
         'next': 'NEXT',
         'back': 'BACK',
         'help': 'HELP',
+        'hindi': 'SELECT_HINDI',
+        'english': 'SELECT_ENGLISH',
+        'marathi': 'SELECT_MARATHI',
     },
     mr: {
         'विमा': 'CHOOSE_INSURANCE',
@@ -70,6 +82,9 @@ const COMMAND_MAP: CommandMap = {
         'नाही': 'CANCEL',
         'पुढे': 'NEXT',
         'मदत': 'HELP',
+        'हिंदी': 'SELECT_HINDI',
+        'इंग्रजी': 'SELECT_ENGLISH',
+        'मराठी': 'SELECT_MARATHI',
     },
     ta: {
         'காப்பீடு': 'CHOOSE_INSURANCE',

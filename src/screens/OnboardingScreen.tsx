@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import gameEngine from '../engine/GameEngine';
+import VoiceManager from '../voice/VoiceManager';
 
 const LANGUAGES = [
   { id: 'hi', name: 'हिंदी' },
@@ -12,13 +13,38 @@ const LANGUAGES = [
 export default function OnboardingScreen({ navigation }: any) {
   const [selectedLang, setSelectedLang] = useState<string>('hi');
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   const selectedLangName = LANGUAGES.find(l => l.id === selectedLang)?.name;
 
-  const handleSpeak = () => {
-    // Later connect:
-    // VoiceManager.startListening()
-    // VoiceCommands.match()
+  const handleSpeak = async () => {
+    if (isListening) return;
+    setIsListening(true);
+
+    try {
+      const action = await VoiceManager.listenForDuration(3000);
+      
+      if (!action) {
+        await VoiceManager.speak("Sorry, I didn't understand. Please try again.");
+        return;
+      }
+
+      const actionToLangMap: Record<string, { id: string, name: string }> = {
+        SELECT_HINDI: { id: 'hi', name: 'Hindi' },
+        SELECT_ENGLISH: { id: 'en', name: 'English' },
+        SELECT_MARATHI: { id: 'mr', name: 'Marathi' },
+      };
+
+      const match = actionToLangMap[action];
+      if (match) {
+        setSelectedLang(match.id);
+        await VoiceManager.speak(`${match.name} selected`);
+      }
+    } catch (err) {
+      console.error('VoiceManager Error:', err);
+    } finally {
+      setIsListening(false);
+    }
   };
 
   return (
@@ -46,11 +72,10 @@ export default function OnboardingScreen({ navigation }: any) {
           )}
 
           <TouchableOpacity 
-            style={[styles.micButton, !selectedLang && { opacity: 0.5 }]} 
+            style={[styles.micButton, isListening && { backgroundColor: '#b02500' }]} 
             onPress={handleSpeak}
-            disabled={!selectedLang}
           >
-            <Text style={styles.micButtonText}>Tap to Speak</Text>
+            <Text style={styles.micButtonText}>{isListening ? 'Listening...' : 'Tap to Speak'}</Text>
             <Text style={styles.micTooltip}>Say your choice</Text>
           </TouchableOpacity>
 
