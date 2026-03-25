@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import gameEngine from '../engine/GameEngine';
 
 const LANGUAGES = [
   { id: 'hi', name: 'हिंदी' },
@@ -9,10 +10,15 @@ const LANGUAGES = [
 ];
 
 export default function OnboardingScreen({ navigation }: any) {
-  const [selectedLang, setSelectedLang] = useState<string | null>(null);
+  const [selectedLang, setSelectedLang] = useState<string>('hi');
+  const [loading, setLoading] = useState(false);
+
+  const selectedLangName = LANGUAGES.find(l => l.id === selectedLang)?.name;
 
   const handleSpeak = () => {
-    // Voice prompt placeholder
+    // Later connect:
+    // VoiceManager.startListening()
+    // VoiceCommands.match()
   };
 
   return (
@@ -32,9 +38,39 @@ export default function OnboardingScreen({ navigation }: any) {
               <Text style={[styles.langText, selectedLang === lang.id && styles.langTextSelected]}>{lang.name}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity style={styles.micButton} onPress={handleSpeak}>
+
+          {selectedLang && (
+            <Text style={{ textAlign: 'center', marginBottom: 16, color: '#176a21', fontWeight: 'bold' }}>
+              Selected: {selectedLangName}
+            </Text>
+          )}
+
+          <TouchableOpacity 
+            style={[styles.micButton, !selectedLang && { opacity: 0.5 }]} 
+            onPress={handleSpeak}
+            disabled={!selectedLang}
+          >
             <Text style={styles.micButtonText}>Tap to Speak</Text>
             <Text style={styles.micTooltip}>Say your choice</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            disabled={!selectedLang || loading}
+            style={[styles.continueButton, (!selectedLang || loading) && { opacity: 0.5 }]}
+            onPress={() => {
+              if (!selectedLang || loading) return;
+              setLoading(true);
+
+              gameEngine.initGame({
+                language: selectedLang
+              });
+
+              setTimeout(() => {
+                navigation.replace('FarmCreation');
+              }, 200);
+            }}
+          >
+            <Text style={styles.continueButtonText}>{loading ? 'Starting...' : 'Continue'}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -55,5 +91,7 @@ const styles = StyleSheet.create({
   langTextSelected: { color: '#005c15' },
   micButton: { backgroundColor: '#176a21', borderRadius: 999, paddingVertical: 20, paddingHorizontal: 32, alignItems: 'center', marginTop: 16, elevation: 6 },
   micButtonText: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' },
-  micTooltip: { color: '#d1ffc8', fontSize: 12, marginTop: 4 }
+  micTooltip: { color: '#d1ffc8', fontSize: 12, marginTop: 4 },
+  continueButton: { backgroundColor: '#f7ba00', borderRadius: 999, paddingVertical: 20, alignItems: 'center', marginTop: 24, elevation: 4 },
+  continueButtonText: { color: '#5c4400', fontSize: 18, fontWeight: '700' }
 });
