@@ -32,7 +32,7 @@ export default function FarmCreationScreen({ navigation }: any) {
               <TouchableOpacity
                 key={crop}
                 style={[styles.cropCard, selectedCrop === crop && styles.cropCardSelected]}
-                onPress={() => setSelectedCrop(crop)}
+                onPress={() => !loading && setSelectedCrop(crop)}
               >
                 <Text style={[styles.cropText, selectedCrop === crop && styles.cropTextSelected]}>{crop}</Text>
               </TouchableOpacity>
@@ -59,6 +59,7 @@ export default function FarmCreationScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>Name Your Farm</Text>
           <View style={styles.inputContainer}>
             <TextInput
+              editable={!loading}
               style={styles.input}
               placeholder="e.g., Sunrise Acres"
               placeholderTextColor="#5a5c58"
@@ -74,10 +75,11 @@ export default function FarmCreationScreen({ navigation }: any) {
         </View>
 
         <TouchableOpacity
-          style={[styles.startButton, (!selectedCrop || !isValidName || loading) && styles.startButtonDisabled]}
-          disabled={!selectedCrop || !isValidName || loading}
+          style={[styles.startButton, (!isValidName || loading) && styles.startButtonDisabled, { opacity: loading ? 0.7 : 1 }]}
+          disabled={!isValidName || loading}
           onPress={() => {
-            if (!selectedCrop || !isValidName) return;
+            if (loading) return;
+            if (!isValidName) return;
             setLoading(true);
 
             // Simulate slight setup delay for smoother UX
