@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { BASE_URL } from '../config/api';
 
 export default function LeaderboardScreen() {
   const [players, setPlayers] = useState<any[]>([]);
@@ -11,7 +12,7 @@ export default function LeaderboardScreen() {
   const fetchLeaderboard = async () => {
     try {
       // NOTE: For physical Android device testing, replace localhost with your machine's local IP address (e.g. 192.168.1.100)
-      const res = await fetch('http://localhost:5000/api/game/leaderboard');
+      const res = await fetch(`${BASE_URL}/api/game/leaderboard`);
       const data = await res.json();
       setPlayers(data.leaderboard || data); // handle standard or nested response
     } catch (err) {

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-chart-kit';
 import gameEngine from '../engine/GameEngine';
+import { BASE_URL } from '../config/api';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -33,7 +34,7 @@ export default function DashboardScreen({ navigation }: any) {
   const fetchEvents = async () => {
     try {
       // NOTE: For physical Android device testing, replace localhost with your machine's local IP address
-      const res = await fetch('http://localhost:5000/api/analytics/popular');
+      const res = await fetch(`${BASE_URL}/api/analytics/popular`);
       if (res.ok) {
         const data = await res.json();
         setEvents(data);
