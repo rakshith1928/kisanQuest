@@ -1,19 +1,26 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
+import Analytics from '../models/Analytics';
 
 export const trackEvent = async (req: AuthRequest, res: Response) => {
   try {
     const { eventName, eventData } = req.body;
-    const playerId = req.playerId;
+    const playerId = req.playerId || 'anonymous';
 
     if (!eventName) {
       return res.status(400).json({ error: 'Event name required' });
     }
 
-    // In a prod app, send to Mixpanel, Amplitude, or log to DB.
-    console.log(`[Analytics] [Player: ${playerId || 'anonymous'}] Event: ${eventName}`, eventData);
+    // Save to MongoDB
+    const event = await Analytics.create({
+      playerId,
+      eventName,
+      eventData
+    });
 
-    res.status(200).json({ message: 'Event logged successfully' });
+    console.log('[Analytics Saved]', event);
+
+    res.status(200).json({ message: 'Event saved successfully' });
   } catch (error) {
     console.error('Analytics track error:', error);
     res.status(500).json({ error: 'Failed to log analytics event' });
