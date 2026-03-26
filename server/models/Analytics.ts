@@ -19,4 +19,8 @@ const AnalyticsSchema = new mongoose.Schema({
   }
 });
 
+AnalyticsSchema.index({ playerId: 1 });
+AnalyticsSchema.index({ eventName: 1 });
+AnalyticsSchema.index({ createdAt: -1 });
+
 export default mongoose.model('Analytics', AnalyticsSchema);

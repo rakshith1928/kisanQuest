@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BarChart } from 'react-native-chart-kit';
 import gameEngine from '../engine/GameEngine';
+
+const screenWidth = Dimensions.get('window').width;
 
 const badgeIcons: Record<string, string> = {
   "First Sown": "🌱",
@@ -11,6 +14,7 @@ const badgeIcons: Record<string, string> = {
 
 export default function DashboardScreen({ navigation }: any) {
   const [gameState, setGameState] = useState(gameEngine.getState());
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     setGameState(gameEngine.getState()); // sync once
@@ -18,11 +22,26 @@ export default function DashboardScreen({ navigation }: any) {
     const unsubscribe = gameEngine.getStateMachine().onStateChange(() => {
       setGameState(gameEngine.getState());
     });
+    
+    fetchEvents();
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  const fetchEvents = async () => {
+    try {
+      // NOTE: For physical Android device testing, replace localhost with your machine's local IP address
+      const res = await fetch('http://localhost:5000/api/analytics/popular');
+      if (res.ok) {
+        const data = await res.json();
+        setEvents(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch popular events:', err);
+    }
+  };
 
   const player = gameState.player;
   const score = player.score.financialHealth;
@@ -114,6 +133,42 @@ export default function DashboardScreen({ navigation }: any) {
                   </View>
                 );
               })
+            )}
+          </View>
+        </View>
+
+        {/* Global Popular Events Analytics */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Global Popular Events</Text>
+          <View style={styles.timelineCard}>
+            {events.length > 0 ? (
+              <BarChart
+                data={{
+                  labels: events.slice(0, 4).map(e => e._id), // Take top 4 to fit the screen
+                  datasets: [{ data: events.slice(0, 4).map(e => e.count) }]
+                }}
+                width={screenWidth - 96}
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=""
+                fromZero
+                chartConfig={{
+                  backgroundColor: '#ffffff',
+                  backgroundGradientFrom: '#ffffff',
+                  backgroundGradientTo: '#ffffff',
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(23, 106, 33, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(79, 93, 103, ${opacity})`,
+                  barPercentage: 0.6,
+                }}
+                style={{
+                  marginVertical: 8,
+                  borderRadius: 16,
+                  marginLeft: -20,
+                }}
+              />
+            ) : (
+               <Text style={{ color: '#4f5d67', fontStyle: 'italic' }}>No global events collected yet</Text>
             )}
           </View>
         </View>
