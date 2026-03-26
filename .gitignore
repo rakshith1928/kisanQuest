@@ -66,3 +66,11 @@ coverage/
 .nyc_output/
 jest-stare/
 junit.xml
+
+# Server specifics
+server/node_modules/
+server/.env
+server/dist/
+.env.production
+.env.staging
+.env.test
