@@ -4,28 +4,31 @@ import { apiClient } from './apiClient';
 export interface AuthResponse {
   token: string;
   player: {
-    id: string;
+    id?: string;
+    _id?: string; // Mongoose returns _id for login
     name: string;
     farmName?: string;
   };
 }
 
 export const authService = {
-  async register(name: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/api/auth/register', { name });
+  async register(name: string, language: string = 'hi', region: string = 'Unknown'): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/api/auth/register', { name, language, region });
     if (response.token) {
       await AsyncStorage.setItem('token', response.token);
-      await AsyncStorage.setItem('playerId', response.player.id.toString());
+      const id = response.player.id || response.player._id;
+      if (id) await AsyncStorage.setItem('playerId', id.toString());
       await AsyncStorage.setItem('playerName', response.player.name);
     }
     return response;
   },
 
-  async login(name: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/api/auth/login', { name });
+  async login(playerId: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/api/auth/login', { playerId });
     if (response.token) {
       await AsyncStorage.setItem('token', response.token);
-      await AsyncStorage.setItem('playerId', response.player.id.toString());
+      const id = response.player.id || response.player._id;
+      if (id) await AsyncStorage.setItem('playerId', id.toString());
       await AsyncStorage.setItem('playerName', response.player.name);
     }
     return response;

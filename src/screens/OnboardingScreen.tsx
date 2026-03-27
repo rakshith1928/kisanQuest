@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import gameEngine from '../engine/GameEngine';
 import VoiceManager from '../voice/VoiceManager';
@@ -12,8 +12,11 @@ const LANGUAGES = [
 
 export default function OnboardingScreen({ navigation }: any) {
   const [selectedLang, setSelectedLang] = useState<string>('hi');
+  const [playerName, setPlayerName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+
+  const isNameValid = playerName.trim().length > 0;
 
   const selectedLangName = LANGUAGES.find(l => l.id === selectedLang)?.name;
 
@@ -71,6 +74,23 @@ export default function OnboardingScreen({ navigation }: any) {
             </Text>
           )}
 
+          <Text style={[styles.title, { fontSize: 20, marginTop: 16 }]}>What is your name?</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              editable={!loading}
+              style={styles.input}
+              placeholder="e.g., Rahul"
+              placeholderTextColor="#5a5c58"
+              value={playerName}
+              onChangeText={setPlayerName}
+            />
+          </View>
+          {!isNameValid && playerName.length > 0 && (
+            <Text style={{ color: '#b02500', marginTop: 8, marginLeft: 16 }}>
+              Please enter a valid name.
+            </Text>
+          )}
+
           <TouchableOpacity 
             style={[styles.micButton, isListening && { backgroundColor: '#b02500' }]} 
             onPress={handleSpeak}
@@ -80,10 +100,10 @@ export default function OnboardingScreen({ navigation }: any) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            disabled={!selectedLang || loading}
-            style={[styles.continueButton, (!selectedLang || loading) && { opacity: 0.5 }]}
+            disabled={!selectedLang || !isNameValid || loading}
+            style={[styles.continueButton, (!selectedLang || !isNameValid || loading) && { opacity: 0.5 }]}
             onPress={async () => {
-              if (!selectedLang || loading) return;
+              if (!selectedLang || !isNameValid || loading) return;
               setLoading(true);
 
               gameEngine.initGame({
@@ -92,7 +112,7 @@ export default function OnboardingScreen({ navigation }: any) {
 
               try {
                 const { authService } = require('../services/authService');
-                await authService.register('New Farmer');
+                await authService.register(playerName.trim(), selectedLang, 'Unknown');
               } catch (err) {
                 console.warn('Backend register failed:', err);
               }
@@ -124,6 +144,8 @@ const styles = StyleSheet.create({
   micButton: { backgroundColor: '#176a21', borderRadius: 999, paddingVertical: 20, paddingHorizontal: 32, alignItems: 'center', marginTop: 16, elevation: 6 },
   micButtonText: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' },
   micTooltip: { color: '#d1ffc8', fontSize: 12, marginTop: 4 },
+  inputContainer: { backgroundColor: '#ffffff', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 16, shadowColor: '#176a21', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 },
+  input: { fontSize: 18, color: '#2d2f2c' },
   continueButton: { backgroundColor: '#f7ba00', borderRadius: 999, paddingVertical: 20, alignItems: 'center', marginTop: 24, elevation: 4 },
   continueButtonText: { color: '#5c4400', fontSize: 18, fontWeight: '700' }
 });
