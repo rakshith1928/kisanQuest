@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { TranslatedText } from '../components/TranslatedText';
 import gameEngine from '../engine/GameEngine';
 
 function getWeatherIcon(type: string | undefined) {
@@ -13,6 +15,7 @@ function getWeatherIcon(type: string | undefined) {
 }
 
 export default function GameplayScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
   const [lastOutcome, setLastOutcome] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,15 +56,15 @@ export default function GameplayScreen({ navigation }: any) {
         {/* Financial Status Bar */}
         <View style={styles.statusBar}>
           <View style={[styles.statItem, { backgroundColor: '#d1ffc8' }]}>
-            <Text style={[styles.statLabel, { color: '#006016' }]}>Cash</Text>
+            <TranslatedText tKey="ui.gameplay.cash" style={[styles.statLabel, { color: '#006016' }]} />
             <Text style={[styles.statValue, { color: '#004b0f' }]}>₹{gameState.player.finances.cash}</Text>
           </View>
           <View style={[styles.statItem, { backgroundColor: '#ffefec' }]}>
-            <Text style={[styles.statLabel, { color: '#b92902' }]}>Debt</Text>
+            <TranslatedText tKey="ui.gameplay.debt" style={[styles.statLabel, { color: '#b92902' }]} />
             <Text style={[styles.statValue, { color: '#520c00' }]}>₹{gameState.player.finances.debt}</Text>
           </View>
           <View style={[styles.statItem, { backgroundColor: '#fff1db' }]}>
-            <Text style={[styles.statLabel, { color: '#765600' }]}>Savings</Text>
+            <TranslatedText tKey="ui.gameplay.savings" style={[styles.statLabel, { color: '#765600' }]} />
             <Text style={[styles.statValue, { color: '#453100' }]}>₹{gameState.player.finances.savings}</Text>
           </View>
         </View>

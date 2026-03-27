@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
+import { useTranslation } from 'react-i18next';
+import { TranslatedText } from '../components/TranslatedText';
 import gameEngine from '../engine/GameEngine';
 
 const CROPS = ['Rice', 'Wheat', 'Cotton', 'Sugarcane'];
 
 export default function FarmCreationScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [selectedCrop, setSelectedCrop] = useState<string>('Rice');
   const [farmName, setFarmName] = useState('');
   const [budgetGoal, setBudgetGoal] = useState<number>(50000);
@@ -18,7 +21,7 @@ export default function FarmCreationScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.header}>
-          <Text style={styles.title}>Set Up Your Farm</Text>
+          <TranslatedText tKey="ui.farm_creation.title" style={styles.title} />
           <Text style={{ color: '#5a5c58', marginTop: 4, marginBottom: 16, fontSize: 16 }}>
             Choose your strategy for this season
           </Text>
@@ -26,7 +29,7 @@ export default function FarmCreationScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Select Main Crop</Text>
+          <TranslatedText tKey="ui.farm_creation.select_crop" style={styles.sectionTitle} />
           <View style={styles.grid}>
             {CROPS.map((crop) => (
               <TouchableOpacity
@@ -41,7 +44,7 @@ export default function FarmCreationScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Budget Goal: ₹{budgetGoal.toLocaleString('en-IN')}</Text>
+          <Text style={styles.sectionTitle}>{t('ui.farm_creation.budget_goal')}: ₹{budgetGoal.toLocaleString('en-IN')}</Text>
           <Slider
             style={{ width: '100%', height: 40 }}
             minimumValue={10000}
@@ -56,7 +59,7 @@ export default function FarmCreationScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Name Your Farm</Text>
+          <TranslatedText tKey="ui.farm_creation.farm_name" style={styles.sectionTitle} />
           <View style={styles.inputContainer}>
             <TextInput
               editable={!loading}

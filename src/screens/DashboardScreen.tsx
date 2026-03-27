@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-chart-kit';
+import { useTranslation } from 'react-i18next';
+import { TranslatedText } from '../components/TranslatedText';
 import gameEngine from '../engine/GameEngine';
 import { analyticsService } from '../services/analyticsService';
 
@@ -14,6 +16,7 @@ const badgeIcons: Record<string, string> = {
 };
 
 export default function DashboardScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
   const [events, setEvents] = useState<any[]>([]);
 
@@ -73,7 +76,7 @@ export default function DashboardScreen({ navigation }: any) {
 
         {/* Financial Health Score */}
         <View style={styles.scoreCard}>
-          <Text style={styles.scoreTitle}>Financial Health</Text>
+          <TranslatedText tKey="ui.dashboard.financial_health" style={styles.scoreTitle} />
           <View style={[styles.circularScore, { borderColor: scoreColor }]}>
             <Text style={[styles.scoreValue, { color: scoreColor }]}>{score}</Text>
             <Text style={styles.scoreMax}>/ 100</Text>
@@ -89,7 +92,7 @@ export default function DashboardScreen({ navigation }: any) {
 
         {/* Milestones & Badges */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Unlocked Badges</Text>
+          <TranslatedText tKey="ui.dashboard.milestones" style={styles.sectionTitle} />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgeScroll}>
             {player.score.badges.length === 0 ? (
               <Text style={[styles.badgeText, { color: '#4f5d67', fontStyle: 'italic' }]}>No badges yet</Text>
@@ -107,7 +110,7 @@ export default function DashboardScreen({ navigation }: any) {
         {/* Season History Timeline */}
         <View style={styles.section}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
-            <Text style={{ fontSize: 22, fontWeight: '800', color: '#233039' }}>Season History</Text>
+            <TranslatedText tKey="ui.dashboard.season_history" style={{ fontSize: 22, fontWeight: '800', color: '#233039' }} />
             <TouchableOpacity onPress={() => navigation.navigate('History')} style={{backgroundColor: '#e2f5e3', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16}}>
                 <Text style={{color: '#176a21', fontWeight: 'bold', fontSize: 13}}>View Detailed</Text>
             </TouchableOpacity>

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import gameEngine from '../engine/GameEngine';
 import VoiceManager from '../voice/VoiceManager';
+import { TranslatedText } from '../components/TranslatedText';
 
 const LANGUAGES = [
   { id: 'hi', name: 'हिंदी' },
@@ -11,7 +13,8 @@ const LANGUAGES = [
 ];
 
 export default function OnboardingScreen({ navigation }: any) {
-  const [selectedLang, setSelectedLang] = useState<string>('hi');
+  const { t, i18n } = useTranslation();
+  const [selectedLang, setSelectedLang] = useState<string>(i18n.language || 'hi');
   const [playerName, setPlayerName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -57,12 +60,15 @@ export default function OnboardingScreen({ navigation }: any) {
           <View style={styles.farmerImagePlaceholder} />
         </View>
         <View style={styles.contentCard}>
-          <Text style={styles.title}>Choose Your Language</Text>
+          <TranslatedText tKey="ui.onboarding.select_language" style={styles.title} />
           {LANGUAGES.map((lang) => (
             <TouchableOpacity
               key={lang.id}
               style={[styles.langCard, selectedLang === lang.id && styles.langCardSelected]}
-              onPress={() => setSelectedLang(lang.id)}
+              onPress={() => {
+                setSelectedLang(lang.id);
+                i18n.changeLanguage(lang.id);
+              }}
             >
               <Text style={[styles.langText, selectedLang === lang.id && styles.langTextSelected]}>{lang.name}</Text>
             </TouchableOpacity>
@@ -96,7 +102,7 @@ export default function OnboardingScreen({ navigation }: any) {
             onPress={handleSpeak}
           >
             <Text style={styles.micButtonText}>{isListening ? 'Listening...' : 'Tap to Speak'}</Text>
-            <Text style={styles.micTooltip}>Say your choice</Text>
+            <TranslatedText tKey="ui.onboarding.voice_prompt_intro" style={styles.micTooltip} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -122,7 +128,7 @@ export default function OnboardingScreen({ navigation }: any) {
               }, 200);
             }}
           >
-            <Text style={styles.continueButtonText}>{loading ? 'Starting...' : 'Continue'}</Text>
+            <Text style={styles.continueButtonText}>{loading ? 'Starting...' : t('ui.start_game')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

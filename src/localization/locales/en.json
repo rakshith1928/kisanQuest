@@ -1,0 +1,55 @@
+{
+  "ui": {
+    "welcome": "Welcome to KisanQuest",
+    "start_game": "Start Game",
+    "onboarding": {
+      "select_language": "Select your language",
+      "voice_prompt_intro": "Tap the mic and speak your choice"
+    },
+    "farm_creation": {
+      "title": "Create Your Farm",
+      "select_crop": "Select Your Crop",
+      "budget_goal": "Set Budget Goal",
+      "farm_name": "Name your farm"
+    },
+    "dashboard": {
+      "financial_health": "Financial Health",
+      "milestones": "Milestones",
+      "season_history": "Season History",
+      "leaderboard": "Leaderboard"
+    },
+    "gameplay": {
+      "cash": "Cash",
+      "debt": "Debt",
+      "insurance": "Insurance",
+      "savings": "Savings",
+      "next_season": "Next Season",
+      "review_details": "Review Details"
+    }
+  },
+  "prompts": {
+    "monsoon_crisis": {
+      "intro": "Heavy rains are approaching. How will you protect your crop?"
+    },
+    "market_price": {
+      "intro": "Market prices are fluctuating. When will you sell?"
+    }
+  },
+  "glossary": {
+    "insurance": "Protection against financial loss from crop failure.",
+    "loan": "Money borrowed that must be paid back with interest.",
+    "savings": "Money set aside for future emergencies.",
+    "interest": "The cost of borrowing money or the reward for saving it.",
+    "kharif": "Autumn harvest season, dependent on monsoon rains.",
+    "rabi": "Spring harvest season, relies on irrigation."
+  },
+  "voice_keywords": {
+    "commands": {
+      "CHOOSE_INSURANCE": ["insurance", "buy insurance", "protect crop"],
+      "TAKE_LOAN": ["loan", "borrow money", "take a loan"],
+      "SAVE": ["save", "keep money", "save money"],
+      "SELL_NOW": ["sell", "sell now", "sell crop"],
+      "WAIT": ["wait", "hold", "keep"]
+    }
+  }
+}
