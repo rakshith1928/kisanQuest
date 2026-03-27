@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-chart-kit';
 import gameEngine from '../engine/GameEngine';
-import { BASE_URL } from '../config/api';
+import { analyticsService } from '../services/analyticsService';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -33,12 +33,8 @@ export default function DashboardScreen({ navigation }: any) {
 
   const fetchEvents = async () => {
     try {
-      // NOTE: For physical Android device testing, replace localhost with your machine's local IP address
-      const res = await fetch(`${BASE_URL}/api/analytics/popular`);
-      if (res.ok) {
-        const data = await res.json();
-        setEvents(data);
-      }
+      const data = await analyticsService.getPopularEvents();
+      setEvents(data);
     } catch (err) {
       console.error('Failed to fetch popular events:', err);
     }
@@ -110,7 +106,12 @@ export default function DashboardScreen({ navigation }: any) {
 
         {/* Season History Timeline */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Season History</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
+            <Text style={{ fontSize: 22, fontWeight: '800', color: '#233039' }}>Season History</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('History')} style={{backgroundColor: '#e2f5e3', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16}}>
+                <Text style={{color: '#176a21', fontWeight: 'bold', fontSize: 13}}>View Detailed</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.timelineCard}>
             {player.seasonHistory.length === 0 ? (
               <Text style={{ color: '#4f5d67', fontStyle: 'italic' }}>No seasons played yet</Text>

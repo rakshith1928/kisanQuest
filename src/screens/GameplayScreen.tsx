@@ -117,6 +117,32 @@ export default function GameplayScreen({ navigation }: any) {
                   setLastOutcome(outcome);
                   
                   setTimeout(() => {
+                    // Sync and track right as the player makes the choice and sees the outcome message
+                    const { analyticsService } = require('../services/analyticsService');
+                    const { gameService } = require('../services/gameService');
+                    
+                    const playerState = gameEngine.getState().player;
+                    
+                    analyticsService.trackEvent(opt.id, {
+                        scenario: node.id || 'Unknown',
+                        season: playerState.farm.season,
+                        crop: playerState.farm.crop,
+                        financialHealth: playerState.score.financialHealth 
+                    }).catch((err: any) => console.warn('Failed to track decision analytics:', err));
+
+                    const syncPayload = {
+                        currentSeason: playerState.farm.season,
+                        cash: playerState.finances.cash,
+                        debt: playerState.finances.debt,
+                        insurance: playerState.finances.insurance,
+                        crops: playerState.farm?.crop ? [playerState.farm.crop] : [],
+                        decisions: playerState.completedScenarios,
+                        seasonHistory: playerState.seasonHistory || []
+                    };
+
+                    gameService.syncGameState(syncPayload)
+                       .catch((err: any) => console.warn('Failed to sync state:', err));
+
                     gameEngine.decisionTree.chooseOption(index);
                     setIsProcessing(false);
                     setLastOutcome(null); // Clear message for next node

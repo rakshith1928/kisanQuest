@@ -82,13 +82,20 @@ export default function OnboardingScreen({ navigation }: any) {
           <TouchableOpacity
             disabled={!selectedLang || loading}
             style={[styles.continueButton, (!selectedLang || loading) && { opacity: 0.5 }]}
-            onPress={() => {
+            onPress={async () => {
               if (!selectedLang || loading) return;
               setLoading(true);
 
               gameEngine.initGame({
                 language: selectedLang
               });
+
+              try {
+                const { authService } = require('../services/authService');
+                await authService.register('New Farmer');
+              } catch (err) {
+                console.warn('Backend register failed:', err);
+              }
 
               setTimeout(() => {
                 navigation.replace('FarmCreation');

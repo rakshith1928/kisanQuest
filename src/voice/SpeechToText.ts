@@ -60,33 +60,23 @@ const SpeechToText = {
     async transcribe(audioUri: string, langCode: string = 'hi'): Promise<string | null> {
         try {
             const { FileSystem } = require('expo-file-system');
-            const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-            const token = await AsyncStorage.getItem('token') || '';
-            const { BASE_URL } = require('../config/api');
+            const { voiceService } = require('../services/voiceService');
 
             // Read as base64 string directly
             const audioBase64 = await FileSystem.readAsStringAsync(audioUri, {
                 encoding: FileSystem.EncodingType.Base64,
             });
 
-            const res = await fetch(`${BASE_URL}/api/voice/stt`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ audio: audioBase64, languageCode: langCode }),
-            });
-
-            if (!res.ok) {
-                if (res.status === 401) {
+            try {
+                const data = await voiceService.processSTT(audioBase64, langCode);
+                return data?.transcript || null;
+            } catch (err: any) {
+                if (err.message.includes('401')) {
                     console.warn('[STT] Unauthorized. Are you logged in?');
                 }
-                throw new Error(`Server responded with ${res.status}`);
+                throw err;
             }
 
-            const data = await res.json();
-            return data?.transcript || null;       // server returns { transcript: "..." }
         } catch (err) {
             console.warn('[STT] Backend transcription proxy failed:', err);
             return null;

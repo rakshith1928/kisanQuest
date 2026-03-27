@@ -63,27 +63,18 @@ const TextToSpeech = {
      */
     async _speakHuggingFace(text: string, langCode: string, options: TTSOptions = {}): Promise<void> {
         try {
-            const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-            const token = await AsyncStorage.getItem('token') || '';
-            const { BASE_URL } = require('../config/api');
+            const { voiceService } = require('../services/voiceService');
 
-            const res = await fetch(`${BASE_URL}/api/voice/tts`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ text, languageCode: langCode }),
-            });
-
-            if (!res.ok) {
-                if (res.status === 401) {
+            let data;
+            try {
+                data = await voiceService.processTTS(text, langCode);
+            } catch (err: any) {
+                if (err.message.includes('401')) {
                     console.warn('[TTS] Unauthorized. Are you logged in? Falling back to device speech.');
                 }
-                throw new Error(`Backend TTS failed: ${res.status}`);
+                throw err;
             }
 
-            const data = await res.json();
             const base64 = data.audioContent;
 
             if (!base64 || base64.startsWith('mocked_')) {
