@@ -13,6 +13,11 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    const existing = await Player.findOne({ name });
+    if (existing) {
+      return res.status(400).json({ error: 'Player already exists' });
+    }
+
     const player = new Player({ name, language, region });
     await player.save();
 
@@ -22,7 +27,13 @@ export const register = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ playerId: player._id }, JWT_SECRET, { expiresIn: '30d' });
 
-    res.status(201).json({ player, token });
+    res.status(201).json({
+      player: {
+        id: player._id,
+        name: player.name
+      },
+      token
+    });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Server error during registration' });

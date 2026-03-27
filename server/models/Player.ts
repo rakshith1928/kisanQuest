@@ -25,4 +25,7 @@ const PlayerSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+PlayerSchema.index({ financialScore: -1 });
+PlayerSchema.index({ region: 1 });
+
 export default mongoose.model<IPlayer>('Player', PlayerSchema);

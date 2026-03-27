@@ -8,14 +8,28 @@ export const syncGameState = async (req: AuthRequest, res: Response) => {
     const { state } = req.body;
     const playerId = req.playerId;
 
+    if (!playerId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     if (!state) {
       return res.status(400).json({ error: 'No state provided for sync' });
     }
 
-    // Upsert the game state
+    // Upsert the game state securely
     const updatedState = await GameState.findOneAndUpdate(
       { playerId },
-      { $set: state },
+      { 
+        $set: {
+          currentSeason: state.currentSeason,
+          cash: state.cash,
+          debt: state.debt,
+          insurance: state.insurance,
+          crops: state.crops,
+          decisions: state.decisions,
+          seasonHistory: state.seasonHistory
+        } 
+      },
       { new: true, upsert: true }
     );
 
@@ -42,7 +56,7 @@ export const getLeaderboard = async (req: Request, res: Response) => {
       .limit(50)
       .select('name region financialScore badges');
 
-    res.status(200).json({ leaderboard: players });
+    res.status(200).json(players);
   } catch (error) {
     console.error('Leaderboard error:', error);
     res.status(500).json({ error: 'Server error retrieving leaderboard' });

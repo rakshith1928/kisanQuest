@@ -5,8 +5,7 @@
  * Falls back to offline keyword matching when no connectivity.
  */
 
-const HF_STT_ENDPOINT = 'https://api-inference.huggingface.co/models/openai/whisper-large-v3';
-const HF_API_KEY = process.env.EXPO_PUBLIC_HF_API_KEY || null;
+// Constants removed: backend handles Hugging Face proxy now.
 
 interface RecordingInstance {
     stopAndUnloadAsync: () => Promise<void>;
@@ -55,40 +54,41 @@ const SpeechToText = {
     },
 
     /**
-     * Transcribe an audio file using Google Cloud STT.
-     * Returns null if offline or if API key is not configured.
+     * Transcribe an audio file using the Node.js backend proxy.
+     * Falls back to offline keyword matching when no connectivity (not implemented here yet).
      */
     async transcribe(audioUri: string, langCode: string = 'hi'): Promise<string | null> {
-        if (!HF_API_KEY) {
-            console.warn('[STT] No HF API key configured.');
-            return null;
-        }
         try {
             const { FileSystem } = require('expo-file-system');
+            const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+            const token = await AsyncStorage.getItem('token') || '';
+            const { BASE_URL } = require('../config/api');
 
-            // Read as base64, convert to binary blob
+            // Read as base64 string directly
             const audioBase64 = await FileSystem.readAsStringAsync(audioUri, {
                 encoding: FileSystem.EncodingType.Base64,
             });
-            const binaryStr = atob(audioBase64);
-            const bytes = new Uint8Array(binaryStr.length);
-            for (let i = 0; i < binaryStr.length; i++) {
-                bytes[i] = binaryStr.charCodeAt(i);
-            }
 
-            const res = await fetch(HF_STT_ENDPOINT, {
+            const res = await fetch(`${BASE_URL}/api/voice/stt`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${HF_API_KEY}`,
-                    'Content-Type': 'audio/wav',      // expo records as WAV/m4a — use audio/wav
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                body: bytes.buffer,
+                body: JSON.stringify({ audio: audioBase64, languageCode: langCode }),
             });
 
+            if (!res.ok) {
+                if (res.status === 401) {
+                    console.warn('[STT] Unauthorized. Are you logged in?');
+                }
+                throw new Error(`Server responded with ${res.status}`);
+            }
+
             const data = await res.json();
-            return data?.text || null;       // HF returns { text: "..." }
+            return data?.transcript || null;       // server returns { transcript: "..." }
         } catch (err) {
-            console.warn('[STT] HF transcription failed:', err);
+            console.warn('[STT] Backend transcription proxy failed:', err);
             return null;
         }
     }

@@ -6,17 +6,7 @@ import * as Speech from 'expo-speech';
  * Falls back to expo-speech when no API key is configured.
  */
 
-const HF_API_KEY = process.env.EXPO_PUBLIC_HF_API_KEY || null;
-
-// MMS-TTS has per-language models — best multilingual coverage for Indian langs
-const HF_TTS_MODEL: Record<string, string> = {
-    hi: 'facebook/mms-tts-hin',
-    en: 'facebook/mms-tts-eng',
-    mr: 'facebook/mms-tts-mar',
-    ta: 'facebook/mms-tts-tam',
-    te: 'facebook/mms-tts-tel',
-    kn: 'facebook/mms-tts-kan',
-};
+// Constants removed: backend handles model mapping now.
 
 export interface VoiceConfig {
     languageCode: string;
@@ -49,13 +39,10 @@ const EXPO_LOCALE_MAP: Record<string, string> = {
 
 const TextToSpeech = {
     /**
-     * Speak text. Uses Google Cloud TTS if API key available, else expo-speech.
+     * Speak text. Uses backend TTS proxy, else falls back to local expo-speech on failure.
      */
     async speak(text: string, langCode: string = 'hi', options: TTSOptions = {}): Promise<void> {
-        if (HF_API_KEY) {
-            return this._speakHuggingFace(text, langCode, options);  // changed
-        }
-        return this._speakDevice(text, langCode, options);
+        return this._speakHuggingFace(text, langCode, options);
     },
 
     /**
@@ -71,30 +58,42 @@ const TextToSpeech = {
     },
 
     /**
-     * Google Cloud TTS (higher quality Wavenet voices).
-     * Downloads audio and plays it via expo-av.
+     * Google Cloud TTS (higher quality Wavenet voices) or Hugging Face.
+     * Hits the Node.js backend proxy which holds the API keys securely.
      */
     async _speakHuggingFace(text: string, langCode: string, options: TTSOptions = {}): Promise<void> {
         try {
-            const model = HF_TTS_MODEL[langCode] || HF_TTS_MODEL['hi'];
-            const endpoint = `https://api-inference.huggingface.co/models/${model}`;
+            const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+            const token = await AsyncStorage.getItem('token') || '';
+            const { BASE_URL } = require('../config/api');
 
-            const res = await fetch(endpoint, {
+            const res = await fetch(`${BASE_URL}/api/voice/tts`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${HF_API_KEY}`,
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ inputs: text }),
+                body: JSON.stringify({ text, languageCode: langCode }),
             });
 
-            // HF TTS returns raw audio bytes (WAV)
-            const arrayBuffer = await res.arrayBuffer();
-            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            if (!res.ok) {
+                if (res.status === 401) {
+                    console.warn('[TTS] Unauthorized. Are you logged in? Falling back to device speech.');
+                }
+                throw new Error(`Backend TTS failed: ${res.status}`);
+            }
+
+            const data = await res.json();
+            const base64 = data.audioContent;
+
+            if (!base64 || base64.startsWith('mocked_')) {
+                throw new Error('Received fallback mock response from server');
+            }
 
             const { Sound } = require('expo-av');
+            // Assuming the server returns mp3 or wav base64
             const { sound } = await Sound.createAsync(
-                { uri: `data:audio/wav;base64,${base64}` },
+                { uri: `data:audio/mp3;base64,${base64}` },
                 { shouldPlay: true }
             );
             sound.setOnPlaybackStatusUpdate((status: { didJustFinish?: boolean }) => {
@@ -104,7 +103,7 @@ const TextToSpeech = {
                 }
             });
         } catch (err) {
-            console.warn('[TTS] HF failed, falling back to device TTS:', err);
+            console.warn('[TTS] Backend proxy failed, falling back to device TTS:', err);
             this._speakDevice(text, langCode, options);
         }
     },
