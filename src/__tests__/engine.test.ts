@@ -8,6 +8,8 @@ import { OutcomeCalculator } from '../engine/OutcomeCalculator';
 import { StateMachine } from '../engine/StateMachine';
 import { DecisionTree } from '../engine/DecisionTree';
 
+import { PlayerState } from '../engine/GameEngine';
+
 // ─── Shared test fixtures ───────────────────────────────────────────────────
 
 const BASE_FINANCES = {
@@ -15,6 +17,17 @@ const BASE_FINANCES = {
   debt: 0,
   savings: 0,
   insurance: false,
+};
+
+const MOCK_PLAYER: PlayerState = {
+    name: 'Test',
+    language: 'en',
+    region: 'North',
+    farm: { name: 'TestFarm', crop: 'rice', season: 1 },
+    finances: { ...BASE_FINANCES },
+    score: { financialHealth: 50, literacyPoints: 0, badges: [], xp: 0, level: 1, streak: 0, unlockedSkills: [] },
+    completedScenarios: [],
+    seasonHistory: []
 };
 
 const mockScenario = {
@@ -71,33 +84,32 @@ describe('OutcomeCalculator — money changes', () => {
   test('1. Insurance option: cash decreases, insurance flag set to true', () => {
     const result = calc.calculate(
       'opt_insurance',
-      { finances: { ...BASE_FINANCES } },
-      mockScenario,
+      { ...MOCK_PLAYER, finances: { ...BASE_FINANCES } },
+      mockScenario as any,
     );
 
     expect(result.success).toBe(true);
     expect(result.financialChanges!.insurance).toBe(true);
-    // cash -3000 * yieldMultiplier (good_monsoon rice = 1.3) = -3900 → 10000 - 3900 = 6100
     expect(result.financialChanges!.cash).toBeLessThan(BASE_FINANCES.cash);
   });
 
   test('2. Borrowing option: debt increases, cash increases', () => {
     const result = calc.calculate(
       'opt_borrow',
-      { finances: { ...BASE_FINANCES } },
-      mockScenario,
+      { ...MOCK_PLAYER, finances: { ...BASE_FINANCES } },
+      mockScenario as any,
     );
 
     expect(result.success).toBe(true);
-    expect(result.financialChanges!.debt).toBeGreaterThan(0);   // debt added
-    expect(result.financialChanges!.cash).toBeGreaterThan(BASE_FINANCES.cash); // cash injected
+    expect(result.financialChanges!.debt).toBeGreaterThan(0);
+    expect(result.financialChanges!.cash).toBeGreaterThan(BASE_FINANCES.cash);
   });
 
   test('3. Savings option: savings balance increases, never goes negative', () => {
     const result = calc.calculate(
       'opt_save',
-      { finances: { ...BASE_FINANCES, savings: 500 } },
-      mockScenario,
+      { ...MOCK_PLAYER, finances: { ...BASE_FINANCES, savings: 500 } },
+      mockScenario as any,
     );
 
     expect(result.financialChanges!.savings).toBeGreaterThan(500);
@@ -105,18 +117,17 @@ describe('OutcomeCalculator — money changes', () => {
   });
 
   test('4. Debt repayment: debt cannot drop below zero', () => {
-    // Only has ₹2,000 in debt but tries to repay ₹5,000
     const result = calc.calculate(
       'opt_repay',
-      { finances: { ...BASE_FINANCES, debt: 2000 } },
-      mockScenario,
+      { ...MOCK_PLAYER, finances: { ...BASE_FINANCES, debt: 2000 } },
+      mockScenario as any,
     );
 
-    expect(result.financialChanges!.debt).toBe(0); // clamped at 0
+    expect(result.financialChanges!.debt).toBe(0);
   });
 
   test('5. Invalid optionId returns failure', () => {
-    const result = calc.calculate('nonexistent_id', { finances: BASE_FINANCES }, mockScenario);
+    const result = calc.calculate('nonexistent_id', MOCK_PLAYER, mockScenario as any);
     expect(result.success).toBe(false);
     expect(result.message).toMatch(/invalid option/i);
   });
@@ -124,11 +135,10 @@ describe('OutcomeCalculator — money changes', () => {
   test('6. Score: insurance decision earns positive healthDelta', () => {
     const result = calc.calculate(
       'opt_insurance',
-      { finances: { ...BASE_FINANCES } },
-      mockScenario,
+      { ...MOCK_PLAYER, finances: { ...BASE_FINANCES } },
+      mockScenario as any,
     );
 
-    // Buying insurance → +4 quality points, so healthDelta > 0
     expect(result.healthDelta).toBeGreaterThan(0);
     expect(result.literacyPoints).toBeGreaterThan(0);
   });
