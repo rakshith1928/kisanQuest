@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import './src/localization/i18n'; // Initialize i18next
 import { GameStateDB } from './src/storage/GameStateDB';
 import { SyncManager } from './src/storage/SyncManager';
 import gameEngine from './src/engine/GameEngine';

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Animated, KeyboardAvoidingView, Platform, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import gameEngine from '../engine/GameEngine';
 import VoiceManager from '../voice/VoiceManager';
 import { TranslatedText } from '../components/TranslatedText';
@@ -12,7 +13,113 @@ const LANGUAGES = [
   { id: 'hi', name: 'हिंदी' },
   { id: 'en', name: 'English' },
   { id: 'mr', name: 'मराठी' },
+  { id: 'ta', name: 'தமிழ்' },
+  { id: 'te', name: 'తెలుగు' },
+  { id: 'kn', name: 'ಕನ್ನಡ' },
+  { id: 'bn', name: 'বাংলা' },
+  { id: 'gu', name: 'ગુજરાતી' },
+  { id: 'pa', name: 'ਪੰਜਾਬੀ' },
+  { id: 'or', name: 'ଓଡ଼ିଆ' },
 ];
+
+const LanguagePill = ({ lang, isSelected, onPress }: any) => {
+  const scaleValue = useRef(new Animated.Value(isSelected ? 1.05 : 1)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleValue, {
+      toValue: isSelected ? 1.05 : 1,
+      friction: 4,
+      tension: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [isSelected]);
+
+  const handlePressIn = () => {
+    Animated.spring(scaleValue, {
+      toValue: 0.95,
+      friction: 4,
+      tension: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: isSelected ? 1.05 : 1,
+      friction: 4,
+      tension: 100,
+      useNativeDriver: true,
+    }).start();
+    onPress();
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+      <TouchableOpacity
+        activeOpacity={1}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[styles.langPill, isSelected && styles.langPillSelected]}
+      >
+        <Text style={[styles.langText, isSelected && styles.langTextSelected]}>
+          {lang.name}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+const MicButton = ({ isListening, onPress, feedbackText }: any) => {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    let loop: Animated.CompositeAnimation;
+    if (isListening) {
+      loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.05,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          })
+        ])
+      );
+      loop.start();
+    } else {
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true
+      }).start();
+    }
+    return () => loop && loop.stop();
+  }, [isListening]);
+
+  return (
+    <View style={styles.micContainer}>
+      <Animated.View style={[styles.micButtonWrapper, { transform: [{ scale: pulseAnim }] }]}>
+        <TouchableOpacity
+          style={[styles.micButton, isListening && styles.micButtonListening]}
+          onPress={onPress}
+          activeOpacity={0.8}
+        >
+          <Ionicons name={isListening ? "mic" : "mic-outline"} size={28} color="#fff" />
+          <Text style={styles.micButtonText}>
+            {isListening ? 'Listening...' : 'Tap to Speak'}
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <Text style={styles.micFeedbackText}>{feedbackText}</Text>
+    </View>
+  );
+};
 
 export default function OnboardingScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
@@ -20,21 +127,43 @@ export default function OnboardingScreen({ navigation }: any) {
   const [playerName, setPlayerName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("Tap the mic and speak your choice");
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   const isNameValid = playerName.trim().length > 0;
 
-  const selectedLangName = LANGUAGES.find(l => l.id === selectedLang)?.name;
-
-  const handleSpeak = async () => {
+  const handleSpeak = async (isRetry = false) => {
     if (isListening) return;
     setIsListening(true);
+    setFeedbackText("Listening...");
 
     try {
       const action = await VoiceManager.listenForDuration(3000);
       
       if (!action) {
-        await VoiceManager.speak("Sorry, I didn't understand. Please try again.");
-        return;
+        if (!isRetry) {
+          setFeedbackText("Didn't catch that, trying again...");
+          setIsListening(false);
+          // Auto retry once
+          setTimeout(() => handleSpeak(true), 1000);
+          return;
+        } else {
+          setFeedbackText("Didn't catch that, please try again");
+          await VoiceManager.speak("Sorry, I didn't understand. Please try again.");
+          setIsListening(false);
+          return;
+        }
       }
 
       const actionToLangMap: Record<string, { id: string, name: string }> = {
@@ -46,128 +175,300 @@ export default function OnboardingScreen({ navigation }: any) {
       const match = actionToLangMap[action];
       if (match) {
         setSelectedLang(match.id);
+        i18n.changeLanguage(match.id);
+        setFeedbackText(`Selected ${match.name}`);
         await VoiceManager.speak(`${match.name} selected`);
+      } else {
+        setFeedbackText("Language not recognized. Try again.");
       }
     } catch (err) {
       console.error('VoiceManager Error:', err);
+      setFeedbackText("Error listening. Please try again.");
     } finally {
       setIsListening(false);
     }
   };
 
+  const handleStartGame = async () => {
+    if (!selectedLang || !isNameValid || loading) return;
+    setLoading(true);
+
+    try {
+      // Initialize engine with selected language
+      gameEngine.initGame({ language: selectedLang });
+
+      const trimmedName = playerName.trim();
+      let playerId = trimmedName;
+
+      try {
+        const { authService } = require('../services/authService');
+        const result = await Promise.race([
+          authService.register(trimmedName, selectedLang, 'Unknown'),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Network Timeout')), 15000))
+        ]) as any;
+        // Use server-assigned ID if available
+        if (result?.id) playerId = result.id;
+      } catch (err) {
+        console.warn('Backend register failed or timed out, continuing offline:', err);
+      }
+
+      // Persist player ID for future session restores
+      await AsyncStorage.setItem('playerId', playerId);
+
+      // Check for an existing saved state (returning player)
+      try {
+        const savedState = await GameStateDB.loadGameState(playerId);
+        if (savedState?.player) {
+          gameEngine.loadState(savedState);
+          console.log(`[Onboarding] Resumed saved game for: ${playerId}`);
+        }
+      } catch (dbErr) {
+        console.warn('Could not load game state from DB:', dbErr);
+      }
+
+      setTimeout(() => {
+        navigation.replace('FarmCreation');
+      }, 200);
+    } catch (err) {
+      console.error("Critical error starting game:", err);
+      alert("Failed to start game. Please try again.");
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.heroSection}>
-          <View style={styles.farmerImagePlaceholder} />
-        </View>
-        <View style={styles.contentCard}>
-          <TranslatedText tKey="ui.onboarding.select_language" style={styles.title} />
-          {LANGUAGES.map((lang) => (
-            <TouchableOpacity
-              key={lang.id}
-              style={[styles.langCard, selectedLang === lang.id && styles.langCardSelected]}
-              onPress={() => {
-                setSelectedLang(lang.id);
-                i18n.changeLanguage(lang.id);
-              }}
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoid} 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+          <ScrollView 
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.titleContainer}>
+              <TranslatedText tKey="ui.onboarding.select_language" style={styles.title} />
+              <Text style={styles.subtitle}>Choose your preferred language to learn and play.</Text>
+            </View>
+
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.langScroll}
+              contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 16 }}
             >
-              <Text style={[styles.langText, selectedLang === lang.id && styles.langTextSelected]}>{lang.name}</Text>
-            </TouchableOpacity>
-          ))}
+              {LANGUAGES.map((lang) => (
+                <LanguagePill
+                  key={lang.id}
+                  lang={lang}
+                  isSelected={selectedLang === lang.id}
+                  onPress={() => {
+                    setSelectedLang(lang.id);
+                    i18n.changeLanguage(lang.id);
+                  }}
+                />
+              ))}
+            </ScrollView>
 
-          {selectedLang && (
-            <Text style={{ textAlign: 'center', marginBottom: 16, color: '#176a21', fontWeight: 'bold' }}>
-              Selected: {selectedLangName}
-            </Text>
-          )}
+            <Text style={styles.sectionTitle}>What is your name?</Text>
+            <View style={[styles.inputContainer, inputFocused && styles.inputContainerFocused]}>
+              <TextInput
+                editable={!loading}
+                style={styles.input}
+                placeholder="e.g., Rahul"
+                placeholderTextColor="#AFAFAF"
+                value={playerName}
+                onChangeText={setPlayerName}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+              />
+            </View>
 
-          <Text style={[styles.title, { fontSize: 20, marginTop: 16 }]}>What is your name?</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              editable={!loading}
-              style={styles.input}
-              placeholder="e.g., Rahul"
-              placeholderTextColor="#5a5c58"
-              value={playerName}
-              onChangeText={setPlayerName}
+            <MicButton 
+              isListening={isListening} 
+              onPress={() => handleSpeak(false)} 
+              feedbackText={feedbackText} 
             />
+
+          </ScrollView>
+
+          <View style={styles.stickyBottom}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[
+                styles.startButton,
+                (!isNameValid || loading) && styles.startButtonDisabled
+              ]}
+              onPress={handleStartGame}
+              disabled={!isNameValid || loading}
+            >
+              <Text style={[
+                styles.startButtonText,
+                (!isNameValid || loading) && styles.startButtonTextDisabled
+              ]}>
+                {loading ? 'Starting...' : t('ui.start_game')}
+              </Text>
+            </TouchableOpacity>
           </View>
-          {!isNameValid && playerName.length > 0 && (
-            <Text style={{ color: '#b02500', marginTop: 8, marginLeft: 16 }}>
-              Please enter a valid name.
-            </Text>
-          )}
-
-          <TouchableOpacity 
-            style={[styles.micButton, isListening && { backgroundColor: '#b02500' }]} 
-            onPress={handleSpeak}
-          >
-            <Text style={styles.micButtonText}>{isListening ? 'Listening...' : 'Tap to Speak'}</Text>
-            <TranslatedText tKey="ui.onboarding.voice_prompt_intro" style={styles.micTooltip} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            disabled={!selectedLang || !isNameValid || loading}
-            style={[styles.continueButton, (!selectedLang || !isNameValid || loading) && { opacity: 0.5 }]}
-            onPress={async () => {
-              if (!selectedLang || !isNameValid || loading) return;
-              setLoading(true);
-
-              // Initialize engine with selected language
-              gameEngine.initGame({ language: selectedLang });
-
-              const trimmedName = playerName.trim();
-              let playerId = trimmedName;
-
-              try {
-                const { authService } = require('../services/authService');
-                const result = await authService.register(trimmedName, selectedLang, 'Unknown');
-                // Use server-assigned ID if available
-                if (result?.id) playerId = result.id;
-              } catch (err) {
-                console.warn('Backend register failed, continuing offline:', err);
-              }
-
-              // Persist player ID for future session restores
-              await AsyncStorage.setItem('playerId', playerId);
-
-              // Check for an existing saved state (returning player)
-              const savedState = await GameStateDB.loadGameState(playerId);
-              if (savedState?.player) {
-                gameEngine.loadState(savedState);
-                console.log(`[Onboarding] Resumed saved game for: ${playerId}`);
-              }
-
-              setTimeout(() => {
-                navigation.replace('FarmCreation');
-              }, 200);
-            }}
-          >
-            <Text style={styles.continueButtonText}>{loading ? 'Starting...' : t('ui.start_game')}</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#eff8ff' },
-  scroll: { flexGrow: 1, padding: 24, paddingBottom: 60 },
-  heroSection: { height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
-  farmerImagePlaceholder: { width: 120, height: 120, backgroundColor: '#9df197', borderRadius: 60 },
-  contentCard: { backgroundColor: '#f6cfc2', borderRadius: 32, padding: 24 },
-  title: { fontSize: 24, fontWeight: '700', color: '#233039', marginBottom: 24, textAlign: 'center' },
-  langCard: { backgroundColor: '#ffffff', borderRadius: 16, padding: 20, marginBottom: 16, shadowColor: '#176a21', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.08, shadowRadius: 24, elevation: 4 },
-  langCardSelected: { backgroundColor: '#9df197' },
-  langText: { fontSize: 18, fontWeight: '600', color: '#4f5d67', textAlign: 'center' },
-  langTextSelected: { color: '#005c15' },
-  micButton: { backgroundColor: '#176a21', borderRadius: 999, paddingVertical: 20, paddingHorizontal: 32, alignItems: 'center', marginTop: 16, elevation: 6 },
-  micButtonText: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' },
-  micTooltip: { color: '#d1ffc8', fontSize: 12, marginTop: 4 },
-  inputContainer: { backgroundColor: '#ffffff', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 16, shadowColor: '#176a21', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 },
-  input: { fontSize: 18, color: '#2d2f2c' },
-  continueButton: { backgroundColor: '#f7ba00', borderRadius: 999, paddingVertical: 20, alignItems: 'center', marginTop: 24, elevation: 4 },
-  continueButtonText: { color: '#5c4400', fontSize: 18, fontWeight: '700' }
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  scroll: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 140, // Space for sticky bottom button
+  },
+  titleContainer: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#4B4B4B',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#AFAFAF',
+    fontWeight: '600',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4B4B4B',
+    marginBottom: 16,
+    marginTop: 32,
+  },
+  langScroll: {
+    marginLeft: -24,
+    marginRight: -24,
+    height: 70, // Fixed height to prevent clipping box shadow during animation
+  },
+  langPill: {
+    backgroundColor: '#E5E5E5',
+    borderRadius: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    marginRight: 12,
+    borderBottomWidth: 4,
+    borderBottomColor: '#D4D4D4',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    height: 54,
+    justifyContent: 'center',
+  },
+  langPillSelected: {
+    backgroundColor: '#58CC02',
+    borderBottomColor: '#46A302',
+    borderColor: '#58CC02',
+  },
+  langText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#777777',
+  },
+  langTextSelected: {
+    color: '#FFFFFF',
+  },
+  inputContainer: {
+    backgroundColor: '#F3F3F3',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#E5E5E5',
+    paddingHorizontal: 16,
+  },
+  inputContainerFocused: {
+    backgroundColor: '#E5F3FF',
+    borderColor: '#1CB0F6',
+  },
+  input: {
+    fontSize: 18,
+    color: '#4B4B4B',
+    paddingVertical: 14,
+    fontWeight: '600',
+  },
+  micContainer: {
+    alignItems: 'center',
+    marginTop: 48,
+  },
+  micButtonWrapper: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  micButton: {
+    backgroundColor: '#58CC02',
+    borderRadius: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '85%',
+    borderBottomWidth: 4,
+    borderBottomColor: '#46A302',
+  },
+  micButtonListening: {
+    backgroundColor: '#FF4B4B',
+    borderBottomColor: '#CC3C3C',
+  },
+  micButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 12,
+  },
+  micFeedbackText: {
+    color: '#AFAFAF',
+    fontSize: 14,
+    marginTop: 16,
+    fontWeight: '600',
+  },
+  stickyBottom: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderTopWidth: 2,
+    borderTopColor: '#E5E5E5',
+  },
+  startButton: {
+    backgroundColor: '#58CC02',
+    borderRadius: 16,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 4,
+    borderBottomColor: '#46A302',
+  },
+  startButtonDisabled: {
+    backgroundColor: '#E5E5E5',
+    borderBottomColor: '#D4D4D4',
+  },
+  startButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  startButtonTextDisabled: {
+    color: '#AFAFAF',
+  }
 });
+

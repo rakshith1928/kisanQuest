@@ -1,11 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
+
+const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }: any) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const handlePressIn = () => { if (!disabled) Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start(); };
+  const handlePressOut = () => {
+    if (!disabled) {
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
+      onPress && onPress();
+    }
+  };
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleAnim }], opacity: disabled ? 0.6 : 1 }}>
+      <TouchableOpacity activeOpacity={1} onPressIn={handlePressIn} onPressOut={handlePressOut} style={[styles.btnBase, styles[`btn${variant}` as keyof typeof styles], style]}>
+        {children}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 export default function HarvestScreen({ navigation, route }: any) {
   const [gameState, setGameState] = useState(gameEngine.getState());
   const [loading, setLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     setGameState(gameEngine.getState());
@@ -14,8 +34,15 @@ export default function HarvestScreen({ navigation, route }: any) {
   const score = gameState.player.score.financialHealth;
 
   useEffect(() => {
+    let earnedBadge = false;
     if (score > 80 && !gameState.player.score.badges.includes("Pro Farmer")) {
       gameState.player.score.badges.push("Pro Farmer");
+      earnedBadge = true;
+    }
+    
+    // Fire confetti on great score or new badge
+    if (earnedBadge || score > 70) {
+      setTimeout(() => setShowConfetti(true), 500);
     }
   }, [score, gameState.player.score.badges]);
 
@@ -25,7 +52,6 @@ export default function HarvestScreen({ navigation, route }: any) {
 
   const previous = gameState.player.seasonHistory[gameState.player.seasonHistory.length - 1];
   const profit = previous ? cash - previous.finances.cash : cash;
-
   const net = cash + savings - debt;
 
   const stars = score > 70 ? 3 : score > 40 ? 2 : 1;
@@ -35,6 +61,16 @@ export default function HarvestScreen({ navigation, route }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {showConfetti && (
+        <ConfettiCannon
+          count={200}
+          origin={{ x: -10, y: 0 }}
+          autoStart={true}
+          fadeOut={true}
+          fallSpeed={3000}
+        />
+      )}
+      
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Header Section */}
         <View style={styles.header}>
@@ -50,14 +86,16 @@ export default function HarvestScreen({ navigation, route }: any) {
 
         {/* Visual Results */}
         <View style={styles.visualCard}>
-          <View style={styles.harvestIllustration} />
+          <View style={styles.harvestIllustrationBox}>
+            <Text style={{fontSize: 64}}>🌾</Text>
+          </View>
           <Text style={styles.harvestText}>{yieldText}</Text>
           {lastOutcome && (
-            <View style={{ marginTop: 12, alignItems: 'center' }}>
-              <Text style={{ fontSize: 16, color: '#65493f', fontWeight: '600' }}>
+            <View style={{ marginTop: 16, alignItems: 'center' }}>
+              <Text style={{ fontSize: 16, color: '#4B4B4B', fontWeight: '800' }}>
                 Weather: {lastOutcome.weather?.type || 'Sunny'}
               </Text>
-              <Text style={{ fontSize: 16, color: lastOutcome.healthDelta >= 0 ? '#176a21' : '#b02500', fontWeight: '600', marginTop: 4 }}>
+              <Text style={{ fontSize: 16, color: lastOutcome.healthDelta >= 0 ? '#58CC02' : '#FF4B4B', fontWeight: '800', marginTop: 4 }}>
                 Health Impact: {lastOutcome.healthDelta > 0 ? '+' : ''}{lastOutcome.healthDelta || 0}
               </Text>
             </View>
@@ -69,7 +107,7 @@ export default function HarvestScreen({ navigation, route }: any) {
           <Text style={styles.summaryTitle}>Financial Overview</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Season Profit</Text>
-            <Text style={styles.summaryValuePositive}>
+            <Text style={profit >= 0 ? styles.summaryValuePositive : styles.summaryValueNegative}>
               {profit >= 0 ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
             </Text>
           </View>
@@ -92,62 +130,68 @@ export default function HarvestScreen({ navigation, route }: any) {
         </View>
 
         {/* Action Area */}
-        <TouchableOpacity
-          style={[styles.primaryButton, loading && { opacity: 0.7 }]}
+        <ScaleButton
+          variant="primary"
           disabled={loading}
           onPress={() => {
             if (loading) return;
             setLoading(true);
-
             gameEngine.advanceSeason();
-
             setTimeout(() => {
               setLoading(false);
               navigation.replace('Gameplay');
-            }, 300);
+            }, 500);
           }}
+          style={{ marginBottom: 16 }}
         >
-          <Text style={styles.primaryButtonText}>{loading ? 'Starting...' : 'Next Season'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('History')}>
-          <Text style={styles.secondaryButtonText}>Review Details</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.secondaryButton, { marginTop: 4 }]}
-          onPress={() => navigation.replace('Dashboard')}
-        >
-          <Text style={[styles.secondaryButtonText, { color: '#4f5d67' }]}>Back to Dashboard</Text>
-        </TouchableOpacity>
+          <Text style={styles.btnTextPrimary}>{loading ? 'Starting...' : 'Next Season'}</Text>
+        </ScaleButton>
+        
+        <ScaleButton variant="secondary" onPress={() => navigation.navigate('History')} style={{ marginBottom: 16 }}>
+          <Text style={styles.btnTextSecondary}>Review Details</Text>
+        </ScaleButton>
+        
+        <ScaleButton variant="tertiary" onPress={() => navigation.replace('Dashboard')}>
+          <Text style={styles.btnTextTertiary}>Back to Dashboard</Text>
+        </ScaleButton>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#eff8ff' },
+  container: { flex: 1, backgroundColor: '#F6F9FA' },
   scroll: { flexGrow: 1, padding: 24, paddingBottom: 60 },
   header: { alignItems: 'center', marginBottom: 24 },
-  title: { fontSize: 32, fontWeight: '800', color: '#233039', marginBottom: 8 },
+  title: { fontSize: 32, fontWeight: '800', color: '#4B4B4B', marginBottom: 8 },
   starContainer: { flexDirection: 'row', gap: 8 },
-  starFilled: { fontSize: 32, color: '#f7ba00' },
-  starEmpty: { fontSize: 32, color: '#a0afb9' },
-  visualCard: { backgroundColor: '#f6cfc2', borderRadius: 32, padding: 24, alignItems: 'center', marginBottom: 24, elevation: 2 },
-  harvestIllustration: { width: '100%', height: 160, backgroundColor: '#e7c1b4', borderRadius: 24, marginBottom: 16 },
-  harvestText: { fontSize: 20, fontWeight: '700', color: '#65493f' },
-  financialCard: { backgroundColor: '#ffffff', borderRadius: 32, padding: 24, marginBottom: 24, elevation: 4 },
-  summaryTitle: { fontSize: 18, fontWeight: '700', color: '#4f5d67', marginBottom: 16 },
+  starFilled: { fontSize: 36, color: '#FFC800' },
+  starEmpty: { fontSize: 36, color: '#E5E5E5' },
+  
+  visualCard: { backgroundColor: '#FFFFFF', borderRadius: 28, padding: 24, alignItems: 'center', marginBottom: 24, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, borderWidth: 2, borderColor: '#E5E5E5' },
+  harvestIllustrationBox: { width: 120, height: 120, backgroundColor: '#FFF0D3', borderRadius: 60, marginBottom: 16, justifyContent: 'center', alignItems: 'center' },
+  harvestText: { fontSize: 24, fontWeight: '800', color: '#4B4B4B' },
+  
+  financialCard: { backgroundColor: '#FFFFFF', borderRadius: 28, padding: 24, marginBottom: 24, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, borderWidth: 2, borderColor: '#E5E5E5' },
+  summaryTitle: { fontSize: 20, fontWeight: '800', color: '#4B4B4B', marginBottom: 16 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  summaryLabel: { fontSize: 16, color: '#4f5d67' },
-  summaryValuePositive: { fontSize: 16, fontWeight: '700', color: '#176a21' },
-  summaryValueNegative: { fontSize: 16, fontWeight: '700', color: '#b02500' },
-  summaryTotalRow: { borderTopWidth: 1, borderTopColor: '#e3f3ff', paddingTop: 12, marginTop: 4 },
-  summaryLabelBold: { fontSize: 18, fontWeight: '800', color: '#233039' },
-  summaryValueBold: { fontSize: 18, fontWeight: '800', color: '#233039' },
-  lessonCard: { backgroundColor: '#ffca4d', borderRadius: 24, padding: 20, marginBottom: 32, elevation: 6 },
-  lessonTitle: { fontSize: 18, fontWeight: '800', color: '#5c4400', marginBottom: 8 },
-  lessonBody: { fontSize: 15, color: '#664b00', lineHeight: 22 },
-  primaryButton: { backgroundColor: '#176a21', borderRadius: 999, paddingVertical: 20, alignItems: 'center', marginBottom: 16, elevation: 4 },
-  primaryButtonText: { color: '#ffffff', fontSize: 18, fontWeight: '700' },
-  secondaryButton: { paddingVertical: 16, alignItems: 'center' },
-  secondaryButtonText: { color: '#176a21', fontSize: 18, fontWeight: '700' }
+  summaryLabel: { fontSize: 16, color: '#AFAFAF', fontWeight: '800' },
+  summaryValuePositive: { fontSize: 16, fontWeight: '800', color: '#58CC02' },
+  summaryValueNegative: { fontSize: 16, fontWeight: '800', color: '#FF4B4B' },
+  summaryTotalRow: { borderTopWidth: 2, borderTopColor: '#E5E5E5', paddingTop: 16, marginTop: 8 },
+  summaryLabelBold: { fontSize: 18, fontWeight: '800', color: '#4B4B4B' },
+  summaryValueBold: { fontSize: 18, fontWeight: '800', color: '#4B4B4B' },
+  
+  lessonCard: { backgroundColor: '#FFF0D3', borderRadius: 24, padding: 20, marginBottom: 32, elevation: 2, borderWidth: 2, borderColor: '#FFC800' },
+  lessonTitle: { fontSize: 20, fontWeight: '800', color: '#D3A500', marginBottom: 8 },
+  lessonBody: { fontSize: 16, color: '#A07E00', lineHeight: 24, fontWeight: '600' },
+  
+  btnBase: { borderRadius: 20, paddingVertical: 18, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, paddingHorizontal: 24 },
+  btnPrimary: { backgroundColor: '#58CC02', borderBottomColor: '#46A302' },
+  btnSecondary: { backgroundColor: '#E5F3FF', borderBottomColor: '#BCE4FF', borderWidth: 2, borderColor: '#1CB0F6', borderBottomWidth: 8 },
+  btnTertiary: { backgroundColor: '#FFFFFF', borderBottomColor: '#E5E5E5', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 8 },
+  btnTextPrimary: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  btnTextSecondary: { color: '#1CB0F6', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 },
+  btnTextTertiary: { color: '#AFAFAF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 }
 });

@@ -9,6 +9,7 @@ import HarvestScreen from '../screens/HarvestScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
+import SkillTreeScreen from '../screens/SkillTreeScreen';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -18,6 +19,7 @@ export type RootStackParamList = {
   Dashboard: undefined;
   History: undefined;
   Leaderboard: undefined;
+  SkillTree: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,6 +38,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
+        <Stack.Screen name="SkillTree" component={SkillTreeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

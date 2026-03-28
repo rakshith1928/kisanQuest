@@ -4,12 +4,13 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.5.2",
     "@react-native-community/slider": "^5.1.2",
@@ -17,28 +18,32 @@
     "@react-navigation/native-stack": "^7.14.6",
     "expo": "~55.0.8",
     "expo-av": "^16.0.8",
+    "expo-dev-client": "~55.0.19",
     "expo-speech": "~55.0.9",
     "expo-sqlite": "~55.0.11",
     "expo-status-bar": "~55.0.4",
     "i18next": "^25.10.5",
     "lottie-react-native": "~7.3.4",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
     "react-i18next": "^16.6.2",
     "react-native": "0.83.2",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-confetti-cannon": "^1.5.2",
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
-    "react-native-svg": "^15.15.4",
-    "react-native-web": "^0.21.0"
+    "react-native-svg": "15.15.3"
   },
   "private": true,
   "devDependencies": {
+    "@expo/ngrok": "^4.1.3",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.2.14",
     "@types/react-native": "^0.72.8",
+    "babel-preset-expo": "^55.0.14-canary-20260328-2049187",
     "jest": "^30.3.0",
+    "react-dom": "^19.2.4",
+    "react-native-web": "^0.21.2",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   }

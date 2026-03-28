@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 import { GameState } from '../engine/GameEngine';
 
@@ -14,6 +15,12 @@ class GameStateDatabase {
 
   async init() {
     if (this.isInitialized) return;
+    if (Platform.OS === 'web') {
+      console.log('GameStateDB: Web detected, using localStorage instead of SQLite.');
+      this.isInitialized = true;
+      return;
+    }
+    
     try {
       this.db = await SQLite.openDatabaseAsync('kisanquest.db');
 
@@ -43,6 +50,12 @@ class GameStateDatabase {
   async saveGameState(playerId: string, state: GameState) {
     if (!this.isInitialized) await this.init();
     const timestamp = Date.now();
+    
+    if (Platform.OS === 'web') {
+      localStorage.setItem(`gameState_${playerId}`, JSON.stringify(state));
+      return;
+    }
+
     await this.db.runAsync(
       `INSERT OR REPLACE INTO game_state (id, state, updatedAt) VALUES (?, ?, ?)`,
       [playerId, JSON.stringify(state), timestamp]
@@ -51,6 +64,12 @@ class GameStateDatabase {
 
   async loadGameState(playerId: string): Promise<GameState | null> {
     if (!this.isInitialized) await this.init();
+    
+    if (Platform.OS === 'web') {
+      const stateStr = localStorage.getItem(`gameState_${playerId}`);
+      return stateStr ? JSON.parse(stateStr) as GameState : null;
+    }
+
     const result = await this.db.getFirstAsync<{ state: string }>(`SELECT * FROM game_state WHERE id = ?`, [playerId]);
     if (result) {
       return JSON.parse(result.state) as GameState;
@@ -62,6 +81,14 @@ class GameStateDatabase {
     if (!this.isInitialized) await this.init();
     const id = Date.now().toString() + '_' + Math.random().toString(36).substring(2, 9);
     const timestamp = Date.now();
+    
+    if (Platform.OS === 'web') {
+      const queue = JSON.parse(localStorage.getItem('syncQueue') || '[]');
+      queue.push({ id, type, payload: JSON.stringify(payload), timestamp });
+      localStorage.setItem('syncQueue', JSON.stringify(queue));
+      return;
+    }
+
     await this.db.runAsync(
       `INSERT INTO sync_queue (id, type, payload, timestamp) VALUES (?, ?, ?, ?)`,
       [id, type, JSON.stringify(payload), timestamp]
@@ -70,11 +97,24 @@ class GameStateDatabase {
 
   async getSyncQueue(): Promise<SyncOperation[]> {
     if (!this.isInitialized) await this.init();
+    
+    if (Platform.OS === 'web') {
+      return JSON.parse(localStorage.getItem('syncQueue') || '[]');
+    }
+
     return await this.db.getAllAsync(`SELECT * FROM sync_queue ORDER BY timestamp ASC`);
   }
 
   async removeSyncOperation(id: string) {
     if (!this.isInitialized) await this.init();
+    
+    if (Platform.OS === 'web') {
+      let queue = JSON.parse(localStorage.getItem('syncQueue') || '[]');
+      queue = queue.filter((item: any) => item.id !== id);
+      localStorage.setItem('syncQueue', JSON.stringify(queue));
+      return;
+    }
+
     await this.db.runAsync(`DELETE FROM sync_queue WHERE id = ?`, [id]);
   }
 }

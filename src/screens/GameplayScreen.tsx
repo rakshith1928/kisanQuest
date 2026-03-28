@@ -1,18 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import LottieView from 'lottie-react-native';
 import { TranslatedText } from '../components/TranslatedText';
 import gameEngine from '../engine/GameEngine';
+
+const screenWidth = Dimensions.get('window').width;
+
+const xpToNextLevel = 1000;
 
 function getWeatherIcon(type: string | undefined) {
   switch (type) {
     case 'good_monsoon': return '🌧️';
     case 'drought': return '☀️';
     case 'flood': return '🌊';
-    default: return '☀️';
+    case 'good_winter': return '❄️';
+    case 'cold_wave': return '🥶';
+    case 'unseasonal_rain': return '⛈️';
+    default: return '🌤️';
   }
 }
+
+const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }: any) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const handlePressIn = () => { if (!disabled) Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start(); };
+  const handlePressOut = () => {
+    if (!disabled) {
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
+      onPress && onPress();
+    }
+  };
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleAnim }], opacity: disabled ? 0.6 : 1 }}>
+      <TouchableOpacity activeOpacity={1} onPressIn={handlePressIn} onPressOut={handlePressOut} style={[styles.btnBase, styles[`btn${variant}` as keyof typeof styles], style]}>
+        {children}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 export default function GameplayScreen({ navigation }: any) {
   const { t } = useTranslation();
@@ -20,6 +46,8 @@ export default function GameplayScreen({ navigation }: any) {
   const [lastOutcome, setLastOutcome] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const node = gameEngine.getCurrentNode();
+
+  const xpProgressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const unsubscribe = gameEngine.getStateMachine().onStateChange(() => {
@@ -29,174 +57,216 @@ export default function GameplayScreen({ navigation }: any) {
     return unsubscribe;
   }, []);
 
-  if (!node) {
+  useEffect(() => {
+    // Animate XP bar whenever XP changes
+    const currentExp = gameState.player.score.xp % xpToNextLevel;
+    const percentage = (currentExp / xpToNextLevel) * 100;
+    
+    Animated.spring(xpProgressAnim, {
+      toValue: percentage,
+      useNativeDriver: false,
+    }).start();
+  }, [gameState.player.score.xp]);
+
+  const handleAdvancePhase = (nextPhase: any) => {
+    if (isProcessing) return;
+    try {
+        gameEngine.getStateMachine().transition(nextPhase);
+        setGameState(gameEngine.getState());
+    } catch (e) {
+        console.log("Phase transition error", e);
+    }
+  };
+
+  const currentPhase = gameState.phase;
+
+  if (currentPhase === 'HARVEST_REVIEW') {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
         <Text style={styles.eventTitle}>Season Complete 🎉</Text>
-        <TouchableOpacity
-          style={[styles.primaryAction, { marginTop: 24, width: '100%' }]}
-          onPress={() => navigation.replace('Harvest', { outcome: lastOutcome })}
-        >
-          <Text style={styles.primaryActionText}>View Harvest Results</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.secondaryAction, { marginTop: 12, width: '100%' }]}
-          onPress={() => navigation.replace('Dashboard')}
-        >
-          <Text style={styles.secondaryActionText}>Go to Dashboard</Text>
-        </TouchableOpacity>
+        <ScaleButton variant="primary" style={{ marginTop: 24, paddingHorizontal: 32 }} onPress={() => navigation.replace('Harvest', { outcome: lastOutcome })}>
+          <Text style={styles.btnTextPrimary}>View Harvest Results</Text>
+        </ScaleButton>
       </View>
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Text style={styles.seasonText}>
-            {gameState.player.farm.season % 2 === 1 ? 'Kharif' : 'Rabi'} Season
-          </Text>
-          <View style={styles.weatherBadge}>
-            <Text style={styles.weatherText}>{getWeatherIcon(lastOutcome?.weather?.type)}</Text>
-          </View>
-        </View>
+  const renderWeatherReveal = () => (
+      <View style={styles.eventCard}>
+         <Text style={styles.eventTitle}>Weather Forecast ☁️</Text>
+         <Text style={styles.eventDescription}>The season is starting. Predictable weather is crucial for a healthy harvest. Let's see what the skies bring.</Text>
+         <ScaleButton onPress={() => handleAdvancePhase('MARKET_UPDATE')} variant="primary" style={{marginTop: 24}}>
+             <Text style={styles.btnTextPrimary}>Continue →</Text>
+         </ScaleButton>
+      </View>
+  );
 
-        {/* Financial Status Bar */}
-        <View style={styles.statusBar}>
-          <View style={[styles.statItem, { backgroundColor: '#d1ffc8' }]}>
-            <TranslatedText tKey="ui.gameplay.cash" style={[styles.statLabel, { color: '#006016' }]} />
-            <Text style={[styles.statValue, { color: '#004b0f' }]}>₹{gameState.player.finances.cash}</Text>
-          </View>
-          <View style={[styles.statItem, { backgroundColor: '#ffefec' }]}>
-            <TranslatedText tKey="ui.gameplay.debt" style={[styles.statLabel, { color: '#b92902' }]} />
-            <Text style={[styles.statValue, { color: '#520c00' }]}>₹{gameState.player.finances.debt}</Text>
-          </View>
-          <View style={[styles.statItem, { backgroundColor: '#fff1db' }]}>
-            <TranslatedText tKey="ui.gameplay.savings" style={[styles.statLabel, { color: '#765600' }]} />
-            <Text style={[styles.statValue, { color: '#453100' }]}>₹{gameState.player.finances.savings}</Text>
-          </View>
-        </View>
+  const renderMarketUpdate = () => (
+      <View style={[styles.eventCard, { backgroundColor: '#E5F3FF' }]}>
+         <Text style={[styles.eventTitle, {color: '#1CB0F6'}]}>Mandi Market Pulse 📈</Text>
+         <Text style={[styles.eventDescription, {color: '#4B4B4B'}]}>Market prices fluctuate based on supply and demand. Unlocked skills like Negotiation will boost your final sale price at Harvest.</Text>
+         <ScaleButton onPress={() => handleAdvancePhase('DECISION_POINT')} variant="secondary" style={{marginTop: 24}}>
+             <Text style={styles.btnTextSecondary}>Start Farm Events →</Text>
+         </ScaleButton>
+      </View>
+  );
 
-        {/* Main Hub (Farm Plot) */}
-        <View style={styles.mainHub}>
-          <View style={styles.farmPlotIllustration} />
-          <Text style={styles.farmStatusText}>Crops are growing well...</Text>
-        </View>
-
-        {/* Event / Action Area */}
-        <View style={styles.eventCard}>
-          <Text style={styles.eventTitle}>Event</Text>
-          <Text style={styles.eventDescription}>
-            {node?.prompt}
-          </Text>
+  const renderDecisionPoint = () => (
+      <View style={styles.eventCard}>
+          <Text style={styles.eventTitle}>Farm Event</Text>
+          <Text style={styles.eventDescription}>{node?.prompt}</Text>
 
           {lastOutcome?.message && (
-            <View style={{ alignItems: 'center', marginBottom: 16, padding: 12, backgroundColor: '#ffffff', borderRadius: 16, elevation: 2 }}>
-              <Text style={{ fontSize: 16, color: '#0a6a1d', fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>
-                {lastOutcome.message}
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={styles.outcomeBanner}>
+              <Text style={styles.outcomeMessage}>{lastOutcome.message}</Text>
+              <View style={styles.outcomeStatsRow}>
                 {lastOutcome.financialChanges?.cash !== undefined && (
-                  <Text style={{ fontSize: 14, fontWeight: '700', color: lastOutcome.financialChanges.cash >= 0 ? '#0a6a1d' : '#b92902' }}>
+                  <Text style={[styles.outcomeStatText, {color: lastOutcome.financialChanges.cash >= 0 ? '#58CC02' : '#FF4B4B'}]}>
                     Cash: {lastOutcome.financialChanges.cash > 0 ? '+' : ''}{lastOutcome.financialChanges.cash}
                   </Text>
                 )}
-                {lastOutcome.healthDelta !== undefined && (
-                  <Text style={{ fontSize: 14, fontWeight: '700', color: lastOutcome.healthDelta >= 0 ? '#0a6a1d' : '#b92902' }}>
-                    Score: {lastOutcome.healthDelta > 0 ? '+' : ''}{lastOutcome.healthDelta}
+                {lastOutcome.literacyPoints !== undefined && (
+                  <Text style={[styles.outcomeStatText, {color: '#1CB0F6'}]}>
+                    +{lastOutcome.literacyPoints} LP
                   </Text>
                 )}
+                <Text style={[styles.outcomeStatText, {color: '#FFC800'}]}>+150 XP</Text>
               </View>
             </View>
           )}
 
           <View style={styles.actionButtons}>
-            {node?.options?.map((opt: any, index: number) => (
-              <TouchableOpacity
-                key={opt.id || index}
-                disabled={isProcessing}
-                style={[
-                  styles.primaryAction,
-                  index === 1 && styles.secondaryAction,
-                  index === 2 && styles.tertiaryAction,
-                  { opacity: isProcessing ? 0.7 : 1 }
-                ]}
-                onPress={() => {
-                  if (isProcessing) return;
-                  setIsProcessing(true);
-                  const outcome = gameEngine.processDecision(opt.id) || {};
-                  setLastOutcome(outcome);
-                  
-                  setTimeout(() => {
-                    // Sync and track right as the player makes the choice and sees the outcome message
-                    const { analyticsService } = require('../services/analyticsService');
-                    const { gameService } = require('../services/gameService');
-                    
-                    const playerState = gameEngine.getState().player;
-                    
-                    analyticsService.trackEvent(opt.id, {
-                        scenario: node.id || 'Unknown',
-                        season: playerState.farm.season,
-                        crop: playerState.farm.crop,
-                        financialHealth: playerState.score.financialHealth 
-                    }).catch((err: any) => console.warn('Failed to track decision analytics:', err));
+            {node?.options?.map((opt: any, index: number) => {
+               // Cycle variants for duolingo aesthetic
+               const variant = index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary";
+               return (
+                 <ScaleButton
+                    key={opt.id || index}
+                    disabled={isProcessing}
+                    variant={variant}
+                    onPress={() => {
+                        if (isProcessing) return;
+                        setIsProcessing(true);
+                        const outcome = gameEngine.processDecision(opt.id) || {};
+                        setLastOutcome(outcome);
+                        
+                        setTimeout(() => {
+                           // Next node or map to Harvest if scenario tree is complete
+                           const result = gameEngine.decisionTree.chooseOption(index);
+                           if (result?.isEnd) {
+                               gameEngine.getStateMachine().transition('HARVEST_REVIEW');
+                           }
+                           setGameState(gameEngine.getState());
+                           setIsProcessing(false);
+                           setLastOutcome(null);
+                        }, 1800);
+                    }}
+                 >
+                    <Text style={styles[`btnText${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles]}>
+                        {isProcessing ? 'Processing...' : opt.label}
+                    </Text>
+                 </ScaleButton>
+               );
+            })}
+          </View>
+      </View>
+  );
 
-                    const syncPayload = {
-                        currentSeason: playerState.farm.season,
-                        cash: playerState.finances.cash,
-                        debt: playerState.finances.debt,
-                        insurance: playerState.finances.insurance,
-                        crops: playerState.farm?.crop ? [playerState.farm.crop] : [],
-                        decisions: playerState.completedScenarios,
-                        seasonHistory: playerState.seasonHistory || []
-                    };
+  const xpWidth = xpProgressAnim.interpolate({
+      inputRange: [0, 100],
+      outputRange: ['0%', '100%']
+  });
 
-                    gameService.syncGameState(syncPayload)
-                       .catch((err: any) => console.warn('Failed to sync state:', err));
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* RPG Top Bar */}
+      <View style={styles.topBar}>
+          <View style={styles.levelBadge}>
+              <Text style={styles.levelText}>Lvl {gameState.player.score.level}</Text>
+          </View>
+          <View style={styles.xpBarContainer}>
+             <Animated.View style={[styles.xpBarFill, { width: xpWidth }]} />
+             <Text style={styles.xpTextOverlay}>{gameState.player.score.xp % xpToNextLevel} / {xpToNextLevel}</Text>
+          </View>
+          <View style={styles.streakBadge}>
+              <Text style={styles.streakText}>🔥 {gameState.player.score.streak}</Text>
+          </View>
+      </View>
 
-                    gameEngine.decisionTree.chooseOption(index);
-                    setIsProcessing(false);
-                    setLastOutcome(null); // Clear message for next node
-                  }, 1500);
-                }}
-              >
-                <Text style={[
-                  styles.primaryActionText,
-                  index === 1 && styles.secondaryActionText,
-                  index === 2 && styles.tertiaryActionText
-                ]}>{isProcessing ? 'Processing...' : opt.label}</Text>
-              </TouchableOpacity>
-            ))}
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Header Section */}
+        <View style={styles.header}>
+          <Text style={styles.seasonText}>
+            Season {gameState.player.farm.season}
+          </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SkillTree')} style={styles.skillBtn}>
+             <Text style={styles.skillBtnText}>🧠 Skills</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Financial Status Bar */}
+        <View style={styles.statusBar}>
+          <View style={[styles.statItem, { backgroundColor: '#F2FBF1', borderColor: '#58CC02' }]}>
+            <TranslatedText tKey="ui.gameplay.cash" style={[styles.statLabel, { color: '#58CC02' }]} />
+            <Text style={[styles.statValue, { color: '#46A302' }]}>₹{gameState.player.finances.cash}</Text>
+          </View>
+          <View style={[styles.statItem, { backgroundColor: '#FFF4F4', borderColor: '#FF4B4B' }]}>
+            <TranslatedText tKey="ui.gameplay.debt" style={[styles.statLabel, { color: '#FF4B4B' }]} />
+            <Text style={[styles.statValue, { color: '#DA2C2C' }]}>₹{gameState.player.finances.debt}</Text>
+          </View>
+          <View style={[styles.statItem, { backgroundColor: '#FFF0D3', borderColor: '#FFC800' }]}>
+            <TranslatedText tKey="ui.gameplay.savings" style={[styles.statLabel, { color: '#FFC800' }]} />
+            <Text style={[styles.statValue, { color: '#D3A500' }]}>₹{gameState.player.finances.savings}</Text>
           </View>
         </View>
+
+        {/* Dynamic Phase Content */}
+        {currentPhase === 'WEATHER_REVEAL' && renderWeatherReveal()}
+        {currentPhase === 'MARKET_UPDATE' && renderMarketUpdate()}
+        {currentPhase === 'DECISION_POINT' && renderDecisionPoint()}
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f7f2' },
-  scroll: { flexGrow: 1, padding: 16, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingHorizontal: 8 },
-  seasonText: { fontSize: 28, fontWeight: '800', color: '#2d2f2c' },
-  weatherBadge: { backgroundColor: '#e8e9e3', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
-  weatherText: { fontSize: 16, fontWeight: '600', color: '#5a5c58' },
+  container: { flex: 1, backgroundColor: '#F6F9FA' },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, backgroundColor: '#FFFFFF', borderBottomWidth: 2, borderBottomColor: '#E5E5E5' },
+  levelBadge: { backgroundColor: '#E5F3FF', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 2, borderColor: '#1CB0F6' },
+  levelText: { color: '#1CB0F6', fontWeight: '800', fontSize: 14 },
+  xpBarContainer: { flex: 1, height: 20, backgroundColor: '#E5E5E5', borderRadius: 10, marginHorizontal: 12, overflow: 'hidden', justifyContent: 'center' },
+  xpBarFill: { position: 'absolute', height: '100%', backgroundColor: '#FFC800', borderRadius: 10 },
+  xpTextOverlay: { textAlign: 'center', fontSize: 11, fontWeight: '800', color: '#4B4B4B', zIndex: 1 },
+  streakBadge: { backgroundColor: '#FFF4F4', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 2, borderColor: '#FF4B4B' },
+  streakText: { color: '#FF4B4B', fontWeight: '800', fontSize: 14 },
+  
+  scroll: { flexGrow: 1, padding: 24, paddingBottom: 40 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  seasonText: { fontSize: 32, fontWeight: '800', color: '#4B4B4B' },
+  skillBtn: { backgroundColor: '#E5F3FF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, borderWidth: 2, borderColor: '#1CB0F6' },
+  skillBtnText: { color: '#1CB0F6', fontWeight: '800', fontSize: 16 },
+  
   statusBar: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 },
-  statItem: { flex: 1, padding: 12, borderRadius: 16, marginHorizontal: 4, alignItems: 'center', elevation: 2 },
-  statLabel: { fontSize: 12, fontWeight: '700', marginBottom: 4 },
+  statItem: { flex: 1, padding: 12, borderRadius: 16, marginHorizontal: 4, alignItems: 'center', borderWidth: 2 },
+  statLabel: { fontSize: 12, fontWeight: '800', marginBottom: 4, textTransform: 'uppercase' },
   statValue: { fontSize: 16, fontWeight: '800' },
-  mainHub: { alignItems: 'center', marginBottom: 40 },
-  farmPlotIllustration: { width: '100%', height: 220, backgroundColor: '#e2e3dd', borderRadius: 32, marginBottom: 16 },
-  farmStatusText: { fontSize: 16, fontWeight: '600', color: '#5a5c58' },
-  eventCard: { backgroundColor: '#fed3c7', borderRadius: 32, padding: 24, elevation: 4 },
-  eventTitle: { fontSize: 22, fontWeight: '800', color: '#51352c', marginBottom: 12 },
-  eventDescription: { fontSize: 16, color: '#67483f', lineHeight: 24, marginBottom: 24 },
-  actionButtons: { gap: 12 },
-  primaryAction: { backgroundColor: '#0a6a1d', paddingVertical: 18, borderRadius: 24, alignItems: 'center', elevation: 4 },
-  primaryActionText: { color: '#ffffff', fontSize: 18, fontWeight: '700' },
-  secondaryAction: { backgroundColor: '#ffca52', paddingVertical: 18, borderRadius: 24, alignItems: 'center' },
-  secondaryActionText: { color: '#5c4300', fontSize: 18, fontWeight: '700' },
-  tertiaryAction: { paddingVertical: 16, alignItems: 'center' },
-  tertiaryActionText: { color: '#0a6a1d', fontSize: 16, fontWeight: '700' }
+  
+  eventCard: { backgroundColor: '#FFFFFF', borderRadius: 28, padding: 28, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, borderWidth: 2, borderColor: '#E5E5E5' },
+  eventTitle: { fontSize: 24, fontWeight: '800', color: '#4B4B4B', marginBottom: 12 },
+  eventDescription: { fontSize: 18, color: '#777777', lineHeight: 26, marginBottom: 28, fontWeight: '600' },
+  actionButtons: { gap: 16 },
+  
+  outcomeBanner: { alignItems: 'center', marginBottom: 24, padding: 16, backgroundColor: '#F2FBF1', borderRadius: 20, borderWidth: 2, borderColor: '#58CC02' },
+  outcomeMessage: { fontSize: 18, color: '#46A302', fontWeight: '800', marginBottom: 12, textAlign: 'center' },
+  outcomeStatsRow: { flexDirection: 'row', gap: 16, flexWrap: 'wrap', justifyContent: 'center' },
+  outcomeStatText: { fontSize: 15, fontWeight: '800' },
+  
+  btnBase: { borderRadius: 20, paddingVertical: 18, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, paddingHorizontal: 24 },
+  btnPrimary: { backgroundColor: '#58CC02', borderBottomColor: '#46A302' },
+  btnSecondary: { backgroundColor: '#E5F3FF', borderBottomColor: '#BCE4FF', borderWidth: 2, borderColor: '#1CB0F6', borderBottomWidth: 4 },
+  btnTertiary: { backgroundColor: '#FFFFFF', borderBottomColor: '#E5E5E5', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 4 },
+  btnTextPrimary: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  btnTextSecondary: { color: '#1CB0F6', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 },
+  btnTextTertiary: { color: '#AFAFAF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 }
 });

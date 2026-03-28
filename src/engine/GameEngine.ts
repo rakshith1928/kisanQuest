@@ -25,6 +25,10 @@ export interface PlayerScore {
     financialHealth: number;
     literacyPoints: number;
     badges: string[];
+    xp: number;
+    level: number;
+    streak: number;
+    unlockedSkills: string[];
 }
 
 export interface PlayerState {
@@ -48,6 +52,7 @@ export interface GameState {
     phase: GameStateName | null;
     player: PlayerState;
     scenario: Scenario | null;
+    eventsCompleted: number;
 }
 
 const INITIAL_PLAYER_STATE: PlayerState = {
@@ -69,6 +74,10 @@ const INITIAL_PLAYER_STATE: PlayerState = {
         financialHealth: 50,
         literacyPoints: 0,
         badges: [],
+        xp: 0,
+        level: 1,
+        streak: 0,
+        unlockedSkills: [],
     },
     completedScenarios: [],
     seasonHistory: [],
@@ -80,6 +89,7 @@ export class GameEngine {
     private outcomeCalculator: OutcomeCalculator;
     private playerState: PlayerState;
     private currentScenario: Scenario | null;
+    public eventsCompleted: number = 0;
 
     constructor() {
         this.stateMachine = new StateMachine();
@@ -97,6 +107,8 @@ export class GameEngine {
             ...INITIAL_PLAYER_STATE,
             ...playerInfo,
         };
+        this.stateMachine.reset();
+        this.eventsCompleted = 0;
         this.stateMachine.transition('ONBOARDING');
         return this.playerState;
     }
@@ -109,6 +121,7 @@ export class GameEngine {
             phase: this.stateMachine.getCurrentState(),
             player: this.playerState,
             scenario: this.currentScenario,
+            eventsCompleted: this.eventsCompleted,
         };
     }
 
@@ -119,6 +132,7 @@ export class GameEngine {
     loadState(state: GameState): void {
         this.playerState = state.player;
         this.currentScenario = state.scenario || null;
+        this.eventsCompleted = state.eventsCompleted || 0;
 
         if (state.phase) {
             this.stateMachine.transition(state.phase);
@@ -163,6 +177,21 @@ export class GameEngine {
         this.playerState.score.financialHealth += outcome.healthDelta || 0;
         this.playerState.score.literacyPoints += outcome.literacyPoints || 0;
 
+        // Apply RPG Mechanisms: XP, Leveling, and Streaks
+        this.playerState.score.xp += 150; // Base XP for decision
+
+        if ((outcome.healthDelta || 0) > 0) {
+            this.playerState.score.streak += 1;
+            this.playerState.score.xp += this.playerState.score.streak * 50; // Streak bonus
+        } else if ((outcome.healthDelta || 0) < 0) {
+            this.playerState.score.streak = 0; // Break streak on poor choices
+        }
+
+        // Recalculate level
+        this.playerState.score.level = Math.floor(this.playerState.score.xp / 1000) + 1;
+        
+        this.eventsCompleted += 1;
+
         return outcome;
     }
 
@@ -176,6 +205,7 @@ export class GameEngine {
             score: this.playerState.score.financialHealth,
         });
         this.playerState.farm.season += 1;
+        this.eventsCompleted = 0; // Reset new season events
         this.stateMachine.transition('SEASON_START');
     }
 

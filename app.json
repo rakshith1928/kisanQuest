@@ -20,13 +20,17 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.rakshith_2005.kisanquest"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
+
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "85224a1b-45fd-425d-850b-fc38a6e4c883"
+      }
+    }
   }
 }

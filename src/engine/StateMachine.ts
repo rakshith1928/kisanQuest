@@ -8,7 +8,8 @@ export type GameStateName =
     | 'ONBOARDING'
     | 'FARM_CREATION'
     | 'SEASON_START'
-    | 'FINANCIAL_EVENT'
+    | 'WEATHER_REVEAL'
+    | 'MARKET_UPDATE'
     | 'DECISION_POINT'
     | 'HARVEST_REVIEW';
 
@@ -42,17 +43,22 @@ const GAME_STATES: Record<GameStateName, GameStateConfig> = {
     },
     SEASON_START: {
         name: 'SEASON_START',
-        allowedTransitions: ['FINANCIAL_EVENT'],
+        allowedTransitions: ['WEATHER_REVEAL'],
         voicePrompt: 'season_begin_prompt',
     },
-    FINANCIAL_EVENT: {
-        name: 'FINANCIAL_EVENT',
+    WEATHER_REVEAL: {
+        name: 'WEATHER_REVEAL',
+        allowedTransitions: ['MARKET_UPDATE', 'DECISION_POINT'],
+        voicePrompt: 'weather_prompt',
+    },
+    MARKET_UPDATE: {
+        name: 'MARKET_UPDATE',
         allowedTransitions: ['DECISION_POINT'],
-        voicePrompt: 'event_notification',
+        voicePrompt: 'market_update',
     },
     DECISION_POINT: {
         name: 'DECISION_POINT',
-        allowedTransitions: ['HARVEST_REVIEW', 'FINANCIAL_EVENT'],
+        allowedTransitions: ['DECISION_POINT', 'HARVEST_REVIEW', 'WEATHER_REVEAL'],
         voicePrompt: 'decision_prompt',
     },
     HARVEST_REVIEW: {

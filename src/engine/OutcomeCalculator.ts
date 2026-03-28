@@ -1,7 +1,4 @@
-/**
- * OutcomeCalculator.ts — Probabilistic outcome engine
- * Factors in: player finances, weather randomness, crop yields, decision quality
- */
+import { PlayerState as FullPlayerState } from './GameEngine';
 
 export type SeasonType = 'kharif' | 'rabi';
 export type CropType = 'rice' | 'wheat' | 'cotton' | 'sugarcane';
@@ -53,14 +50,6 @@ interface Scenario {
     nodes: ScenarioNode[];
 }
 
-interface PlayerState {
-    farm?: {
-        season?: number;
-        crop?: string;
-    };
-    finances: FinancialState;
-}
-
 // Weather probability weights based on Indian monsoon patterns
 const WEATHER_PATTERNS: Record<SeasonType, Record<string, number>> = {
     kharif: {
@@ -95,9 +84,22 @@ export class OutcomeCalculator {
     }
 
     /**
+     * Calculate mandi price dynamically based on random fluctuation + skills
+     */
+    calculateMandiPrice(baseRevenue: number, unlockedSkills: string[]): number {
+        // Market fluctuation +/- 15%
+        const fluctuation = 0.85 + (Math.random() * 0.30);
+        
+        // RPG SKILL: Negotiation (+15% to final market sale)
+        const skillBonus = unlockedSkills.includes('Negotiation') ? 1.15 : 1.0;
+
+        return Math.floor(baseRevenue * fluctuation * skillBonus);
+    }
+
+    /**
      * Calculate outcome of a player decision
      */
-    calculate(optionId: string, playerState: PlayerState, scenario: Scenario): OutcomeResult {
+    calculate(optionId: string, playerState: FullPlayerState, scenario: Scenario): OutcomeResult {
         const option = this._findOption(optionId, scenario);
         if (!option) {
             return { success: false, message: 'Invalid option' };
@@ -111,9 +113,23 @@ export class OutcomeCalculator {
         );
 
         // Calculate financial changes
-        const cashChange = (impact.cash || 0) * yieldMultiplier;
-        const debtChange = impact.debt || 0;
-        const savingsChange = impact.savings || 0;
+        let cashChange = (impact.cash || 0) * yieldMultiplier;
+        let debtChange = impact.debt || 0;
+        let savingsChange = impact.savings || 0;
+
+        // Apply RPG Skills
+        const skills = playerState.score?.unlockedSkills || [];
+        
+        if (impact.cash && impact.cash > 0) {
+            cashChange = this.calculateMandiPrice(impact.cash * yieldMultiplier, skills);
+        }
+
+        // Insurance Literacy Skill: 25% discount on purchasing insurance
+        if (impact.cash && impact.cash < 0 && impact.insurance) {
+            if (skills.includes('Insurance Literacy')) {
+                cashChange *= 0.75;
+            }
+        }
 
         const financialChanges: FinancialState = {
             cash: Math.round(playerState.finances.cash + cashChange),
@@ -175,7 +191,7 @@ export class OutcomeCalculator {
     /**
      * Assess decision quality (returns -10 to +10 health score delta)
      */
-    private _assessDecisionQuality(option: ScenarioOption, playerState: PlayerState): number {
+    private _assessDecisionQuality(option: ScenarioOption, playerState: FullPlayerState): number {
         let score = 0;
         const impact = option.financialImpact || {};
 

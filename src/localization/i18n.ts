@@ -29,7 +29,8 @@ export const resources = {
 i18n
   .use(initReactI18next)
   .init({
-    compatibilityJSON: 'v4',
+    // @ts-ignore: Required to prevent Hermes crashes on Android without Intl polyfill
+    compatibilityJSON: 'v3',
     resources,
     lng: 'en', // default language
     fallbackLng: 'en',
