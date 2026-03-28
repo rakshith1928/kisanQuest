@@ -1,0 +1,59 @@
+{
+  "id": "harvest_bargain",
+  "title": "Harvest Bargain",
+  "season": "Kharif",
+  "theme": "Negotiation",
+  "nodes": [
+    {
+      "id": "hb_1",
+      "prompt": "Your cotton harvest is ready. A trader offers ₹5,500/quintal. A cooperative promises ₹6,200 but payment comes in 30 days. What do you do?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Sell to trader now (₹5,500/q, instant payment)",
+          "nextNode": "hb_2a",
+          "financialImpact": { "cash": 27500 }
+        },
+        {
+          "id": "B",
+          "label": "Join the cooperative (₹6,200/q, 30-day wait)",
+          "nextNode": "hb_2b",
+          "financialImpact": { "cash": 31000 }
+        },
+        {
+          "id": "C",
+          "label": "Negotiate with trader for a higher price",
+          "nextNode": "hb_2c",
+          "financialImpact": { "cash": 29000 }
+        }
+      ]
+    },
+    {
+      "id": "hb_2a",
+      "type": "outcome",
+      "result": "neutral",
+      "prompt": "You got ₹27,500 quickly but missed ₹3,500 extra by not waiting 30 days.",
+      "financialImpact": {},
+      "financialScoreDelta": 0,
+      "lesson": "[Skill Tested: Negotiation] Cooperative selling usually yields 10–15% more than private traders. Plan your cash needs to afford the wait."
+    },
+    {
+      "id": "hb_2b",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "Great patience! The cooperative paid ₹31,000 — ₹3,500 more than the trader offered.",
+      "financialImpact": {},
+      "financialScoreDelta": 12,
+      "lesson": "[Skill Tested: Negotiation] Farmer cooperatives cut out middlemen and share profits with members. Joining one is one of the best financial decisions a farmer can make."
+    },
+    {
+      "id": "hb_2c",
+      "type": "outcome",
+      "result": "neutral",
+      "prompt": "The trader agreed to ₹5,800/q. A small win! You earned ₹29,000.",
+      "financialImpact": {},
+      "financialScoreDelta": 5,
+      "lesson": "[Skill Tested: Negotiation] Always negotiate! Even a small increase per quintal adds up significantly over a full harvest. Research the MSP (Minimum Support Price) before any sale."
+    }
+  ]
+}

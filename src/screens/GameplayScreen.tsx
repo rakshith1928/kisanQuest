@@ -188,7 +188,7 @@ export default function GameplayScreen({ navigation }: any) {
                                // Next node or map to Harvest if scenario tree is complete
                                const result = gameEngine.decisionTree.chooseOption(index);
                                if (result?.isEnd) {
-                                   if (gameEngine.getState().eventsCompleted < 3) {
+                                   if (gameEngine.getState().eventsCompleted < 5) {
                                        gameEngine.loadRandomScenario().then(() => {
                                            setGameState(gameEngine.getState());
                                            setIsProcessing(false);
@@ -215,7 +215,7 @@ export default function GameplayScreen({ navigation }: any) {
                 <ScaleButton
                     variant="primary"
                     onPress={() => {
-                        if (gameEngine.getState().eventsCompleted < 3) {
+                        if (gameEngine.getState().eventsCompleted < 5) {
                             gameEngine.loadRandomScenario().then(() => {
                                 setGameState(gameEngine.getState());
                             });

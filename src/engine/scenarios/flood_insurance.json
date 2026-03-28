@@ -1,0 +1,59 @@
+{
+  "id": "flood_insurance",
+  "title": "Flood Warning",
+  "season": "Kharif",
+  "theme": "Insurance Literacy",
+  "nodes": [
+    {
+      "id": "fi_1",
+      "prompt": "The weather forecast shows 90% chance of flash floods next week. Your sugarcane crop worth ₹60,000 is standing in the field. The insurance deadline is TODAY.",
+      "options": [
+        {
+          "id": "A",
+          "label": "Buy insurance now (₹1,800 premium, 2% of crop value)",
+          "nextNode": "fi_2a",
+          "financialImpact": { "cash": -1800, "insurance": true }
+        },
+        {
+          "id": "B",
+          "label": "Skip insurance, harvest early to save what you can",
+          "nextNode": "fi_2b",
+          "financialImpact": { "cash": 25000 }
+        },
+        {
+          "id": "C",
+          "label": "Do nothing and hope the forecast is wrong",
+          "nextNode": "fi_2c",
+          "financialImpact": {}
+        }
+      ]
+    },
+    {
+      "id": "fi_2a",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "The floods came. Insurance paid ₹48,000 (80% of crop value). You only paid ₹1,800!",
+      "financialImpact": { "cash": 48000 },
+      "financialScoreDelta": 20,
+      "lesson": "[Skill Tested: Insurance Literacy] Under PMFBY, farmers pay just 1.5-2% premium. The government subsidises the rest. ₹1,800 protected a ₹60,000 crop — a 33x return on protection!"
+    },
+    {
+      "id": "fi_2b",
+      "type": "outcome",
+      "result": "neutral",
+      "prompt": "You harvested early and got ₹25,000 — only 42% of the potential value due to immature crop.",
+      "financialImpact": {},
+      "financialScoreDelta": -5,
+      "lesson": "[Skill Tested: Insurance Literacy] Early harvesting due to panic often results in lower quality and price. Insurance allows you to wait for optimal harvest timing without fear."
+    },
+    {
+      "id": "fi_2c",
+      "type": "outcome",
+      "result": "failure",
+      "prompt": "The floods destroyed 95% of your crop. With no insurance, you lost ₹57,000 and still owe harvest loans.",
+      "financialImpact": { "cash": -57000, "debt": 20000 },
+      "financialScoreDelta": -20,
+      "lesson": "[Skill Tested: Insurance Literacy] One uninsured flood can wipe out years of savings. PMFBY enrolment is now linked to Kisan Credit Cards — always enrol before the deadline."
+    }
+  ]
+}

@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BarChart } from 'react-native-chart-kit';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle } from 'react-native-svg';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
 import { TranslatedText } from '../components/TranslatedText';
 import gameEngine from '../engine/GameEngine';
-import { analyticsService } from '../services/analyticsService';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -17,6 +15,49 @@ const badgeIcons: Record<string, string> = {
   "Insured": "🛡️",
   "Debt Free": "💰"
 };
+
+const GOVT_SCHEMES = [
+  {
+    icon: "🌾",
+    name: "PM-KISAN Samman Nidhi",
+    benefit: "₹6,000/year direct to bank",
+    color: "#F2FBF1",
+    border: "#58CC02",
+    tag: "Income Support"
+  },
+  {
+    icon: "🛡️",
+    name: "PM Fasal Bima Yojana",
+    benefit: "Crop insurance at 1.5-2% premium",
+    color: "#E5F3FF",
+    border: "#1CB0F6",
+    tag: "Insurance"
+  },
+  {
+    icon: "💳",
+    name: "Kisan Credit Card (KCC)",
+    benefit: "Loans at 4-7% interest rate",
+    color: "#FFF0D3",
+    border: "#FFC800",
+    tag: "Credit"
+  },
+  {
+    icon: "📱",
+    name: "e-NAM Market Platform",
+    benefit: "Sell crops online at best mandi price",
+    color: "#F3F0FF",
+    border: "#CE82FF",
+    tag: "Market Access"
+  },
+  {
+    icon: "💧",
+    name: "PM Krishi Sinchayee Yojana",
+    benefit: "Drip/sprinkler irrigation subsidy",
+    color: "#E5F3FF",
+    border: "#1CB0F6",
+    tag: "Irrigation"
+  },
+];
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -132,7 +173,6 @@ const SlideInCard = ({ children, delay = 0, style }: any) => {
 export default function DashboardScreen({ navigation }: any) {
   const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
-  const [events, setEvents] = useState<any[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -140,32 +180,20 @@ export default function DashboardScreen({ navigation }: any) {
 
     const unsubscribe = gameEngine.getStateMachine().onStateChange(() => {
       const newState = gameEngine.getState();
-      // Check if badges increased
       if (newState.player.score.badges.length > gameState.player.score.badges.length) {
         setShowConfetti(true);
       }
       setGameState(newState);
     });
 
-    fetchEvents();
-
     if (gameEngine.getState().player.score.badges.length > 0) {
-      setTimeout(() => setShowConfetti(true), 500); // Intro confetti if already have badges
+      setTimeout(() => setShowConfetti(true), 500);
     }
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
   }, []);
-
-  const fetchEvents = async () => {
-    try {
-      const data = await analyticsService.getPopularEvents();
-      setEvents(data);
-    } catch (err) {
-      console.error('Failed to fetch events', err);
-    }
-  };
 
   const player = gameState.player;
   const farmName = gameState.player.farm?.name || "Player Profile";
@@ -269,38 +297,23 @@ export default function DashboardScreen({ navigation }: any) {
           </View>
         </SlideInCard>
 
-        {/* Global Popular Events Analytics */}
+        {/* Government Schemes Section */}
         <SlideInCard delay={400} style={styles.section}>
-          <Text style={styles.sectionTitle}>Global Popular Events</Text>
-          <View style={[styles.card, { paddingHorizontal: 0, overflow: 'hidden' }]}>
-            {events.length > 0 ? (
-              <BarChart
-                data={{
-                  labels: events.slice(0, 4).map(e => e._id),
-                  datasets: [{ data: events.slice(0, 4).map(e => e.count) }]
-                }}
-                width={screenWidth - 48}
-                height={220}
-                yAxisLabel=""
-                yAxisSuffix=""
-                fromZero
-                chartConfig={{
-                  backgroundColor: '#ffffff',
-                  backgroundGradientFrom: '#ffffff',
-                  backgroundGradientTo: '#ffffff',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(88, 204, 2, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(119, 119, 119, ${opacity})`,
-                  barPercentage: 0.6,
-                }}
-                style={{
-                  marginVertical: 8,
-                }}
-              />
-            ) : (
-               <Text style={[styles.emptyItalic, { padding: 24 }]}>No global events collected yet</Text>
-            )}
-          </View>
+          <Text style={styles.sectionTitle}>🏛️ Govt Schemes for You</Text>
+          {GOVT_SCHEMES.map((scheme) => (
+            <View key={scheme.name} style={[styles.schemeCard, { backgroundColor: scheme.color, borderColor: scheme.border }]}>
+              <View style={[styles.schemeIconBox, { borderColor: scheme.border }]}>
+                <Text style={{ fontSize: 28 }}>{scheme.icon}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.schemeName}>{scheme.name}</Text>
+                <Text style={styles.schemeBenefit}>{scheme.benefit}</Text>
+              </View>
+              <View style={[styles.schemeTag, { borderColor: scheme.border }]}>
+                <Text style={[styles.schemeTagText, { color: scheme.border }]}>{scheme.tag}</Text>
+              </View>
+            </View>
+          ))}
         </SlideInCard>
 
         {/* Actions */}
@@ -382,4 +395,10 @@ const styles = StyleSheet.create({
   btnTextPrimary: { color: '#1B3D01', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
   btnTextSecondary: { color: '#1CB0F6', fontSize: 16, fontWeight: '800', textTransform: 'uppercase' },
   btnTextTertiary: { color: '#D3A500', fontSize: 16, fontWeight: '800', textTransform: 'uppercase' },
+  schemeCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 20, padding: 16, marginBottom: 12, borderWidth: 2 },
+  schemeIconBox: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 2 },
+  schemeName: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', marginBottom: 4 },
+  schemeBenefit: { fontSize: 14, fontWeight: '600', color: '#777777' },
+  schemeTag: { borderWidth: 2, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, marginLeft: 8 },
+  schemeTagText: { fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
 });
