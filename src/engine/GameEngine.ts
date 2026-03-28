@@ -175,7 +175,7 @@ export class GameEngine {
 
         // Update score
         this.playerState.score.financialHealth += outcome.healthDelta || 0;
-        this.playerState.score.literacyPoints += outcome.literacyPoints || 0;
+        this.playerState.score.literacyPoints += 20 + (outcome.literacyPoints || 0);
 
         // Apply RPG Mechanisms: XP, Leveling, and Streaks
         this.playerState.score.xp += 150; // Base XP for decision

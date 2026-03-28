@@ -67,7 +67,7 @@
       "prompt": "Smart! The bank confirmed it was a fraud attempt. Your account is safe.",
       "financialImpact": {},
       "financialScoreDelta": 15,
-      "lesson": "Always verify by calling your bank's official number (back of debit card). Real banks NEVER ask for OTP via SMS or calls."
+      "lesson": "[Skill Tested: Fraud Detection] Always verify by calling your bank's official number (back of debit card). Real banks NEVER ask for OTP via SMS or calls."
     },
     {
       "id": "dp_2c",

@@ -136,8 +136,18 @@ export default function GameplayScreen({ navigation }: any) {
 
   const renderDecisionPoint = () => (
       <View style={styles.eventCard}>
-          <Text style={styles.eventTitle}>Farm Event</Text>
+          <Text style={styles.eventTitle}>{node?.options && node.options.length > 0 ? "Farm Event" : "Event Outcome 💡"}</Text>
           <Text style={styles.eventDescription}>{node?.prompt}</Text>
+
+          {/* Render the lesson if it's an outcome node */}
+          {(node as any)?.lesson && (
+              <View style={[styles.outcomeBanner, { backgroundColor: '#FFF0D3', borderColor: '#FFC800' }]}>
+                  <Text style={[styles.outcomeMessage, { color: '#D3A500', marginBottom: 8 }]}>💡 Lesson Learned</Text>
+                  <Text style={{ fontSize: 16, color: '#4B4B4B', fontWeight: '600', textAlign: 'center', lineHeight: 22 }}>
+                      {(node as any).lesson}
+                  </Text>
+              </View>
+          )}
 
           {lastOutcome?.message && (
             <View style={styles.outcomeBanner}>
@@ -159,38 +169,67 @@ export default function GameplayScreen({ navigation }: any) {
           )}
 
           <View style={styles.actionButtons}>
-            {node?.options?.map((opt: any, index: number) => {
-               // Cycle variants for duolingo aesthetic
-               const variant = index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary";
-               return (
-                 <ScaleButton
-                    key={opt.id || index}
-                    disabled={isProcessing}
-                    variant={variant}
+            {node?.options && node.options.length > 0 ? (
+                node.options.map((opt: any, index: number) => {
+                   // Cycle variants for duolingo aesthetic
+                   const variant = index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary";
+                   return (
+                     <ScaleButton
+                        key={opt.id || index}
+                        disabled={isProcessing}
+                        variant={variant}
+                        onPress={() => {
+                            if (isProcessing) return;
+                            setIsProcessing(true);
+                            const outcome = gameEngine.processDecision(opt.id) || {};
+                            setLastOutcome(outcome);
+                            
+                            setTimeout(() => {
+                               // Next node or map to Harvest if scenario tree is complete
+                               const result = gameEngine.decisionTree.chooseOption(index);
+                               if (result?.isEnd) {
+                                   if (gameEngine.getState().eventsCompleted < 3) {
+                                       gameEngine.loadRandomScenario().then(() => {
+                                           setGameState(gameEngine.getState());
+                                           setIsProcessing(false);
+                                           setLastOutcome(null);
+                                       });
+                                       return;
+                                   } else {
+                                       gameEngine.getStateMachine().transition('HARVEST_REVIEW');
+                                   }
+                               }
+                               setGameState(gameEngine.getState());
+                               setIsProcessing(false);
+                               setLastOutcome(null);
+                            }, 2500); // slightly longer wait to read the outcome banner
+                        }}
+                     >
+                        <Text style={styles[`btnText${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles]}>
+                            {isProcessing ? 'Processing...' : opt.label}
+                        </Text>
+                     </ScaleButton>
+                   );
+                })
+            ) : (
+                <ScaleButton
+                    variant="primary"
                     onPress={() => {
-                        if (isProcessing) return;
-                        setIsProcessing(true);
-                        const outcome = gameEngine.processDecision(opt.id) || {};
-                        setLastOutcome(outcome);
-                        
-                        setTimeout(() => {
-                           // Next node or map to Harvest if scenario tree is complete
-                           const result = gameEngine.decisionTree.chooseOption(index);
-                           if (result?.isEnd) {
-                               gameEngine.getStateMachine().transition('HARVEST_REVIEW');
-                           }
-                           setGameState(gameEngine.getState());
-                           setIsProcessing(false);
-                           setLastOutcome(null);
-                        }, 1800);
+                        if (gameEngine.getState().eventsCompleted < 3) {
+                            gameEngine.loadRandomScenario().then(() => {
+                                setGameState(gameEngine.getState());
+                            });
+                        } else {
+                            gameEngine.getStateMachine().transition('HARVEST_REVIEW');
+                            setGameState(gameEngine.getState());
+                        }
                     }}
-                 >
-                    <Text style={styles[`btnText${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles]}>
-                        {isProcessing ? 'Processing...' : opt.label}
+                >
+                    <Text style={styles.btnTextPrimary}>
+                        {gameEngine.getState().eventsCompleted < 3 ? "Next Event →" : "Complete Season →"}
                     </Text>
-                 </ScaleButton>
-               );
-            })}
+                </ScaleButton>
+            )}
           </View>
       </View>
   );

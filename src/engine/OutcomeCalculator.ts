@@ -117,11 +117,14 @@ export class OutcomeCalculator {
         let debtChange = impact.debt || 0;
         let savingsChange = impact.savings || 0;
 
-        // Apply RPG Skills
         const skills = playerState.score?.unlockedSkills || [];
         
         if (impact.cash && impact.cash > 0) {
             cashChange = this.calculateMandiPrice(impact.cash * yieldMultiplier, skills);
+            // Digital Payments Skill: Earn 5% cashback/subsidy on positive cash flow
+            if (skills.includes('Digital Payments')) {
+                cashChange += Math.floor(cashChange * 0.05);
+            }
         }
 
         // Insurance Literacy Skill: 25% discount on purchasing insurance
@@ -131,8 +134,24 @@ export class OutcomeCalculator {
             }
         }
 
+        // Fraud Detection Skill: Cap catastrophic losses
+        if (impact.cash && impact.cash < -10000) {
+            if (skills.includes('Fraud Detection')) {
+                // Caught the fraud early!
+                cashChange = -1000;
+            }
+        }
+
+        // Budget Planning Skill: Prevent overdraft penalties
+        let overdraftPenalty = 0;
+        if (playerState.finances.cash + cashChange < 0) {
+            if (!skills.includes('Budget Planning')) {
+                overdraftPenalty = -2000; // standard penalty
+            }
+        }
+
         const financialChanges: FinancialState = {
-            cash: Math.round(playerState.finances.cash + cashChange),
+            cash: Math.round(playerState.finances.cash + cashChange + overdraftPenalty),
             debt: Math.max(0, playerState.finances.debt + debtChange),
             savings: Math.max(0, playerState.finances.savings + savingsChange),
             insurance: impact.insurance !== undefined

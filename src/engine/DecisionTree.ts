@@ -10,6 +10,7 @@ import marketPrice from './scenarios/market_price.json';
 import digitalPayment from './scenarios/digital_payment.json';
 import savingsChallenge from './scenarios/savings_challenge.json';
 import loanTrap from './scenarios/loan_trap.json';
+import digitalSubsidy from './scenarios/digital_subsidy.json';
 
 export interface ScenarioOption {
     id?: string;
@@ -64,6 +65,7 @@ const SCENARIO_MAP: Record<ScenarioName, Scenario> = {
     digital_payment: digitalPayment as unknown as Scenario,
     savings_challenge: savingsChallenge as unknown as Scenario,
     loan_trap: loanTrap as unknown as Scenario,
+    digital_subsidy: digitalSubsidy as unknown as Scenario,
 };
 
 export class DecisionTree {

@@ -1,0 +1,62 @@
+{
+  "id": "digital_subsidy",
+  "title": "Government Subsidy Transfer",
+  "season": "Any",
+  "theme": "Digital Finance & Governance",
+  "nodes": [
+    {
+      "id": "ds_1",
+      "prompt": "The PM-Kisan subsidy of ₹2,000 has been announced. How will you receive it?",
+      "voicePrompt": "पीएम-किसान योजना के ₹2,000 आ गए हैं। आप इसे कैसे प्राप्त करेंगे?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Direct Benefit Transfer (DBT) to bank account",
+          "voiceKeywords": [
+            "bank",
+            "dbt",
+            "direct",
+            "khata",
+            "खाता"
+          ],
+          "nextNode": "ds_2a",
+          "financialImpact": {
+            "cash": 2000
+          }
+        },
+        {
+          "id": "B",
+          "label": "Ask a local agent to collect it for ₹200 fee",
+          "voiceKeywords": [
+            "agent",
+            "fee",
+            "local",
+            "एजेंट"
+          ],
+          "nextNode": "ds_2b",
+          "financialImpact": {
+            "cash": 1800
+          }
+        }
+      ]
+    },
+    {
+      "id": "ds_2a",
+      "type": "outcome",
+      "result": "success",
+      "prompt": "The money arrived instantly in your account!",
+      "financialImpact": {},
+      "financialScoreDelta": 10,
+      "lesson": "[Skill Tested: Digital Payments] Linking your mobile and Aadhaar to your bank ensures instant, zero-fee direct government transfers."
+    },
+    {
+      "id": "ds_2b",
+      "type": "outcome",
+      "result": "failure",
+      "prompt": "The agent took a ₹200 cut. You only received ₹1,800 and had to wait 3 days.",
+      "financialImpact": {},
+      "financialScoreDelta": -5,
+      "lesson": "[Skill Tested: Digital Payments] Relying on middlemen for government funds introduces unnecessary fees and delays."
+    }
+  ]
+}
