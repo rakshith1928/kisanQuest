@@ -69,9 +69,13 @@ export default function GameplayScreen({ navigation }: any) {
   }, [gameState.player.score.xp]);
 
   useEffect(() => {
-    if (gameState.phase === 'SEASON_START') {
+    const p = gameState.phase;
+    if (p === 'SEASON_START' || p === 'ONBOARDING' || p === 'FARM_CREATION') {
         try {
-            gameEngine.getStateMachine().transition('WEATHER_REVEAL');
+            const sm = gameEngine.getStateMachine();
+            if (p === 'ONBOARDING') sm.transition('FARM_CREATION');
+            if (p === 'ONBOARDING' || p === 'FARM_CREATION') sm.transition('SEASON_START');
+            sm.transition('WEATHER_REVEAL');
             setGameState(gameEngine.getState());
         } catch(e) { console.warn("Auto-transition failed", e); }
     }
@@ -275,7 +279,7 @@ const styles = StyleSheet.create({
   btnPrimary: { backgroundColor: '#58CC02', borderBottomColor: '#46A302' },
   btnSecondary: { backgroundColor: '#E5F3FF', borderBottomColor: '#BCE4FF', borderWidth: 2, borderColor: '#1CB0F6', borderBottomWidth: 4 },
   btnTertiary: { backgroundColor: '#FFFFFF', borderBottomColor: '#E5E5E5', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 4 },
-  btnTextPrimary: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  btnTextPrimary: { color: '#1B3D01', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
   btnTextSecondary: { color: '#1CB0F6', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 },
   btnTextTertiary: { color: '#AFAFAF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 }
 });

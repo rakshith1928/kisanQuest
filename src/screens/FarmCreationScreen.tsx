@@ -103,6 +103,13 @@ export default function FarmCreationScreen({ navigation }: any) {
         }
       });
 
+      // Crucial Fix: Push the state machine into the actual game loop for a new farm!
+      const sm = gameEngine.getStateMachine();
+      if(sm.getCurrentState() === 'ONBOARDING'){
+          sm.transition('FARM_CREATION');
+          sm.transition('SEASON_START');
+      }
+
       navigation.replace('Dashboard');
     }, 400);
   };
@@ -374,7 +381,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#D4D4D4',
   },
   startButtonText: {
-    color: '#FFFFFF',
+    color: '#1B3D01',
     fontSize: 16,
     fontWeight: '800',
     textTransform: 'uppercase',

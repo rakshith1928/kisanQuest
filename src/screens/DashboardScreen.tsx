@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   btnPrimary: { backgroundColor: '#58CC02', borderBottomColor: '#46A302' },
   btnSecondary: { backgroundColor: '#E5F3FF', borderBottomColor: '#BCE4FF' },
   btnTertiary: { backgroundColor: '#FFF0D3', borderBottomColor: '#E5D8BE' },
-  btnTextPrimary: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  btnTextPrimary: { color: '#1B3D01', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
   btnTextSecondary: { color: '#1CB0F6', fontSize: 16, fontWeight: '800', textTransform: 'uppercase' },
   btnTextTertiary: { color: '#D3A500', fontSize: 16, fontWeight: '800', textTransform: 'uppercase' },
 });
