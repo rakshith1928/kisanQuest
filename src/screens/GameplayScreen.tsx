@@ -68,6 +68,15 @@ export default function GameplayScreen({ navigation }: any) {
     }).start();
   }, [gameState.player.score.xp]);
 
+  useEffect(() => {
+    if (gameState.phase === 'SEASON_START') {
+        try {
+            gameEngine.getStateMachine().transition('WEATHER_REVEAL');
+            setGameState(gameEngine.getState());
+        } catch(e) { console.warn("Auto-transition failed", e); }
+    }
+  }, [gameState.phase]);
+
   const handleAdvancePhase = (nextPhase: any) => {
     if (isProcessing) return;
     try {
