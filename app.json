@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "temp_init",
-    "slug": "temp_init",
+    "name": "KisanQuest",
+    "slug": "kisanquest",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0a4f1a"
     },
     "ios": {
       "supportsTablet": true

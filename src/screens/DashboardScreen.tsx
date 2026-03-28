@@ -186,6 +186,28 @@ export default function DashboardScreen({ navigation }: any) {
           <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700' }}>Continue Game →</Text>
         </TouchableOpacity>
 
+        {/* Leaderboard Button */}
+        <TouchableOpacity
+          style={{ marginTop: 12, backgroundColor: '#e3f3ff', padding: 16, borderRadius: 12, alignItems: 'center' }}
+          onPress={() => navigation.navigate('Leaderboard')}
+        >
+          <Text style={{ color: '#176a21', fontSize: 16, fontWeight: '700' }}>🏆 Leaderboard</Text>
+        </TouchableOpacity>
+
+        {/* Start New Farm — full reset, clears stack + engine */}
+        <TouchableOpacity
+          style={{ marginTop: 12, backgroundColor: '#fff1db', padding: 16, borderRadius: 12, alignItems: 'center' }}
+          onPress={() => {
+            gameEngine.reset();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'FarmCreation' }],
+            });
+          }}
+        >
+          <Text style={{ color: '#765600', fontSize: 16, fontWeight: '700' }}>🌱 Start New Farm</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );

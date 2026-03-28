@@ -109,8 +109,14 @@ export default function HarvestScreen({ navigation, route }: any) {
         >
           <Text style={styles.primaryButtonText}>{loading ? 'Starting...' : 'Next Season'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryButton}>
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('History')}>
           <Text style={styles.secondaryButtonText}>Review Details</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.secondaryButton, { marginTop: 4 }]}
+          onPress={() => navigation.replace('Dashboard')}
+        >
+          <Text style={[styles.secondaryButtonText, { color: '#4f5d67' }]}>Back to Dashboard</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

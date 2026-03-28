@@ -31,10 +31,19 @@ export default function GameplayScreen({ navigation }: any) {
 
   if (!node) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
         <Text style={styles.eventTitle}>Season Complete 🎉</Text>
-        <TouchableOpacity style={styles.primaryAction} onPress={() => navigation.navigate('Dashboard')}>
-          <Text style={styles.primaryActionText}>Go to Dashboard</Text>
+        <TouchableOpacity
+          style={[styles.primaryAction, { marginTop: 24, width: '100%' }]}
+          onPress={() => navigation.replace('Harvest', { outcome: lastOutcome })}
+        >
+          <Text style={styles.primaryActionText}>View Harvest Results</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.secondaryAction, { marginTop: 12, width: '100%' }]}
+          onPress={() => navigation.replace('Dashboard')}
+        >
+          <Text style={styles.secondaryActionText}>Go to Dashboard</Text>
         </TouchableOpacity>
       </View>
     );

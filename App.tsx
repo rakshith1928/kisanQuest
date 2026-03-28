@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 import { GameStateDB } from './src/storage/GameStateDB';
 import { SyncManager } from './src/storage/SyncManager';
 import gameEngine from './src/engine/GameEngine';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppNavigator from './src/navigation/AppNavigator';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -38,21 +37,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+  return <AppNavigator />;
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 export default App;

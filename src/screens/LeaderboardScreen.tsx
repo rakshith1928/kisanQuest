@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { gameService } from '../services/gameService';
 
-export default function LeaderboardScreen() {
+export default function LeaderboardScreen({ navigation }: any) {
   const [players, setPlayers] = useState<any[]>([]);
 
   useEffect(() => {
@@ -20,7 +20,13 @@ export default function LeaderboardScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Top Farmers 🏆</Text>
+      {/* Header with Back */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Top Farmers 🏆</Text>
+      </View>
       {players.map((p, index) => (
         <View key={index} style={styles.card}>
           <Text style={styles.rank}>#{index + 1}</Text>
@@ -38,11 +44,26 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#F5F5F5',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  backBtn: {
+    marginRight: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: '#e2f5e3',
+    borderRadius: 8,
+  },
+  backText: {
+    fontSize: 16,
+    color: '#176a21',
+    fontWeight: '600',
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
     color: '#333',
   },
   card: {
