@@ -206,7 +206,18 @@ export class GameEngine {
         });
         this.playerState.farm.season += 1;
         this.eventsCompleted = 0; // Reset new season events
+        this.currentScenario = null;
+        this.decisionTree = new DecisionTree(); // reset the decision tree state
         this.stateMachine.transition('SEASON_START');
+    }
+
+    /**
+     * Load a random scenario
+     */
+    async loadRandomScenario(): Promise<Scenario> {
+        const scenarios = DecisionTree.getAvailableScenarios();
+        const rand = scenarios[Math.floor(Math.random() * scenarios.length)];
+        return await this.loadScenario(rand);
     }
 
     /**

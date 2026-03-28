@@ -75,11 +75,21 @@ export default function GameplayScreen({ navigation }: any) {
             const sm = gameEngine.getStateMachine();
             if (p === 'ONBOARDING') sm.transition('FARM_CREATION');
             if (p === 'ONBOARDING' || p === 'FARM_CREATION') sm.transition('SEASON_START');
-            sm.transition('WEATHER_REVEAL');
-            setGameState(gameEngine.getState());
+            
+            if (!gameEngine.getState().scenario) {
+                gameEngine.loadRandomScenario().then(() => {
+                    sm.transition('WEATHER_REVEAL');
+                    setGameState(gameEngine.getState());
+                });
+            } else {
+                sm.transition('WEATHER_REVEAL');
+                setGameState(gameEngine.getState());
+            }
         } catch(e) { console.warn("Auto-transition failed", e); }
+    } else if (!gameState.scenario && ['WEATHER_REVEAL', 'MARKET_UPDATE', 'DECISION_POINT'].includes(p as string)) {
+        gameEngine.loadRandomScenario().then(() => setGameState(gameEngine.getState()));
     }
-  }, [gameState.phase]);
+  }, [gameState.phase, gameState.scenario]);
 
   const handleAdvancePhase = (nextPhase: any) => {
     if (isProcessing) return;

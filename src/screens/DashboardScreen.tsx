@@ -195,8 +195,8 @@ export default function DashboardScreen({ navigation }: any) {
         {/* Header Section */}
         <Animated.View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{farmName}</Text>
-            <Text style={styles.subtitle}>{player.name || "Farmer"}</Text>
+            <Text style={styles.title}>{player.name || "Farmer"}</Text>
+            <Text style={styles.subtitle}>{farmName}</Text>
           </View>
           <View style={styles.avatarPlaceholder}>
             <Text style={{ fontSize: 28 }}>👨‍🌾</Text>
