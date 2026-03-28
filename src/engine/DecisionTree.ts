@@ -7,9 +7,9 @@
 // Static scenario imports (bundled with the app for offline use)
 import monsoonCrisis from './scenarios/monsoon_crisis.json';
 import marketPrice from './scenarios/market_price.json';
-// import digitalPayment from './scenarios/digital_payment.json';
+import digitalPayment from './scenarios/digital_payment.json';
 import savingsChallenge from './scenarios/savings_challenge.json';
-// import loanTrap from './scenarios/loan_trap.json';
+import loanTrap from './scenarios/loan_trap.json';
 
 export interface ScenarioOption {
     id?: string;
@@ -61,9 +61,9 @@ type ScenarioName = string;
 const SCENARIO_MAP: Record<ScenarioName, Scenario> = {
     monsoon_crisis: monsoonCrisis as unknown as Scenario,
     market_price: marketPrice as unknown as Scenario,
-    // digital_payment: digitalPayment as unknown as Scenario,
+    digital_payment: digitalPayment as unknown as Scenario,
     savings_challenge: savingsChallenge as unknown as Scenario,
-    // loan_trap: loanTrap as unknown as Scenario,
+    loan_trap: loanTrap as unknown as Scenario,
 };
 
 export class DecisionTree {

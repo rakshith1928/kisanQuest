@@ -16,7 +16,7 @@ class GameStateDatabase {
     if (this.isInitialized) return;
     try {
       this.db = await SQLite.openDatabaseAsync('kisanquest.db');
-      
+
       await this.db.execAsync(`
         PRAGMA journal_mode = WAL;
         CREATE TABLE IF NOT EXISTS game_state (
