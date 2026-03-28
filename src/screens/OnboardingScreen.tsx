@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import gameEngine from '../engine/GameEngine';
 import VoiceManager from '../voice/VoiceManager';
 import { TranslatedText } from '../components/TranslatedText';
+import { GameStateDB } from '../storage/GameStateDB';
 
 const LANGUAGES = [
   { id: 'hi', name: 'हिंदी' },
@@ -112,15 +114,29 @@ export default function OnboardingScreen({ navigation }: any) {
               if (!selectedLang || !isNameValid || loading) return;
               setLoading(true);
 
-              gameEngine.initGame({
-                language: selectedLang
-              });
+              // Initialize engine with selected language
+              gameEngine.initGame({ language: selectedLang });
+
+              const trimmedName = playerName.trim();
+              let playerId = trimmedName;
 
               try {
                 const { authService } = require('../services/authService');
-                await authService.register(playerName.trim(), selectedLang, 'Unknown');
+                const result = await authService.register(trimmedName, selectedLang, 'Unknown');
+                // Use server-assigned ID if available
+                if (result?.id) playerId = result.id;
               } catch (err) {
-                console.warn('Backend register failed:', err);
+                console.warn('Backend register failed, continuing offline:', err);
+              }
+
+              // Persist player ID for future session restores
+              await AsyncStorage.setItem('playerId', playerId);
+
+              // Check for an existing saved state (returning player)
+              const savedState = await GameStateDB.loadGameState(playerId);
+              if (savedState?.player) {
+                gameEngine.loadState(savedState);
+                console.log(`[Onboarding] Resumed saved game for: ${playerId}`);
               }
 
               setTimeout(() => {

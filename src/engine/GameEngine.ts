@@ -113,6 +113,19 @@ export class GameEngine {
     }
 
     /**
+     * Restore a full game state (e.g. from offline SQLite).
+     * Unlike initGame(), this preserves phase, scenario, and all player progress.
+     */
+    loadState(state: GameState): void {
+        this.playerState = state.player;
+        this.currentScenario = state.scenario || null;
+
+        if (state.phase) {
+            this.stateMachine.transition(state.phase);
+        }
+    }
+
+    /**
      * Get current decision node
      */
     getCurrentNode() {

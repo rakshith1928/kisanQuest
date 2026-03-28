@@ -76,5 +76,5 @@ server/dist/
 .env.test
 # Project Specifics
 .stitch/
-raw_ip.txt
+#raw_ip.txt
 "Implementation Plan"
