@@ -37,6 +37,7 @@
       "type": "outcome",
       "result": "failure",
       "prompt": "scenarios.digital_payment.dp_2a.prompt",
+      "voicePrompt": "scenarios.digital_payment.dp_2a.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": -20,
       "lesson": "scenarios.digital_payment.dp_2a.lesson"
@@ -46,6 +47,7 @@
       "type": "outcome",
       "result": "success",
       "prompt": "scenarios.digital_payment.dp_2b.prompt",
+      "voicePrompt": "scenarios.digital_payment.dp_2b.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 15,
       "lesson": "scenarios.digital_payment.dp_2b.lesson"
@@ -55,6 +57,7 @@
       "type": "outcome",
       "result": "neutral",
       "prompt": "scenarios.digital_payment.dp_2c.prompt",
+      "voicePrompt": "scenarios.digital_payment.dp_2c.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 8,
       "lesson": "scenarios.digital_payment.dp_2c.lesson"

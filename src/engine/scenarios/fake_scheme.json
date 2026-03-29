@@ -1,28 +1,29 @@
 {
   "id": "fake_scheme",
-  "title": "Too Good To Be True",
+  "title": "scenarios.fake_scheme.title",
   "season": "Any",
   "theme": "Fraud Detection",
   "nodes": [
     {
       "id": "fs_1",
-      "prompt": "A man visits your village claiming to offer a government scheme: 'Pay ₹2,000 registration fee and get ₹50,000 subsidy in 1 week!' He shows an official-looking certificate. What do you do?",
+      "prompt": "scenarios.fake_scheme.fs_1.prompt",
+      "voicePrompt": "scenarios.fake_scheme.fs_1.voicePrompt",
       "options": [
         {
           "id": "A",
-          "label": "Pay the ₹2,000 registration fee",
+          "label": "scenarios.fake_scheme.fs_1.options.A",
           "nextNode": "fs_2a",
           "financialImpact": { "cash": -2000 }
         },
         {
           "id": "B",
-          "label": "Ask him to show official government website link",
+          "label": "scenarios.fake_scheme.fs_1.options.B",
           "nextNode": "fs_2b",
           "financialImpact": {}
         },
         {
           "id": "C",
-          "label": "Call local bank or gram panchayat to verify first",
+          "label": "scenarios.fake_scheme.fs_1.options.C",
           "nextNode": "fs_2c",
           "financialImpact": {}
         }
@@ -32,28 +33,31 @@
       "id": "fs_2a",
       "type": "outcome",
       "result": "failure",
-      "prompt": "He disappeared with your ₹2,000. The 'scheme' was completely fake. You were scammed.",
+      "prompt": "scenarios.fake_scheme.fs_2a.prompt",
+      "voicePrompt": "scenarios.fake_scheme.fs_2a.voicePrompt",
       "financialImpact": { "cash": -2000 },
       "financialScoreDelta": -15,
-      "lesson": "[Skill Tested: Fraud Detection] No legitimate government scheme ever asks for ADVANCE payment. Real schemes have a documented application process on official .gov.in websites."
+      "lesson": "scenarios.fake_scheme.fs_2a.lesson"
     },
     {
       "id": "fs_2b",
       "type": "outcome",
       "result": "success",
-      "prompt": "He couldn't provide a valid .gov.in URL and left quickly! You saved ₹2,000 from a classic scam.",
+      "prompt": "scenarios.fake_scheme.fs_2b.prompt",
+      "voicePrompt": "scenarios.fake_scheme.fs_2b.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 15,
-      "lesson": "[Skill Tested: Fraud Detection] Always verify schemes at pmkisan.gov.in, agricoop.nic.in, or your local Krishi Vigyan Kendra. If there's no official website, it's a fraud."
+      "lesson": "scenarios.fake_scheme.fs_2b.lesson"
     },
     {
       "id": "fs_2c",
       "type": "outcome",
       "result": "success",
-      "prompt": "The panchayat confirmed it was a scam operating in 3 nearby villages. You alerted your community!",
+      "prompt": "scenarios.fake_scheme.fs_2c.prompt",
+      "voicePrompt": "scenarios.fake_scheme.fs_2c.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 20,
-      "lesson": "[Skill Tested: Fraud Detection] Community verification is the strongest shield against fraud. Report suspicious persons to the National Cyber Crime Helpline: 1930."
+      "lesson": "scenarios.fake_scheme.fs_2c.lesson"
     }
   ]
 }

@@ -1,28 +1,29 @@
 {
   "id": "equipment_loan",
-  "title": "New Equipment Dilemma",
+  "title": "scenarios.equipment_loan.title",
   "season": "Rabi",
   "theme": "Budget Planning & Credit",
   "nodes": [
     {
       "id": "eq_1",
-      "prompt": "A salesman offers a new tractor on EMI: ₹8,000/month for 5 years. Your current monthly income is ₹12,000. Should you buy it?",
+      "prompt": "scenarios.equipment_loan.eq_1.prompt",
+      "voicePrompt": "scenarios.equipment_loan.eq_1.voicePrompt",
       "options": [
         {
           "id": "A",
-          "label": "Buy immediately on EMI (₹8,000/month)",
+          "label": "scenarios.equipment_loan.eq_1.options.A",
           "nextNode": "eq_2a",
           "financialImpact": { "debt": 480000 }
         },
         {
           "id": "B",
-          "label": "Rent a tractor this season (₹3,000 one-time)",
+          "label": "scenarios.equipment_loan.eq_1.options.B",
           "nextNode": "eq_2b",
           "financialImpact": { "cash": -3000 }
         },
         {
           "id": "C",
-          "label": "Form a group with 3 neighbours and buy jointly",
+          "label": "scenarios.equipment_loan.eq_1.options.C",
           "nextNode": "eq_2c",
           "financialImpact": { "cash": -40000, "savings": -40000 }
         }
@@ -32,28 +33,31 @@
       "id": "eq_2a",
       "type": "outcome",
       "result": "failure",
-      "prompt": "The EMI eats 67% of your income. One bad season and you default on the loan.",
+      "prompt": "scenarios.equipment_loan.eq_2a.prompt",
+      "voicePrompt": "scenarios.equipment_loan.eq_2a.voicePrompt",
       "financialImpact": { "debt": 100000 },
       "financialScoreDelta": -15,
-      "lesson": "[Skill Tested: Budget Planning] EMI should never exceed 30-40% of your monthly income. A ₹8,000 EMI on a ₹12,000 income leaves no room for food, school fees, or emergencies."
+      "lesson": "scenarios.equipment_loan.eq_2a.lesson"
     },
     {
       "id": "eq_2b",
       "type": "outcome",
       "result": "success",
-      "prompt": "Smart! Renting saved you from a debt trap. You paid just ₹3,000 and kept ₹9,000 free for other expenses.",
+      "prompt": "scenarios.equipment_loan.eq_2b.prompt",
+      "voicePrompt": "scenarios.equipment_loan.eq_2b.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 10,
-      "lesson": "[Skill Tested: Budget Planning] Renting equipment makes sense when you don't need it year-round. Custom Hiring Centres (CHC) offer government-subsidised machinery rentals."
+      "lesson": "scenarios.equipment_loan.eq_2b.lesson"
     },
     {
       "id": "eq_2c",
       "type": "outcome",
       "result": "neutral",
-      "prompt": "Joint ownership works! Each farmer paid ₹40,000 and sharing the maintenance cost keeps everyone happy.",
+      "prompt": "scenarios.equipment_loan.eq_2c.prompt",
+      "voicePrompt": "scenarios.equipment_loan.eq_2c.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 8,
-      "lesson": "[Skill Tested: Budget Planning] Collective asset ownership is a cornerstone of rural financial resilience. Farmer Producer Organizations (FPOs) often provide equipment pools."
+      "lesson": "scenarios.equipment_loan.eq_2c.lesson"
     }
   ]
 }

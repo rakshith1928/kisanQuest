@@ -38,6 +38,7 @@
       "type": "outcome",
       "result": "neutral",
       "prompt": "scenarios.market_price.mp_2a.prompt",
+      "voicePrompt": "scenarios.market_price.mp_2a.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 0,
       "lesson": "scenarios.market_price.mp_2a.lesson"
@@ -47,6 +48,7 @@
       "type": "outcome",
       "result": "success",
       "prompt": "scenarios.market_price.mp_2b.prompt",
+      "voicePrompt": "scenarios.market_price.mp_2b.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 10,
       "lesson": "scenarios.market_price.mp_2b.lesson"
@@ -56,6 +58,7 @@
       "type": "outcome",
       "result": "risky",
       "prompt": "scenarios.market_price.mp_2c.prompt",
+      "voicePrompt": "scenarios.market_price.mp_2c.voicePrompt",
       "financialImpact": { "cash": -1500 },
       "financialScoreDelta": -8,
       "lesson": "scenarios.market_price.mp_2c.lesson"

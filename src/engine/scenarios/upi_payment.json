@@ -1,28 +1,29 @@
 {
   "id": "upi_payment",
-  "title": "Digital Payment at Mandi",
+  "title": "scenarios.upi_payment.title",
   "season": "Any",
   "theme": "Digital Payments",
   "nodes": [
     {
       "id": "up_1",
-      "prompt": "You sold wheat for ₹45,000 at the mandi. The buyer says: 'I'll pay you ₹44,000 in cash now, or ₹45,000 via UPI in 2 days.' What do you choose?",
+      "prompt": "scenarios.upi_payment.up_1.prompt",
+      "voicePrompt": "scenarios.upi_payment.up_1.voicePrompt",
       "options": [
         {
           "id": "A",
-          "label": "Take cash now (₹44,000, no waiting)",
+          "label": "scenarios.upi_payment.up_1.options.A",
           "nextNode": "up_2a",
           "financialImpact": { "cash": 44000 }
         },
         {
           "id": "B",
-          "label": "Accept UPI transfer (₹45,000 in 48 hours)",
+          "label": "scenarios.upi_payment.up_1.options.B",
           "nextNode": "up_2b",
           "financialImpact": { "cash": 45000 }
         },
         {
           "id": "C",
-          "label": "Demand cash but ask for full ₹45,000",
+          "label": "scenarios.upi_payment.up_1.options.C",
           "nextNode": "up_2c",
           "financialImpact": { "cash": 45000 }
         }
@@ -32,28 +33,31 @@
       "id": "up_2a",
       "type": "outcome",
       "result": "neutral",
-      "prompt": "You got ₹44,000 in cash. But carrying ₹44,000 in cash home is risky — and you lost ₹1,000 for no reason.",
+      "prompt": "scenarios.upi_payment.up_2a.prompt",
+      "voicePrompt": "scenarios.upi_payment.up_2a.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 0,
-      "lesson": "[Skill Tested: Digital Payments] Digital payments are safer than carrying large amounts of cash, fully traceable, and reduce the risk of theft and disputes."
+      "lesson": "scenarios.upi_payment.up_2a.lesson"
     },
     {
       "id": "up_2b",
       "type": "outcome",
       "result": "success",
-      "prompt": "The UPI transfer arrived exactly 2 days later. Full ₹45,000, with a digital receipt for your records!",
+      "prompt": "scenarios.upi_payment.up_2b.prompt",
+      "voicePrompt": "scenarios.upi_payment.up_2b.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 12,
-      "lesson": "[Skill Tested: Digital Payments] UPI transfers are instant and free. Always get a transaction ID as your receipt. You can also use UPI to pay for seeds and fertilizers directly from dealers."
+      "lesson": "scenarios.upi_payment.up_2b.lesson"
     },
     {
       "id": "up_2c",
       "type": "outcome",
       "result": "neutral",
-      "prompt": "The buyer walked away. You found another buyer but had to transport again, costing ₹2,000.",
+      "prompt": "scenarios.upi_payment.up_2c.prompt",
+      "voicePrompt": "scenarios.upi_payment.up_2c.voicePrompt",
       "financialImpact": { "cash": -2000 },
       "financialScoreDelta": -3,
-      "lesson": "[Skill Tested: Digital Payments] When negotiating, consider the cost of alternatives. Sometimes accepting digital payment and waiting 2 days is smarter than losing the sale."
+      "lesson": "scenarios.upi_payment.up_2c.lesson"
     }
   ]
 }

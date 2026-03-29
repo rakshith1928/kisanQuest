@@ -8,7 +8,7 @@ import GameplayScreen from '../screens/GameplayScreen';
 import HarvestScreen from '../screens/HarvestScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import HistoryScreen from '../screens/HistoryScreen';
-import LeaderboardScreen from '../screens/LeaderboardScreen';
+import SchemesScreen from '../screens/SchemesScreen';
 import SkillTreeScreen from '../screens/SkillTreeScreen';
 
 export type RootStackParamList = {
@@ -18,7 +18,7 @@ export type RootStackParamList = {
   Harvest: { outcome?: any };
   Dashboard: undefined;
   History: undefined;
-  Leaderboard: undefined;
+  Schemes: undefined;
   SkillTree: undefined;
 };
 
@@ -37,7 +37,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Harvest" component={HarvestScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
-        <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
+        <Stack.Screen name="Schemes" component={SchemesScreen} />
         <Stack.Screen name="SkillTree" component={SkillTreeScreen} />
       </Stack.Navigator>
     </NavigationContainer>

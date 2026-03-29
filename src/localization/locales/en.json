@@ -103,7 +103,7 @@
       "view_all": "View All",
       "season_label": "Season {{season}}",
       "continue_farming": "Continue Farming ▶️",
-      "leaderboard": "🏆 Leaderboard",
+      "govt_schemes": "📜 Govt Schemes",
       "new_farm": "🌱 New Farm"
     },
     "gameplay": {
@@ -141,6 +141,34 @@
       "score_result": "Score Result: {{score}}",
       "no_player_id": "No player ID found. Are you logged in?",
       "failed_load": "Failed to load history."
+    },
+    "schemes": {
+      "title": "Government Schemes 📜",
+      "subtitle": "Essential financial support and resources for farmers.",
+      "learn_more": "Learn More",
+      "apply": "Apply Now",
+      "list": {
+        "pm_kisan": {
+          "name": "PM-KISAN",
+          "desc": "Income support of ₹6,000 per year in three installments."
+        },
+        "pmfby": {
+          "name": "PM Fasal Bima Yojana",
+          "desc": "Crop insurance against natural calamities and pests."
+        },
+        "kcc": {
+          "name": "Kisan Credit Card (KCC)",
+          "desc": "Access to low-interest loans for cultivation and maintenance."
+        },
+        "soil_health": {
+          "name": "Soil Health Card",
+          "desc": "Nutrient status analysis and fertilizer recommendations."
+        },
+        "pm_kmy": {
+          "name": "PM Kisan Maan-Dhan Yojana",
+          "desc": "Pension scheme for small and marginal farmers."
+        }
+      }
     },
     "skill_tree": {
       "title": "Skill Tree 🧠",
@@ -255,15 +283,229 @@
       },
       "mp_2a": {
         "prompt": "You sold quickly and got ₹28,000. But you left ₹8,000 on the table by not going to the mandi.",
+        "voicePrompt": "You sold quickly but lost 8,000 by not going to the mandi.",
         "lesson": "[Skill Tested: Negotiation] Always compare prices at multiple buyers. The mandi price is publicly listed on e-NAM (National Agriculture Market app)."
       },
       "mp_2b": {
         "prompt": "After ₹2,000 transport cost you earned ₹34,000 — ₹6,000 more than the middleman offer!",
+        "voicePrompt": "You earned 34,000 after transport — much better than the middleman offer!",
         "lesson": "Transporting to the mandi took extra effort but yielded 21% more income. Collective transport with other farmers reduces cost further."
       },
       "mp_2c": {
         "prompt": "Prices fell further. You paid ₹1,500 storage and still sold for ₹1,400.",
+        "voicePrompt": "Prices fell and you paid for storage. Waiting led to a loss.",
         "lesson": "Storing grain requires proper facilities and market intelligence. Without these, waiting often leads to losses."
+      }
+    },
+    "savings_challenge": {
+      "title": "Savings Challenge",
+      "sc_1": {
+        "prompt": "The season ends with ₹12,000 profit. A new phone costs ₹8,000. Your emergency fund is ₹0. What do you do?",
+        "voicePrompt": "The season ends with 12,000 profit. A new phone costs 8,000. Your emergency fund is zero. What do you do?",
+        "options": {
+          "A": "Buy the phone now (₹8,000)",
+          "B": "Save all ₹12,000 as emergency fund",
+          "C": "Save ₹10,000, spend ₹2,000 on family"
+        },
+        "options_C_voicePrompt": "Save 10,000, spend 2,000 on family"
+      },
+      "sc_2a": {
+        "prompt": "Next season your child needed medicine costing ₹5,000. With only ₹4,000 left, you had to borrow.",
+        "voicePrompt": "You had no savings left for the emergency and had to take a loan.",
+        "lesson": "An emergency fund of 3-6 months of expenses prevents taking loans during crises. Save before you spend."
+      },
+      "sc_2b": {
+        "prompt": "Next season your child needed medicine. Your emergency fund covered it. No debt needed!",
+        "voicePrompt": "Excellent! Your emergency fund saved you from a debt trap.",
+        "lesson": "[Skill Tested: Budget Planning] A healthy emergency fund (₹10,000-₹50,000) is the primary protection for farming families."
+      },
+      "sc_2c": {
+        "prompt": "Good balance! Your savings covered 80% of the emergency. Only a small loan was needed.",
+        "voicePrompt": "A good balance. Your savings covered most of the emergency cost.",
+        "lesson": "Balancing savings and family needs is wise. Even partial savings significantly reduce crisis impact."
+      }
+    },
+    "loan_trap": {
+      "title": "The Loan Trap",
+      "lt_1": {
+        "prompt": "You need ₹30,000 to buy seeds and fertilizer for the season. Where do you borrow?",
+        "voicePrompt": "You need 30,000 to buy seeds and fertilizer. Where do you borrow?",
+        "options": {
+          "A": "Kisan Credit Card (bank, 7% interest)",
+          "B": "Village moneylender (30% interest, instant)",
+          "C": "Self-Help Group (SHG) loan (12% interest)"
+        }
+      },
+      "lt_2a": {
+        "prompt": "You repaid ₹32,100 (7% interest after 1 year). Formal credit costs least!",
+        "voicePrompt": "Great choice! The bank loan was the cheapest and safest option.",
+        "lesson": "Kisan Credit Card offers loans at 7% p.a. (4% with subsidy). It is the cheapest and most farmer-friendly credit option in India."
+      },
+      "lt_2b": {
+        "prompt": "After a bad harvest, you can't repay ₹39,000. Interest compounds. Two seasons later you owe ₹65,000.",
+        "voicePrompt": "Oh no! The moneylender's high interest has trapped you in debt.",
+        "lesson": "Informal moneylender debt often traps families for generations. Always opt for formal banking credit, even if it takes longer to process."
+      },
+      "lt_2c": {
+        "prompt": "SHG loan at 12% was manageable. You repaid ₹33,600. Better than a moneylender!",
+        "voicePrompt": "The self help group loan was a good middle ground and you repaid it.",
+        "lesson": "Self-Help Groups are a great community-based alternative to moneylenders. Join or form a local SHG to access collective credit."
+      }
+    },
+    "digital_subsidy": {
+      "title": "Government Subsidy Transfer",
+      "ds_1": {
+        "prompt": "The PM-Kisan subsidy of ₹2,000 has been announced. How will you receive it?",
+        "voicePrompt": "The PM-Kisan subsidy of 2,000 has been announced. How will you receive it?",
+        "options": {
+          "A": "Direct Benefit Transfer (DBT) to bank account",
+          "B": "Ask a local agent to collect it for ₹200 fee"
+        }
+      },
+      "ds_2a": {
+        "prompt": "The money arrived instantly in your account!",
+        "voicePrompt": "The money arrived instantly in your account via direct transfer!",
+        "lesson": "[Skill Tested: Digital Payments] Linking your mobile and Aadhaar to your bank ensures instant, zero-fee direct government transfers."
+      },
+      "ds_2b": {
+        "prompt": "The agent took a ₹200 cut. You only received ₹1,800 and had to wait 3 days.",
+        "voicePrompt": "The agent took a cut of your money. Next time use direct transfer.",
+        "lesson": "[Skill Tested: Digital Payments] Relying on middlemen for government funds introduces unnecessary fees and delays."
+      }
+    },
+    "harvest_bargain": {
+      "title": "Harvest Bargain",
+      "hb_1": {
+        "prompt": "Your cotton harvest is ready. A trader offers ₹5,500/quintal. A cooperative promises ₹6,200 but payment comes in 30 days. What do you do?",
+        "voicePrompt": "Cotton harvest is ready. Trader offers 5,500 now. Cooperative offers 6,200 in 30 days. What will you do?",
+        "options": {
+          "A": "Sell to trader now (₹5,500/q, instant payment)",
+          "B": "Join the cooperative (₹6,200/q, 30-day wait)",
+          "C": "Negotiate with trader for a higher price"
+        }
+      },
+      "hb_2a": {
+        "prompt": "You got ₹27,500 quickly but missed ₹3,500 extra by not waiting 30 days.",
+        "voicePrompt": "You got 27,500 quickly, but missed the extra 3,500 from the cooperative.",
+        "lesson": "[Skill Tested: Negotiation] Cooperative selling usually yields 10–15% more than private traders. Plan your cash needs to afford the wait."
+      },
+      "hb_2b": {
+        "prompt": "Great patience! The cooperative paid ₹31,000 — ₹3,500 more than the trader offered.",
+        "voicePrompt": "Great patience! The cooperative paid 31,000, which is 3,500 more than the trader offered.",
+        "lesson": "[Skill Tested: Negotiation] Farmer cooperatives cut out middlemen and share profits with members. Joining one is one of the best financial decisions a farmer can make."
+      },
+      "hb_2c": {
+        "prompt": "The trader agreed to ₹5,800/q. A small win! You earned ₹29,000.",
+        "voicePrompt": "The trader agreed to 5,800. A small win! You earned 29,000.",
+        "lesson": "[Skill Tested: Negotiation] Always negotiate! Even a small increase per quintal adds up significantly over a full harvest. Research the MSP (Minimum Support Price) before any sale."
+      }
+    },
+    "equipment_loan": {
+      "title": "New Equipment Dilemma",
+      "eq_1": {
+        "prompt": "A salesman offers a new tractor on EMI: ₹8,000/month for 5 years. Your current monthly income is ₹12,000. Should you buy it?",
+        "voicePrompt": "A salesman offers a tractor on EMI: 8,000 a month. Your income is 12,000. Should you buy it?",
+        "options": {
+          "A": "Buy immediately on EMI (₹8,000/month)",
+          "B": "Rent a tractor this season (₹3,000 one-time)",
+          "C": "Form a group with 3 neighbours and buy jointly"
+        }
+      },
+      "eq_2a": {
+        "prompt": "The EMI eats 67% of your income. One bad season and you default on the loan.",
+        "voicePrompt": "The EMI is 67 percent of your income. You might default on the loan.",
+        "lesson": "[Skill Tested: Budget Planning] EMI should never exceed 30-40% of your monthly income. A ₹8,000 EMI on a ₹12,000 income leaves no room for food, school fees, or emergencies."
+      },
+      "eq_2b": {
+        "prompt": "Smart! Renting saved you from a debt trap. You paid just ₹3,000 and kept ₹9,000 free for other expenses.",
+        "voicePrompt": "Smart! Renting saved you from a debt trap and kept your cash free.",
+        "lesson": "[Skill Tested: Budget Planning] Renting equipment makes sense when you don't need it year-round. Custom Hiring Centres (CHC) offer government-subsidised machinery rentals."
+      },
+      "eq_2c": {
+        "prompt": "Joint ownership works! Each farmer paid ₹40,000 and sharing the maintenance cost keeps everyone happy.",
+        "voicePrompt": "Joint ownership works! Sharing the cost keeps everyone happy.",
+        "lesson": "[Skill Tested: Budget Planning] Collective asset ownership is a cornerstone of rural financial resilience. Farmer Producer Organizations (FPOs) often provide equipment pools."
+      }
+    },
+    "flood_insurance": {
+      "title": "Flood Warning",
+      "fi_1": {
+        "prompt": "The weather forecast shows 90% chance of flash floods next week. Your sugarcane crop worth ₹60,000 is standing in the field. The insurance deadline is TODAY.",
+        "voicePrompt": "Weather forecast shows 90 percent chance of floods. Your 60,000 crop is at risk. Insurance deadline is today.",
+        "options": {
+          "A": "Buy insurance now (₹1,800 premium, 2% of crop value)",
+          "B": "Skip insurance, harvest early to save what you can",
+          "C": "Do nothing and hope the forecast is wrong"
+        }
+      },
+      "fi_2a": {
+        "prompt": "The floods came. Insurance paid ₹48,000 (80% of crop value). You only paid ₹1,800!",
+        "voicePrompt": "The floods came. Insurance paid 48,000. You were protected!",
+        "lesson": "[Skill Tested: Insurance Literacy] Under PMFBY, farmers pay just 1.5-2% premium. The government subsidises the rest. ₹1,800 protected a ₹60,000 crop — a 33x return on protection!"
+      },
+      "fi_2b": {
+        "prompt": "You harvested early and got ₹25,000 — only 42% of the potential value due to immature crop.",
+        "voicePrompt": "You harvested early and got 25,000, which is only 42 percent of the value.",
+        "lesson": "[Skill Tested: Insurance Literacy] Early harvesting due to panic often results in lower quality and price. Insurance allows you to wait for optimal harvest timing without fear."
+      },
+      "fi_2c": {
+        "prompt": "The floods destroyed 95% of your crop. With no insurance, you lost ₹57,000 and still owe harvest loans.",
+        "voicePrompt": "The floods destroyed 95 percent of your crop. You lost 57,000 and still owe loans.",
+        "lesson": "[Skill Tested: Insurance Literacy] One uninsured flood can wipe out years of savings. PMFBY enrolment is now linked to Kisan Credit Cards — always enrol before the deadline."
+      }
+    },
+    "upi_payment": {
+      "title": "Digital Payment at Mandi",
+      "up_1": {
+        "prompt": "You sold wheat for ₹45,000 at the mandi. The buyer says: 'I'll pay you ₹44,000 in cash now, or ₹45,000 via UPI in 2 days.' What do you choose?",
+        "voicePrompt": "You sold wheat for 45,000. Buyer offers 44,000 cash now, or 45,000 via UPI in 2 days. What will you do?",
+        "options": {
+          "A": "Take cash now (₹44,000, no waiting)",
+          "B": "Accept UPI transfer (₹45,000 in 48 hours)",
+          "C": "Demand cash but ask for full ₹45,000"
+        }
+      },
+      "up_2a": {
+        "prompt": "You got ₹44,000 in cash. But carrying ₹44,000 in cash home is risky — and you lost ₹1,000 for no reason.",
+        "voicePrompt": "You got 44,000 cash, but it's risky to carry and you lost 1,000.",
+        "lesson": "[Skill Tested: Digital Payments] Digital payments are safer than carrying large amounts of cash, fully traceable, and reduce the risk of theft and disputes."
+      },
+      "up_2b": {
+        "prompt": "The UPI transfer arrived exactly 2 days later. Full ₹45,000, with a digital receipt for your records!",
+        "voicePrompt": "The UPI transfer arrived! You got the full 45,000 and a digital receipt.",
+        "lesson": "[Skill Tested: Digital Payments] UPI transfers are instant and free. Always get a transaction ID as your receipt. You can also use UPI to pay for seeds and fertilizers directly from dealers."
+      },
+      "up_2c": {
+        "prompt": "The buyer walked away. You found another buyer but had to transport again, costing ₹2,000.",
+        "voicePrompt": "The buyer walked away. Finding another buyer cost you 2,000 in transport.",
+        "lesson": "[Skill Tested: Digital Payments] When negotiating, consider the cost of alternatives. Sometimes accepting digital payment and waiting 2 days is smarter than losing the sale."
+      }
+    },
+    "fake_scheme": {
+      "title": "Too Good To Be True",
+      "fs_1": {
+        "prompt": "A man visits your village claiming to offer a government scheme: 'Pay ₹2,000 registration fee and get ₹50,000 subsidy in 1 week!' He shows an official-looking certificate. What do you do?",
+        "voicePrompt": "A man offers a government scheme: pay 2,000 now, get 50,000 in a week. It looks official. What do you do?",
+        "options": {
+          "A": "Pay the ₹2,000 registration fee",
+          "B": "Ask him to show official government website link",
+          "C": "Call local bank or gram panchayat to verify first"
+        }
+      },
+      "fs_2a": {
+        "prompt": "He disappeared with your ₹2,000. The 'scheme' was completely fake. You were scammed.",
+        "voicePrompt": "He disappeared with your money. The scheme was a scam.",
+        "lesson": "[Skill Tested: Fraud Detection] No legitimate government scheme ever asks for ADVANCE payment. Real schemes have a documented application process on official .gov.in websites."
+      },
+      "fs_2b": {
+        "prompt": "He couldn't provide a valid .gov.in URL and left quickly! You saved ₹2,000 from a classic scam.",
+        "voicePrompt": "He couldn't provide a proper website and left. You saved your money!",
+        "lesson": "[Skill Tested: Fraud Detection] Always verify schemes at pmkisan.gov.in, agricoop.nic.in, or your local Krishi Vigyan Kendra. If there's no official website, it's a fraud."
+      },
+      "fs_2c": {
+        "prompt": "The panchayat confirmed it was a scam operating in 3 nearby villages. You alerted your community!",
+        "voicePrompt": "The panchayat confirmed it was a scam. You protected your community!",
+        "lesson": "[Skill Tested: Fraud Detection] Community verification is the strongest shield against fraud. Report suspicious persons to the National Cyber Crime Helpline: 1930."
       }
     },
     "digital_payment": {
@@ -279,14 +521,17 @@
       },
       "dp_2a": {
         "prompt": "You were scammed! ₹20,000 was withdrawn from your account. Banks never ask for OTPs.",
+        "voicePrompt": "You were scammed! Banks never ask for O T P. Your account is at risk.",
         "lesson": "NEVER share your OTP, PIN, or password. Banks and government schemes will NEVER ask for these. Report fraud to 1930 (National Cybercrime Helpline)."
       },
       "dp_2b": {
         "prompt": "Smart! The bank confirmed it was a fraud attempt. Your account is safe.",
+        "voicePrompt": "Smart move! You protected your account from a scammer.",
         "lesson": "[Skill Tested: Fraud Detection] Always verify by calling your bank's official number (back of debit card). Real banks NEVER ask for OTP via SMS or calls."
       },
       "dp_2c": {
         "prompt": "Your family member recognized it as a scam. Good thinking to ask!",
+        "voicePrompt": "Good thinking! Your family helped you avoid a scam.",
         "lesson": "When in doubt, consult trusted people before acting. Community knowledge is a powerful shield against fraud."
       }
     }

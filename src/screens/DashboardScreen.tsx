@@ -451,6 +451,24 @@ export default function DashboardScreen({ navigation }: any) {
             })}
           </View>
         )}
+        
+        {/* ── Featured Schemes ──────────────────────────────────── */}
+        <View style={styles.section}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.sectionTitle}>{t('ui.dashboard.govt_schemes')}</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Schemes')} style={styles.viewAllBtn}>
+              <Text style={styles.viewAllText}>{t('ui.dashboard.view_all')}</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 4 }}>
+            {['pm_kisan', 'pmfby', 'kcc'].map(key => (
+              <TouchableOpacity key={key} onPress={() => navigation.navigate('Schemes')} style={styles.schemeMiniCard}>
+                <Text style={styles.schemeEmoji}>{key === 'pm_kisan' ? '💰' : key === 'pmfby' ? '🛡️' : '💳'}</Text>
+                <Text numberOfLines={1} style={styles.schemeMiniTitle}>{t(`ui.schemes.list.${key}.name`)}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
         {/* ── CTA Buttons ─────────────────────────────────────── */}
         <View style={styles.ctaGroup}>
@@ -458,8 +476,8 @@ export default function DashboardScreen({ navigation }: any) {
             <Text style={styles.ctaTextPrimary}>{t('ui.dashboard.continue_farming')}</Text>
           </PulseButton>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Leaderboard')} style={styles.secondaryBtn}>
-            <Text style={styles.secondaryBtnText}>{t('ui.dashboard.leaderboard')}</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Schemes')} style={styles.secondaryBtn}>
+            <Text style={styles.secondaryBtnText}>{t('ui.dashboard.govt_schemes')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -596,4 +614,9 @@ const styles = StyleSheet.create({
   secondaryBtnText: { color: '#1565C0', fontSize: 16, fontWeight: '800' },
   tertiaryBtn: { backgroundColor: '#FFF8E1', borderRadius: 16, height: 52, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, borderBottomColor: '#FFE082' },
   tertiaryBtnText: { color: '#F57F17', fontSize: 16, fontWeight: '800' },
+  
+  // Scheme mini cards
+  schemeMiniCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 12, width: 140, alignItems: 'center', borderWidth: 1.5, borderColor: '#E0E0E0', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
+  schemeEmoji: { fontSize: 24, marginBottom: 4 },
+  schemeMiniTitle: { fontSize: 12, fontWeight: '800', color: '#2E3A23', textAlign: 'center' },
 });

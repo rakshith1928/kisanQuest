@@ -1,17 +1,17 @@
 {
   "id": "digital_subsidy",
-  "title": "Government Subsidy Transfer",
+  "title": "scenarios.digital_subsidy.title",
   "season": "Any",
   "theme": "Digital Finance & Governance",
   "nodes": [
     {
       "id": "ds_1",
-      "prompt": "The PM-Kisan subsidy of ₹2,000 has been announced. How will you receive it?",
-      "voicePrompt": "पीएम-किसान योजना के ₹2,000 आ गए हैं। आप इसे कैसे प्राप्त करेंगे?",
+      "prompt": "scenarios.digital_subsidy.ds_1.prompt",
+      "voicePrompt": "scenarios.digital_subsidy.ds_1.voicePrompt",
       "options": [
         {
           "id": "A",
-          "label": "Direct Benefit Transfer (DBT) to bank account",
+          "label": "scenarios.digital_subsidy.ds_1.options.A",
           "voiceKeywords": [
             "bank",
             "dbt",
@@ -26,7 +26,7 @@
         },
         {
           "id": "B",
-          "label": "Ask a local agent to collect it for ₹200 fee",
+          "label": "scenarios.digital_subsidy.ds_1.options.B",
           "voiceKeywords": [
             "agent",
             "fee",
@@ -44,19 +44,21 @@
       "id": "ds_2a",
       "type": "outcome",
       "result": "success",
-      "prompt": "The money arrived instantly in your account!",
+      "prompt": "scenarios.digital_subsidy.ds_2a.prompt",
+      "voicePrompt": "scenarios.digital_subsidy.ds_2a.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": 10,
-      "lesson": "[Skill Tested: Digital Payments] Linking your mobile and Aadhaar to your bank ensures instant, zero-fee direct government transfers."
+      "lesson": "scenarios.digital_subsidy.ds_2a.lesson"
     },
     {
       "id": "ds_2b",
       "type": "outcome",
       "result": "failure",
-      "prompt": "The agent took a ₹200 cut. You only received ₹1,800 and had to wait 3 days.",
+      "prompt": "scenarios.digital_subsidy.ds_2b.prompt",
+      "voicePrompt": "scenarios.digital_subsidy.ds_2b.voicePrompt",
       "financialImpact": {},
       "financialScoreDelta": -5,
-      "lesson": "[Skill Tested: Digital Payments] Relying on middlemen for government funds introduces unnecessary fees and delays."
+      "lesson": "scenarios.digital_subsidy.ds_2b.lesson"
     }
   ]
 }

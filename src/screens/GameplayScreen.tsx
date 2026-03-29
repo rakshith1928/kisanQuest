@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
 import { useTranslation } from 'react-i18next';
+import VoiceManager from '../voice/VoiceManager';
 
 const { width: W } = Dimensions.get('window');
 const XP_TO_NEXT = 1000;
@@ -134,6 +135,17 @@ export default function GameplayScreen({ navigation }: any) {
   const cardScale = useRef(new Animated.Value(1)).current;
   const cardFade  = useRef(new Animated.Value(1)).current;
   const confettiRef = useRef<any>(null);
+
+  // Auto-speak voicePrompt on node change
+  useEffect(() => {
+    const vp = node?.voicePrompt;
+    if (vp) {
+      VoiceManager.stopSpeaking().then(() => {
+        VoiceManager.speak(t(vp));
+      });
+    }
+    return () => { VoiceManager.stopSpeaking(); };
+  }, [node?.id, gameState.player.language]);
 
   useEffect(() => {
     const unsub = gameEngine.getStateMachine().onStateChange(() => setGameState(gameEngine.getState()));
