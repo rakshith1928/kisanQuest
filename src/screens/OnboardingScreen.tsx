@@ -199,6 +199,18 @@ function DialogueBubble({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState('');
   const slideAnim = useRef(new Animated.Value(20)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleSpeak = async () => {
+    if (isPlaying) {
+      VoiceManager.stopSpeaking();
+      setIsPlaying(false);
+      return;
+    }
+    setIsPlaying(true);
+    await VoiceManager.speak(text);
+    setIsPlaying(false);
+  };
 
   useEffect(() => {
     setDisplayed('');
@@ -231,10 +243,13 @@ function DialogueBubble({ text }: { text: string }) {
     <Animated.View
       style={[
         styles.dialogueBubble,
-        { transform: [{ translateY: slideAnim }], opacity: opacityAnim },
+        { flexDirection: 'row', alignItems: 'center', transform: [{ translateY: slideAnim }], opacity: opacityAnim },
       ]}
     >
-      <Text style={styles.dialogueText}>{displayed}</Text>
+      <Text style={[styles.dialogueText, { flex: 1 }]}>{displayed}</Text>
+      <TouchableOpacity onPress={handleSpeak} style={{ marginLeft: 8, padding: 4 }}>
+        <Ionicons name={isPlaying ? "volume-high" : "volume-medium-outline"} size={22} color="#58CC02" />
+      </TouchableOpacity>
       <View style={styles.dialogueTail} />
     </Animated.View>
   );
@@ -476,13 +491,13 @@ export default function OnboardingScreen({ navigation }: any) {
   const handleSelectLanguage = (langId: string) => {
     setSelectedLang(langId);
     i18n.changeLanguage(langId);
-    setFarmerReaction('Great choice! 🌟');
+    setFarmerReaction(t('ui.onboarding.reaction_great_choice'));
   };
 
   const handleNameConfirm = () => {
     if (playerName.trim().length === 0) return;
     cannonRef.current?.start();
-    setFarmerReaction('Lovely name! 😍');
+    setFarmerReaction(t('ui.onboarding.reaction_lovely_name'));
     setTimeout(() => transitionTo(4), 1000);
   };
 
@@ -499,9 +514,13 @@ export default function OnboardingScreen({ navigation }: any) {
       if (action && map[action]) {
         setSelectedLang(map[action]);
         i18n.changeLanguage(map[action]);
-        setFarmerReaction('Great choice! 🌟');
+        setFarmerReaction(t('ui.onboarding.reaction_great_choice'));
+      } else {
+        setFarmerReaction(t('ui.onboarding.error_mic_clear'));
       }
-    } catch (_) {}
+    } catch (_) {
+      setFarmerReaction(t('ui.onboarding.error_mic_general'));
+    }
     finally { setIsListening(false); }
   };
 
@@ -559,7 +578,7 @@ export default function OnboardingScreen({ navigation }: any) {
                 <Text style={styles.logoEmoji}>🌱</Text>
               </View>
               <Text style={styles.splashTitle}>KisanQuest</Text>
-              <Text style={styles.splashSubtitle}>Your Financial Farming Adventure</Text>
+              <Text style={styles.splashSubtitle}>{t('ui.onboarding.splash_subtitle')}</Text>
             </Animated.View>
           </LinearGradient>
         );
@@ -578,11 +597,11 @@ export default function OnboardingScreen({ navigation }: any) {
               <FloatingSparkle emoji="☀️" style={styles.sun} />
             </View>
             <View style={styles.characterArea}>
-              <DialogueBubble text="Hi there! 👋 I'm Kisan, your farming buddy! Let's pick your language first." />
+              <DialogueBubble text={t('ui.onboarding.hi_kisan')} />
               <FarmerCharacter reactionText={farmerReaction} />
             </View>
             <View style={styles.stepFooter}>
-              <PulsingButton label="Let's go! 🚀" onPress={() => transitionTo(2)} disabled={false} />
+              <PulsingButton label={t('ui.onboarding.lets_go')} onPress={() => transitionTo(2)} disabled={false} />
             </View>
           </LinearGradient>
         );
@@ -593,7 +612,7 @@ export default function OnboardingScreen({ navigation }: any) {
           <LinearGradient colors={['#F1F8E9', '#E8F5E9']} style={styles.fill}>
             <View style={styles.stepHeader}>
               <FarmerCharacter reactionText={farmerReaction} />
-              <DialogueBubble text="Which language do you speak? 🌍 Choose your language to begin!" />
+              <DialogueBubble text={t('ui.onboarding.select_language')} />
             </View>
 
             <ScrollView
@@ -622,14 +641,14 @@ export default function OnboardingScreen({ navigation }: any) {
                   color={isListening ? '#fff' : '#58CC02'}
                 />
                 <Text style={[styles.micChipText, isListening && { color: '#fff' }]}>
-                  {isListening ? 'Listening…' : 'Speak to select'}
+                  {isListening ? t('ui.onboarding.listening') : t('ui.onboarding.speak_to_select')}
                 </Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.stepFooter}>
               <PulsingButton
-                label="Next →"
+                label={t('ui.onboarding.next')}
                 onPress={() => transitionTo(3)}
                 disabled={!selectedLang}
               />
@@ -647,11 +666,11 @@ export default function OnboardingScreen({ navigation }: any) {
             >
               <View style={styles.stepHeader}>
                 <FarmerCharacter reactionText={farmerReaction} />
-                <DialogueBubble text="Wonderful! 🌟 Now, what's your name, dear farmer?" />
+                <DialogueBubble text={t('ui.onboarding.ask_name')} />
               </View>
 
               <View style={styles.nameInputArea}>
-                <Text style={styles.nameLabel}>Your Name</Text>
+                <Text style={styles.nameLabel}>{t('ui.onboarding.your_name')}</Text>
                 <View
                   style={[
                     styles.nameInputContainer,
@@ -661,7 +680,7 @@ export default function OnboardingScreen({ navigation }: any) {
                   <Text style={styles.nameInputEmoji}>👤</Text>
                   <TextInput
                     style={styles.nameInput}
-                    placeholder="Type your name…"
+                    placeholder={t('ui.onboarding.type_name')}
                     placeholderTextColor="#BDBDBD"
                     value={playerName}
                     onChangeText={setPlayerName}
@@ -682,7 +701,7 @@ export default function OnboardingScreen({ navigation }: any) {
 
               <View style={styles.stepFooter}>
                 <PulsingButton
-                  label="That's me! ✅"
+                  label={t('ui.onboarding.thats_me')}
                   onPress={handleNameConfirm}
                   disabled={playerName.trim().length === 0}
                 />
@@ -710,7 +729,7 @@ export default function OnboardingScreen({ navigation }: any) {
                   },
                 ]}
               >
-                Hi, {playerName}! 😊
+                {t('ui.onboarding.hi_player', { name: playerName })}
               </Animated.Text>
               <Animated.Text
                 style={[
@@ -721,7 +740,7 @@ export default function OnboardingScreen({ navigation }: any) {
                   },
                 ]}
               >
-                Ready to start your farming adventure? 🌾
+                {t('ui.onboarding.ready_adventure')}
               </Animated.Text>
               <Animated.Text
                 style={[
@@ -731,11 +750,11 @@ export default function OnboardingScreen({ navigation }: any) {
                   },
                 ]}
               >
-                👆 Let's build your farm together!
+                {t('ui.onboarding.build_together')}
               </Animated.Text>
             </View>
             <View style={styles.stepFooter}>
-              <PulsingButton label="Show me! 🌱" onPress={() => transitionTo(5)} disabled={false} />
+              <PulsingButton label={t('ui.onboarding.show_me')} onPress={() => transitionTo(5)} disabled={false} />
             </View>
           </LinearGradient>
         );
@@ -752,16 +771,16 @@ export default function OnboardingScreen({ navigation }: any) {
             <View style={styles.ctaArea}>
               <Text style={styles.ctaBigEmoji}>🏆</Text>
               <Text style={styles.ctaTitle}>
-                {playerName}, the fields await!
+                {t('ui.onboarding.fields_await', { name: playerName })}
               </Text>
               <Text style={styles.ctaSubtitle}>
-                Master financial skills,{'\n'}grow your farm, become a legend.
+                {t('ui.onboarding.cta_subtitle')}
               </Text>
             </View>
 
             <View style={styles.ctaButtonWrapper}>
               <PulsingButton
-                label={loading ? 'Starting…' : "Let's Start! 🚀"}
+                label={loading ? t('ui.onboarding.starting') : t('ui.onboarding.lets_start')}
                 onPress={handleStartGame}
                 disabled={loading}
               />

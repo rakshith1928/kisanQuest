@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
+import { useTranslation } from 'react-i18next';
 
 const { width: W } = Dimensions.get('window');
 const XP_TO_NEXT = 1000;
@@ -14,6 +15,7 @@ const MAX_HEARTS = 3;
 
 // ─── Farmer Reaction ──────────────────────────────────────────────────────────
 function FarmerReaction({ type, visible }: { type: 'correct' | 'wrong' | 'idle'; visible: boolean }) {
+  const { t } = useTranslation();
   const scale = useRef(new Animated.Value(0)).current;
   const bounce = useRef(new Animated.Value(0)).current;
 
@@ -33,7 +35,7 @@ function FarmerReaction({ type, visible }: { type: 'correct' | 'wrong' | 'idle';
   if (!visible) return null;
 
   const isCorrect = type === 'correct';
-  const msg = isCorrect ? 'Nice! You got it! 🌟' : 'Oops! Try again 💡';
+  const msg = isCorrect ? t('ui.gameplay.reaction.correct') : t('ui.gameplay.reaction.wrong');
   const bg  = isCorrect ? '#E8F5E9' : '#FFF3E0';
   const bdr = isCorrect ? '#A5D6A7' : '#FFCC80';
 
@@ -105,6 +107,7 @@ function OptionCard({ label, onPress, state, disabled }: {
         {state === 'correct' && <Text style={styles.optionIcon}>✅</Text>}
         {state === 'wrong'   && <Text style={styles.optionIcon}>❌</Text>}
         {state === 'idle'    && <View style={styles.optionRadio} />}
+        {state === 'idle'    && <View style={styles.optionRadio} />}
         <Text style={[styles.optionLabel, state === 'correct' && { color: '#2E7D32', fontWeight: '900' }, state === 'wrong' && { color: '#C62828' }]}>
           {label}
         </Text>
@@ -115,6 +118,7 @@ function OptionCard({ label, onPress, state, disabled }: {
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function GameplayScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [gameState, setGameState]   = useState(gameEngine.getState());
   const [lastOutcome, setLastOutcome] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -235,13 +239,13 @@ export default function GameplayScreen({ navigation }: any) {
       <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ConfettiCannon count={200} origin={{ x: W / 2, y: -20 }} fadeOut autoStart />
         <Text style={{ fontSize: 64, marginBottom: 16 }}>🎉</Text>
-        <Text style={styles.harvestTitle}>Season Complete!</Text>
-        <Text style={styles.harvestSub}>Amazing work, farmer! 🌟</Text>
+        <Text style={styles.harvestTitle}>{t('ui.gameplay.season_complete')}</Text>
+        <Text style={styles.harvestSub}>{t('ui.gameplay.amazing_work')}</Text>
         <TouchableOpacity
           style={styles.harvestBtn}
           onPress={() => navigation.replace('Harvest', { outcome: lastOutcome })}
         >
-          <Text style={styles.harvestBtnText}>View Harvest Results 🌾</Text>
+          <Text style={styles.harvestBtnText}>{t('ui.gameplay.view_harvest_results')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -251,13 +255,12 @@ export default function GameplayScreen({ navigation }: any) {
   const renderWeather = () => (
     <LinearGradient colors={['#1565C0', '#42A5F5', '#B3E5FC']} style={styles.phaseCard}>
       <Text style={styles.phaseBigEmoji}>🌤️</Text>
-      <Text style={styles.phaseTitle}>Weather Forecast</Text>
+      <Text style={styles.phaseTitle}>{t('ui.gameplay.weather_forecast')}</Text>
       <Text style={styles.phaseDesc}>
-        The season is starting! Predictable weather is crucial for a healthy harvest.
-        Let's see what the skies bring this season.
+        {t('ui.gameplay.weather_forecast_desc')}
       </Text>
       <TouchableOpacity style={styles.phaseBtn} onPress={() => advancePhase('MARKET_UPDATE')}>
-        <Text style={styles.phaseBtnText}>Continue →</Text>
+        <Text style={styles.phaseBtnText}>{t('ui.gameplay.continue')}</Text>
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -266,12 +269,12 @@ export default function GameplayScreen({ navigation }: any) {
   const renderMarket = () => (
     <LinearGradient colors={['#1B5E20', '#388E3C', '#A5D6A7']} style={styles.phaseCard}>
       <Text style={styles.phaseBigEmoji}>📈</Text>
-      <Text style={styles.phaseTitle}>Mandi Market Pulse</Text>
+      <Text style={styles.phaseTitle}>{t('ui.gameplay.market_pulse')}</Text>
       <Text style={styles.phaseDesc}>
-        Market prices fluctuate based on supply and demand. Skills like Negotiation will boost your sale price at harvest!
+        {t('ui.gameplay.market_pulse_desc')}
       </Text>
       <TouchableOpacity style={[styles.phaseBtn, { backgroundColor: '#FFC800' }]} onPress={() => advancePhase('DECISION_POINT')}>
-        <Text style={[styles.phaseBtnText, { color: '#1B3D01' }]}>Start Farm Events 🚀</Text>
+        <Text style={[styles.phaseBtnText, { color: '#1B3D01' }]}>{t('ui.gameplay.start_events')}</Text>
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -285,7 +288,7 @@ export default function GameplayScreen({ navigation }: any) {
       <View>
         {/* Progress Bar */}
         <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Event {Math.min(evDone + 1, 5)} of 5</Text>
+          <Text style={styles.progressLabel}>{t('ui.gameplay.event_label', { current: Math.min(evDone + 1, 5), total: 5 })}</Text>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${(Math.min(evDone, 5) / 5) * 100}%` }]} />
           </View>
@@ -301,15 +304,15 @@ export default function GameplayScreen({ navigation }: any) {
           {/* floating animation indicator */}
           <LinearGradient colors={['#F1F8E9', '#FFFFFF']} style={styles.questionGradient}>
             <Text style={styles.questionEmoji}>🧠</Text>
-            <Text style={styles.questionText}>{node?.prompt || '...'}</Text>
+            <Text style={styles.questionText}>{t(node?.prompt || '...')}</Text>
           </LinearGradient>
         </Animated.View>
 
         {/* Lesson */}
         {(node as any)?.lesson && (
           <View style={styles.lessonBanner}>
-            <Text style={styles.lessonTitle}>💡 Lesson Learned</Text>
-            <Text style={styles.lessonBody}>{(node as any).lesson}</Text>
+            <Text style={styles.lessonTitle}>{t('ui.gameplay.lesson_learned')}</Text>
+            <Text style={styles.lessonBody}>{t((node as any).lesson)}</Text>
           </View>
         )}
 
@@ -317,7 +320,7 @@ export default function GameplayScreen({ navigation }: any) {
         {lastOutcome?.message && (
           <View style={[styles.outcomeBanner, { borderColor: (lastOutcome.healthDelta || 0) >= 0 ? '#66BB6A' : '#EF9A9A' }]}>
             <Text style={[styles.outcomeMsg, { color: (lastOutcome.healthDelta || 0) >= 0 ? '#2E7D32' : '#C62828' }]}>
-              {lastOutcome.message}
+              {t(lastOutcome.message)}
             </Text>
             <View style={styles.outcomeStats}>
               {lastOutcome.financialChanges?.cash !== undefined && (
@@ -352,7 +355,7 @@ export default function GameplayScreen({ navigation }: any) {
               return (
                 <OptionCard
                   key={opt.id || i}
-                  label={isProcessing ? (chosenOption === opt.id ? 'Processing...' : opt.label) : opt.label}
+                  label={isProcessing ? (chosenOption === opt.id ? t('ui.gameplay.feedback.processing') : t(opt.label)) : t(opt.label)}
                   state={st}
                   disabled={isProcessing}
                   onPress={() => handleChoice(opt.id, i)}
@@ -361,7 +364,7 @@ export default function GameplayScreen({ navigation }: any) {
             })
           ) : (
             <TouchableOpacity style={styles.nextBtn} onPress={handleNextAfterOutcome}>
-              <Text style={styles.nextBtnText}>{evDone < 3 ? 'Next Event →' : 'Complete Season 🌾'}</Text>
+              <Text style={styles.nextBtnText}>{evDone < 4 ? t('ui.gameplay.next_event') : t('ui.gameplay.complete_season')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -376,11 +379,11 @@ export default function GameplayScreen({ navigation }: any) {
       {/* ── Top Bar ─────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <View style={styles.levelPill}>
-          <Text style={styles.levelText}>⚔️ Lv {gameState.player.score.level}</Text>
+          <Text style={styles.levelText}>{t('ui.gameplay.level_label', { level: gameState.player.score.level })}</Text>
         </View>
         <View style={styles.xpTrack}>
           <Animated.View style={[styles.xpFill, { width: xpWidth }]} />
-          <Text style={styles.xpOverlay}>{gameState.player.score.xp % XP_TO_NEXT} XP</Text>
+          <Text style={styles.xpOverlay}>{t('ui.gameplay.xp_label', { xp: gameState.player.score.xp % XP_TO_NEXT })}</Text>
         </View>
         <View style={styles.streakPill}>
           <Text style={styles.streakText}>🔥 {gameState.player.score.streak}</Text>
@@ -412,9 +415,9 @@ export default function GameplayScreen({ navigation }: any) {
 
         {/* ── Season + Skills Header ────────────────────────────── */}
         <View style={styles.footer}>
-          <Text style={styles.seasonLabel}>Season {gameState.player.farm.season}</Text>
+          <Text style={styles.seasonLabel}>{t('ui.gameplay.season_label', { season: gameState.player.farm.season })}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('SkillTree')} style={styles.skillBtn}>
-            <Text style={styles.skillBtnText}>🧠 Skills</Text>
+            <Text style={styles.skillBtnText}>🧠 {t('ui.gameplay.skills')}</Text>
           </TouchableOpacity>
         </View>
 

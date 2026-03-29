@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import gameEngine from '../engine/GameEngine';
+import { useTranslation } from 'react-i18next';
 
-const SKILLS = [
-  { id: 'Insurance Literacy', icon: '🛡️', cost: 50, desc: '-25% Insurance Premium' },
-  { id: 'Budget Planning', icon: '📝', cost: 100, desc: 'Avoid overdraft penalties' },
-  { id: 'Negotiation', icon: '🤝', cost: 150, desc: '+15% Mandi sale price' },
-  { id: 'Digital Payments', icon: '📱', cost: 200, desc: 'Access quick govt subsidies' },
-  { id: 'Fraud Detection', icon: '🕵️', cost: 300, desc: 'Immune to scam events' },
+const getSKILLS = (t: any) => [
+  { id: 'Insurance Literacy', icon: '🛡️', cost: 50, desc: t('ui.skill_tree.skills.insurance_literacy.desc'), name: t('ui.skill_tree.skills.insurance_literacy.name') },
+  { id: 'Budget Planning', icon: '📝', cost: 100, desc: t('ui.skill_tree.skills.budget_planning.desc'), name: t('ui.skill_tree.skills.budget_planning.name') },
+  { id: 'Negotiation', icon: '🤝', cost: 150, desc: t('ui.skill_tree.skills.negotiation.desc'), name: t('ui.skill_tree.skills.negotiation.name') },
+  { id: 'Digital Payments', icon: '📱', cost: 200, desc: t('ui.skill_tree.skills.digital_payments.desc'), name: t('ui.skill_tree.skills.digital_payments.name') },
+  { id: 'Fraud Detection', icon: '🕵️', cost: 300, desc: t('ui.skill_tree.skills.fraud_detection.desc'), name: t('ui.skill_tree.skills.fraud_detection.name') },
 ];
 
 const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }: any) => {
@@ -30,6 +31,7 @@ const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }
 };
 
 export default function SkillTreeScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function SkillTreeScreen({ navigation }: any) {
       // Force update by triggering state machine or manual update (Game Engine needs to be robust)
       setGameState({ ...state }); // local re-render
     } else {
-      Alert.alert("Not enough points", "Answer more scenarios to earn Literacy Points!");
+      Alert.alert(t('ui.skill_tree.not_enough_points'), t('ui.skill_tree.earn_more_msg'));
     }
   };
 
@@ -58,14 +60,14 @@ export default function SkillTreeScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Text style={{fontSize: 24}}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Skill Tree 🧠</Text>
+        <Text style={styles.title}>{t('ui.skill_tree.title')}</Text>
         <View style={styles.lpTag}>
-          <Text style={styles.lpText}>{lp} LP</Text>
+          <Text style={styles.lpText}>{t('ui.skill_tree.lp_label', { count: lp })}</Text>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        {SKILLS.map((skill, idx) => {
+        {getSKILLS(t).map((skill, idx) => {
           const isUnlocked = unlocked.includes(skill.id);
           const canAfford = lp >= skill.cost;
           return (
@@ -74,12 +76,12 @@ export default function SkillTreeScreen({ navigation }: any) {
                 <Text style={{ fontSize: 32 }}>{skill.icon}</Text>
               </View>
               <View style={styles.skillContent}>
-                <Text style={styles.skillName}>{skill.id}</Text>
+                <Text style={styles.skillName}>{skill.name}</Text>
                 <Text style={styles.skillDesc}>{skill.desc}</Text>
               </View>
               <View style={styles.actionBox}>
                 {isUnlocked ? (
-                  <Text style={styles.unlockedText}>Unlocked</Text>
+                  <Text style={styles.unlockedText}>{t('ui.skill_tree.unlocked')}</Text>
                 ) : (
                   <ScaleButton 
                     variant={canAfford ? "primary" : "disabled"} 

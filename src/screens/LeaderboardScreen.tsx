@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { gameService } from '../services/gameService';
 
 export default function LeaderboardScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [players, setPlayers] = useState<any[]>([]);
 
   useEffect(() => {
@@ -23,15 +25,15 @@ export default function LeaderboardScreen({ navigation }: any) {
       {/* Header with Back */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{t('ui.leaderboard.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Top Farmers 🏆</Text>
+        <Text style={styles.title}>{t('ui.leaderboard.title')}</Text>
       </View>
       {players.map((p, index) => (
         <View key={index} style={styles.card}>
           <Text style={styles.rank}>#{index + 1}</Text>
           <Text style={styles.name}>{p.name}</Text>
-          <Text style={styles.score}>{p.financialScore} pts</Text>
+          <Text style={styles.score}>{p.financialScore} {t('ui.leaderboard.pts')}</Text>
         </View>
       ))}
     </ScrollView>

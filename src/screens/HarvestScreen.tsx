@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
+import { useTranslation } from 'react-i18next';
 
 const { width: W } = Dimensions.get('window');
 
@@ -50,6 +51,7 @@ function StarRating({ stars }: { stars: number }) {
 
 // ─── Farmer Celebration ───────────────────────────────────────────────────────
 function FarmerCelebration({ yieldText }: { yieldText: string }) {
+  const { t } = useTranslation();
   const bounce = useRef(new Animated.Value(0)).current;
   const rot    = useRef(new Animated.Value(0)).current;
   const msgScale = useRef(new Animated.Value(0)).current;
@@ -80,7 +82,7 @@ function FarmerCelebration({ yieldText }: { yieldText: string }) {
       </Animated.View>
       <Animated.View style={[styles.celebBubble, { transform: [{ scale: msgScale }] }]}>
         <View style={styles.bubbleTail} />
-        <Text style={styles.celebMsg}>Amazing work! 🌟</Text>
+        <Text style={styles.celebMsg}>{t('ui.harvest.amazing_work')}</Text>
         <Text style={styles.celebSub}>{yieldText}</Text>
       </Animated.View>
     </View>
@@ -108,6 +110,7 @@ function SummaryCard({ icon, label, value, color, bg }: any) {
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function HarvestScreen({ navigation, route }: any) {
+  const { t } = useTranslation();
   const [gameState, setGameState]     = useState(gameEngine.getState());
   const [loading, setLoading]         = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -130,7 +133,7 @@ export default function HarvestScreen({ navigation, route }: any) {
   const profit   = prev ? cash - prev.finances.cash : cash;
   const net      = cash + savings - debt;
   const stars    = score > 70 ? 3 : score > 40 ? 2 : 1;
-  const yieldText = score > 70 ? 'Your farm is thriving! 🌾' : score > 40 ? 'Decent season, keep going! 💪' : 'Tough season — learn and grow! 🌱';
+  const yieldText = score > 70 ? t('ui.harvest.yield.thriving') : score > 40 ? t('ui.harvest.yield.decent') : t('ui.harvest.yield.tough');
   const xpGained = player.score.xp;
   const lastOutcome = route?.params?.outcome;
 
@@ -154,10 +157,10 @@ export default function HarvestScreen({ navigation, route }: any) {
 
         {/* ── Hero Banner ─────────────────────────────────────── */}
         <LinearGradient colors={gradColors} style={styles.heroBanner}>
-          <Text style={styles.heroTitle}>Season Harvest 🌾</Text>
+          <Text style={styles.heroTitle}>{t('ui.harvest.title')}</Text>
           <StarRating stars={stars} />
-          <Text style={styles.heroSub}>Season {player.farm.season}</Text>
-          <Text style={styles.heroCropText}>Crop: {player.farm.crop || 'Mixed'}</Text>
+          <Text style={styles.heroSub}>{t('ui.harvest.season_label', { season: player.farm.season })}</Text>
+          <Text style={styles.heroCropText}>{t('ui.harvest.crop_label', { crop: player.farm.crop || t('ui.harvest.mixed') })}</Text>
         </LinearGradient>
 
         {/* ── Farmer Celebration ─────────────────────────────── */}
@@ -169,40 +172,40 @@ export default function HarvestScreen({ navigation, route }: any) {
         <View style={styles.rewardRow}>
           <View style={styles.rewardChip}>
             <Text style={styles.rewardIcon}>💰</Text>
-            <Text style={styles.rewardLabel}>Earnings</Text>
+            <Text style={styles.rewardLabel}>{t('ui.harvest.earnings')}</Text>
             <AnimCounter target={Math.max(0, profit)} prefix="₹" color="#2E7D32" />
           </View>
           <View style={[styles.rewardChip, { backgroundColor: '#FFF9C4' }]}>
             <Text style={styles.rewardIcon}>⭐</Text>
-            <Text style={styles.rewardLabel}>XP Gained</Text>
+            <Text style={styles.rewardLabel}>{t('ui.harvest.xp_gained_label')}</Text>
             <AnimCounter target={xpGained} prefix="+" suffix=" XP" color="#F57F17" />
           </View>
           <View style={[styles.rewardChip, { backgroundColor: '#E3F2FD' }]}>
             <Text style={styles.rewardIcon}>🚀</Text>
-            <Text style={styles.rewardLabel}>Level</Text>
+            <Text style={styles.rewardLabel}>{t('ui.harvest.level_label')}</Text>
             <Text style={{ fontSize: 28, fontWeight: '900', color: '#1565C0' }}>{player.score.level}</Text>
           </View>
         </View>
 
         {/* ── Financial Summary ─────────────────────────────────── */}
         <View style={[styles.section, styles.finCard]}>
-          <Text style={styles.sectionTitle}>📊 Financial Overview</Text>
+          <Text style={styles.sectionTitle}>{t('ui.harvest.fin_overview')}</Text>
           <View style={styles.finRow}>
-            <Text style={styles.finRowLabel}>Season Profit</Text>
+            <Text style={styles.finRowLabel}>{t('ui.harvest.season_profit')}</Text>
             <Text style={[styles.finRowValue, { color: profit >= 0 ? '#2E7D32' : '#C62828' }]}>
               {profit >= 0 ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
             </Text>
           </View>
           <View style={styles.finRow}>
-            <Text style={styles.finRowLabel}>Cash Balance</Text>
+            <Text style={styles.finRowLabel}>{t('ui.harvest.cash_balance')}</Text>
             <Text style={[styles.finRowValue, { color: '#1565C0' }]}>₹{cash.toLocaleString('en-IN')}</Text>
           </View>
           <View style={styles.finRow}>
-            <Text style={styles.finRowLabel}>Outstanding Debt</Text>
+            <Text style={styles.finRowLabel}>{t('ui.harvest.outstanding_debt')}</Text>
             <Text style={[styles.finRowValue, { color: '#C62828' }]}>₹{debt.toLocaleString('en-IN')}</Text>
           </View>
           <View style={[styles.finRow, styles.finTotalRow]}>
-            <Text style={styles.finTotalLabel}>Net Worth</Text>
+            <Text style={styles.finTotalLabel}>{t('ui.harvest.net_worth')}</Text>
             <Text style={[styles.finTotalValue, { color: net >= 0 ? '#2E7D32' : '#C62828' }]}>
               ₹{net.toLocaleString('en-IN')}
             </Text>
@@ -210,25 +213,25 @@ export default function HarvestScreen({ navigation, route }: any) {
         </View>
 
         {/* ── Summary Cards ─────────────────────────────────────── */}
-        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>🌾 Performance Breakdown</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>{t('ui.harvest.performance_breakdown')}</Text>
         <View style={styles.summaryGrid}>
-          <SummaryCard icon="🌱" label="Crop" value={player.farm.crop || 'Mixed'} color="#2E7D32" bg="#E8F5E9" />
+          <SummaryCard icon="🌱" label={t('ui.harvest.crop_label', { crop: '' }).replace(': ', '')} value={player.farm.crop || t('ui.harvest.mixed')} color="#2E7D32" bg="#E8F5E9" />
           <SummaryCard
             icon={score > 70 ? '💹' : score > 40 ? '📊' : '📉'}
-            label="Risk vs Profit"
-            value={score > 70 ? 'Excellent' : score > 40 ? 'Average' : 'Poor'}
+            label={t('ui.harvest.risk_profit')}
+            value={score > 70 ? t('ui.harvest.performance.excellent') : score > 40 ? t('ui.harvest.performance.average') : t('ui.harvest.performance.poor')}
             color={score > 70 ? '#2E7D32' : score > 40 ? '#E65100' : '#C62828'}
             bg={score > 70 ? '#E8F5E9' : score > 40 ? '#FFF3E0' : '#FFEBEE'}
           />
-          <SummaryCard icon="☀️" label="Weather Impact" value={lastOutcome?.weather?.type || 'Favorable'} color="#1565C0" bg="#E3F2FD" />
-          <SummaryCard icon="🔥" label="Streak" value={`${player.score.streak} days`} color="#C62828" bg="#FFEBEE" />
+          <SummaryCard icon="☀️" label={t('ui.harvest.weather_impact')} value={lastOutcome?.weather?.type || t('ui.harvest.weather_status.favorable')} color="#1565C0" bg="#E3F2FD" />
+          <SummaryCard icon="🔥" label={t('ui.harvest.streak')} value={`${player.score.streak} days`} color="#C62828" bg="#FFEBEE" />
         </View>
 
         {/* ── Lesson Card ──────────────────────────────────────── */}
         <View style={styles.lessonCard}>
-          <Text style={styles.lessonTitle}>💡 Financial Lesson</Text>
+          <Text style={styles.lessonTitle}>{t('ui.harvest.fin_lesson')}</Text>
           <Text style={styles.lessonBody}>
-            {lastOutcome?.lesson || "You've completed the season! Smart financial decisions are key to a thriving farm. Keep learning and growing!"}
+            {lastOutcome?.lesson || t('ui.harvest.lesson_default', { defaultValue: "You've completed the season! Smart financial decisions are key to a thriving farm. Keep learning and growing!" })}
           </Text>
         </View>
 
@@ -244,15 +247,15 @@ export default function HarvestScreen({ navigation, route }: any) {
             setTimeout(() => { setLoading(false); navigation.replace('Gameplay'); }, 500);
           }}
         >
-          <Text style={styles.ctaPrimary}>{loading ? 'Starting...' : '🚜 Next Season'}</Text>
+          <Text style={styles.ctaPrimary}>{loading ? t('ui.harvest.starting') : t('ui.harvest.next_season')}</Text>
         </CTAButton>
 
         <TouchableOpacity style={styles.ctaSecondary} onPress={() => navigation.navigate('History')}>
-          <Text style={styles.ctaSecondaryText}>📋 Review Details</Text>
+          <Text style={styles.ctaSecondaryText}>{t('ui.harvest.review_details')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.ctaTertiary} onPress={() => navigation.replace('Dashboard')}>
-          <Text style={styles.ctaTertiaryText}>🏡 Back to Dashboard</Text>
+          <Text style={styles.ctaTertiaryText}>{t('ui.harvest.back_dashboard')}</Text>
         </TouchableOpacity>
 
         <View style={{ height: 32 }} />

@@ -90,6 +90,7 @@ export class GameEngine {
     private playerState: PlayerState;
     private currentScenario: Scenario | null;
     public eventsCompleted: number = 0;
+    private unplayedScenarios: string[] = [];
 
     constructor() {
         this.stateMachine = new StateMachine();
@@ -220,12 +221,17 @@ export class GameEngine {
     }
 
     /**
-     * Load a random scenario
+     * Load a random scenario with pooling to prevent immediate repeats
      */
     async loadRandomScenario(): Promise<Scenario> {
-        const scenarios = DecisionTree.getAvailableScenarios();
-        const rand = scenarios[Math.floor(Math.random() * scenarios.length)];
-        return await this.loadScenario(rand);
+        if (this.unplayedScenarios.length === 0) {
+            this.unplayedScenarios = [...DecisionTree.getAvailableScenarios()];
+            // Shuffle
+            this.unplayedScenarios.sort(() => Math.random() - 0.5);
+        }
+        
+        const scenarioName = this.unplayedScenarios.pop()!;
+        return await this.loadScenario(scenarioName);
     }
 
     /**

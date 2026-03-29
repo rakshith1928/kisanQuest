@@ -4,10 +4,13 @@ import {
   Dimensions, Animated, Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
+import VoiceManager from '../voice/VoiceManager';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width: W } = Dimensions.get('window');
 const xpToNextLevel = 1000;
@@ -16,10 +19,10 @@ const badgeIcons: Record<string, string> = {
   'First Sown': '🌱', 'Insured': '🛡️', 'Debt Free': '💰', 'Pro Farmer': '🏆',
 };
 
-const DAILY_TASKS = [
-  { id: 'q', emoji: '🎮', label: 'Answer 5 questions', xp: 50 },
-  { id: 'w', emoji: '💧', label: 'Water your crops',   xp: 20 },
-  { id: 'c', emoji: '📊', label: 'Check season stats', xp: 15 },
+const DAILY_TASKS = (t: any) => [
+  { id: 'q', emoji: '🎮', label: t('ui.dashboard.tasks.answer_questions'), xp: 50 },
+  { id: 'w', emoji: '💧', label: t('ui.dashboard.tasks.water_crops'),   xp: 20 },
+  { id: 'c', emoji: '📊', label: t('ui.dashboard.tasks.check_stats'), xp: 15 },
 ];
 
 // ─── Animated Circular Progress ───────────────────────────────────────────────
@@ -71,6 +74,19 @@ function FarmerCompanion({ message }: { message: string }) {
   const msgOp  = useRef(new Animated.Value(0)).current;
   const msgY   = useRef(new Animated.Value(8)).current;
   const prevMsg = useRef('');
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const { t } = useTranslation();
+  const handleSpeak = async () => {
+    if (isPlaying) {
+      VoiceManager.stopSpeaking();
+      setIsPlaying(false);
+      return;
+    }
+    setIsPlaying(true);
+    await VoiceManager.speak(message);
+    setIsPlaying(false);
+  };
 
   useEffect(() => {
     Animated.loop(Animated.sequence([
@@ -118,9 +134,12 @@ function FarmerCompanion({ message }: { message: string }) {
         </View>
       </Animated.View>
       {/* Bubble */}
-      <Animated.View style={[styles.farmerBubble, { opacity: msgOp, transform: [{ translateY: msgY }] }]}>
+      <Animated.View style={[styles.farmerBubble, { flexDirection: 'row', alignItems: 'center', opacity: msgOp, transform: [{ translateY: msgY }] }]}>
         <View style={styles.bubbleTail} />
-        <Text style={styles.farmerBubbleText}>{message}</Text>
+        <Text style={[styles.farmerBubbleText, { flex: 1 }]}>{message}</Text>
+        <TouchableOpacity onPress={handleSpeak} style={{ marginLeft: 6, padding: 4 }}>
+          <Ionicons name={isPlaying ? "volume-high" : "volume-medium-outline"} size={22} color="#58CC02" />
+        </TouchableOpacity>
       </Animated.View>
     </LinearGradient>
   );
@@ -128,6 +147,7 @@ function FarmerCompanion({ message }: { message: string }) {
 
 // ─── Animated Farm Visualization ──────────────────────────────────────────────
 function FarmVisualization({ crop, level, isWatered, onWater, onHarvest }: { crop: string | null; level: number; isWatered: boolean; onWater: () => void; onHarvest: () => void }) {
+  const { t } = useTranslation();
   const CROP_STAGE = level < 2 ? '🌱' : level < 4 ? '🌿' : '🌾';
   const canHarvest = level >= 4;
 
@@ -178,18 +198,18 @@ function FarmVisualization({ crop, level, isWatered, onWater, onHarvest }: { cro
       <View style={styles.vizGround}>
         {canHarvest ? (
           <TouchableOpacity onPress={onHarvest} style={[styles.waterBtn, { backgroundColor: '#FFB300', borderColor: '#FF8F00' }]}>
-            <Text style={styles.waterBtnText}>🚜 Harvest Now!</Text>
+            <Text style={styles.waterBtnText}>{t('ui.dashboard.harvest_now')}</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={handleWaterPress} disabled={isWatered} style={[styles.waterBtn, isWatered && { opacity: 0.6 }]}>
-            <Text style={styles.waterBtnText}>{isWatered ? '💧 Watered (+20 XP)' : '💧 Water Crops'}</Text>
+            <Text style={styles.waterBtnText}>{isWatered ? t('ui.dashboard.watered_reward') : t('ui.dashboard.water_crops')}</Text>
           </TouchableOpacity>
         )}
         <Animated.Text style={[styles.waterXpText, { opacity: xpOp, transform: [{ translateY: xpY }] }]}>
-          +20 XP!
+          {t('ui.dashboard.xp_gain')}
         </Animated.Text>
         <Text style={styles.vizCropLabel}>
-          {crop ? `${crop} Field` : 'Your Farm'} · Level {level}
+          {crop ? t('ui.dashboard.field_label', { crop }) : t('ui.dashboard.default_farm')} · {t('ui.dashboard.farm_level', { level })}
         </Text>
       </View>
     </LinearGradient>
@@ -198,6 +218,7 @@ function FarmVisualization({ crop, level, isWatered, onWater, onHarvest }: { cro
 
 // ─── XP Bar ───────────────────────────────────────────────────────────────────
 function XPBar({ xp, level }: { xp: number; level: number }) {
+  const { t } = useTranslation();
   const pct = (xp % xpToNextLevel) / xpToNextLevel;
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -207,11 +228,11 @@ function XPBar({ xp, level }: { xp: number; level: number }) {
   return (
     <View style={styles.xpRow}>
       <View style={styles.levelBadge}>
-        <Text style={styles.levelText}>⚔️ Lv {level}</Text>
+        <Text style={styles.levelText}>{t('ui.dashboard.level_badge', { level })}</Text>
       </View>
       <View style={styles.xpBarTrack}>
         <Animated.View style={[styles.xpBarFill, { width }]} />
-        <Text style={styles.xpLabel}>{xp % xpToNextLevel} / {xpToNextLevel} XP</Text>
+        <Text style={styles.xpLabel}>{t('ui.dashboard.xp_progress', { xp: xp % xpToNextLevel, total: xpToNextLevel })}</Text>
       </View>
     </View>
   );
@@ -251,6 +272,7 @@ function DailyTaskCard({ task, done, onDone }: any) {
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function DashboardScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
   const [showConfetti, setShowConfetti]   = useState(false);
   const [doneTasks, setDoneTasks]         = useState<string[]>([]);
@@ -271,20 +293,20 @@ export default function DashboardScreen({ navigation }: any) {
   }, []);
 
   const player   = gameState.player;
-  const farmName = player.farm?.name || 'Your Farm';
+  const farmName = player.farm?.name || t('ui.dashboard.default_farm');
   const netWorth = player.finances.cash + player.finances.savings - player.finances.debt;
   const rawScore = Math.floor((netWorth / 50000) * 100);
   const score    = Math.min(100, Math.max(0, rawScore));
   const scoreColor = score > 70 ? '#58CC02' : score > 40 ? '#FFC800' : '#FF4B4B';
 
   const farmerMsg = useCallback(() => {
-    if (player.score.level >= 4) return "Your crops are fully grown! Time to harvest! 🚜";
-    if (wateredToday) return "Great job watering! The crops are happy 🌿";
-    if (player.score.streak >= 5) return `🔥 ${player.score.streak} day streak! You're on fire!`;
-    if (score > 70) return "Your crops are thriving! 🌿 Keep it up!";
-    if (score > 40) return "Good progress! 🌱 Ready for today's tasks?";
-    return "Let's turn this farm around 💪 Play today!";
-  }, [score, player.score.streak, wateredToday, player.score.level]);
+    if (player.score.level >= 4) return t('ui.dashboard.msg_harvest');
+    if (wateredToday) return t('ui.dashboard.msg_watered');
+    if (player.score.streak >= 5) return t('ui.dashboard.msg_streak', { streak: player.score.streak });
+    if (score > 70) return t('ui.dashboard.msg_thriving');
+    if (score > 40) return t('ui.dashboard.msg_progress');
+    return t('ui.dashboard.msg_turn_around');
+  }, [score, player.score.streak, wateredToday, player.score.level, t]);
 
   const handleTaskDone = (id: string) => setDoneTasks(p => [...p, id]);
 
@@ -316,13 +338,13 @@ export default function DashboardScreen({ navigation }: any) {
         {/* ── Header ─────────────────────────────────────────── */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Good Morning 🌅</Text>
-            <Text style={styles.playerName}>{player.name || 'Farmer'}</Text>
+            <Text style={styles.greeting}>{t('ui.dashboard.good_morning')}</Text>
+            <Text style={styles.playerName}>{player.name || t('ui.dashboard.default_farmer')}</Text>
             <Text style={styles.farmName}>{farmName}</Text>
           </View>
           <View style={styles.streakPill}>
             <Text style={styles.streakText}>🔥 {player.score.streak}</Text>
-            <Text style={styles.streakSub}>streak</Text>
+            <Text style={styles.streakSub}>{t('ui.dashboard.streak')}</Text>
           </View>
         </View>
 
@@ -334,7 +356,7 @@ export default function DashboardScreen({ navigation }: any) {
 
         {/* ── Farm Visualization ─────────────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌾 Your Farm</Text>
+          <Text style={styles.sectionTitle}>{t('ui.dashboard.your_farm_section')}</Text>
           <FarmVisualization 
             crop={player.farm?.crop} 
             level={player.score.level} 
@@ -346,32 +368,32 @@ export default function DashboardScreen({ navigation }: any) {
 
         {/* ── Financial Health ────────────────────────────────── */}
         <View style={[styles.section, styles.healthCard]}>
-          <Text style={styles.sectionTitle}>📊 Financial Health</Text>
+          <Text style={styles.sectionTitle}>{t('ui.dashboard.financial_health')}</Text>
           <View style={{ alignItems: 'center' }}>
             <CircularScore score={score} color={scoreColor} />
           </View>
           <View style={styles.statRow}>
             <View style={[styles.statChip, { backgroundColor: '#E8F5E9' }]}>
-              <Text style={styles.statChipLabel}>💰 Cash</Text>
+              <Text style={styles.statChipLabel}>{t('ui.dashboard.cash')}</Text>
               <Text style={[styles.statChipValue, { color: '#2E7D32' }]}>
                 ₹{player.finances.cash.toLocaleString('en-IN')}
               </Text>
             </View>
             <View style={[styles.statChip, { backgroundColor: '#FFF3E0' }]}>
-              <Text style={styles.statChipLabel}>📉 Debt</Text>
+              <Text style={styles.statChipLabel}>{t('ui.dashboard.debt')}</Text>
               <Text style={[styles.statChipValue, { color: '#E65100' }]}>
                 ₹{player.finances.debt.toLocaleString('en-IN')}
               </Text>
             </View>
             <View style={[styles.statChip, { backgroundColor: '#E3F2FD' }]}>
-              <Text style={styles.statChipLabel}>🏦 Savings</Text>
+              <Text style={styles.statChipLabel}>{t('ui.dashboard.savings')}</Text>
               <Text style={[styles.statChipValue, { color: '#1565C0' }]}>
                 ₹{player.finances.savings.toLocaleString('en-IN')}
               </Text>
             </View>
           </View>
           <View style={styles.netWorthRow}>
-            <Text style={styles.netWorthLabel}>Net Worth</Text>
+            <Text style={styles.netWorthLabel}>{t('ui.dashboard.net_worth')}</Text>
             <Text style={[styles.netWorthValue, { color: scoreColor }]}>
               ₹{netWorth.toLocaleString('en-IN')}
             </Text>
@@ -380,8 +402,8 @@ export default function DashboardScreen({ navigation }: any) {
 
         {/* ── Daily Tasks ─────────────────────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🎯 Daily Tasks</Text>
-          {DAILY_TASKS.map(task => (
+          <Text style={styles.sectionTitle}>{t('ui.dashboard.daily_tasks')}</Text>
+          {DAILY_TASKS(t).map(task => (
             <DailyTaskCard
               key={task.id}
               task={task}
@@ -394,7 +416,7 @@ export default function DashboardScreen({ navigation }: any) {
         {/* ── Badges ──────────────────────────────────────────── */}
         {player.score.badges.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🏅 Achievements</Text>
+            <Text style={styles.sectionTitle}>{t('ui.dashboard.achievements')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 6 }}>
               {player.score.badges.map((b: string) => (
                 <View key={b} style={styles.badgeItem}>
@@ -410,9 +432,9 @@ export default function DashboardScreen({ navigation }: any) {
         {player.seasonHistory.length > 0 && (
           <View style={styles.section}>
             <View style={styles.rowBetween}>
-              <Text style={styles.sectionTitle}>📅 Season History</Text>
+              <Text style={styles.sectionTitle}>{t('ui.dashboard.season_history')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('History')} style={styles.viewAllBtn}>
-                <Text style={styles.viewAllText}>View All</Text>
+                <Text style={styles.viewAllText}>{t('ui.dashboard.view_all')}</Text>
               </TouchableOpacity>
             </View>
             {player.seasonHistory.slice(-2).map((h: any, i: number) => {
@@ -420,7 +442,7 @@ export default function DashboardScreen({ navigation }: any) {
               return (
                 <View key={i} style={styles.historyRow}>
                   <View style={[styles.historyDot, { backgroundColor: profit >= 0 ? '#58CC02' : '#FF4B4B' }]} />
-                  <Text style={styles.historyLabel}>Season {h.season}</Text>
+                  <Text style={styles.historyLabel}>{t('ui.dashboard.season_label', { season: h.season })}</Text>
                   <Text style={[styles.historyValue, { color: profit >= 0 ? '#58CC02' : '#FF4B4B' }]}>
                     {profit >= 0 ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
                   </Text>
@@ -433,18 +455,18 @@ export default function DashboardScreen({ navigation }: any) {
         {/* ── CTA Buttons ─────────────────────────────────────── */}
         <View style={styles.ctaGroup}>
           <PulseButton onPress={() => navigation.navigate('Gameplay')} color={['#58CC02', '#43A047']}>
-            <Text style={styles.ctaTextPrimary}>Continue Farming ▶️</Text>
+            <Text style={styles.ctaTextPrimary}>{t('ui.dashboard.continue_farming')}</Text>
           </PulseButton>
 
           <TouchableOpacity onPress={() => navigation.navigate('Leaderboard')} style={styles.secondaryBtn}>
-            <Text style={styles.secondaryBtnText}>🏆 Leaderboard</Text>
+            <Text style={styles.secondaryBtnText}>{t('ui.dashboard.leaderboard')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => { gameEngine.reset(); navigation.reset({ index: 0, routes: [{ name: 'FarmCreation' }] }); }}
             style={styles.tertiaryBtn}
           >
-            <Text style={styles.tertiaryBtnText}>🌱 New Farm</Text>
+            <Text style={styles.tertiaryBtnText}>{t('ui.dashboard.new_farm')}</Text>
           </TouchableOpacity>
         </View>
 

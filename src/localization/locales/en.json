@@ -3,28 +3,292 @@
     "welcome": "Welcome to KisanQuest",
     "start_game": "Start Game",
     "onboarding": {
-      "select_language": "Select your language",
-      "voice_prompt_intro": "Tap the mic and speak your choice"
+      "splash_subtitle": "Your Financial Farming Adventure",
+      "hi_kisan": "Hi there! 👋 I'm Kisan, your farming buddy! Let's pick your language first.",
+      "lets_go": "Let's go! 🚀",
+      "select_language": "Which language do you speak? 🌍 Choose your language to begin!",
+      "speak_to_select": "Speak to select",
+      "listening": "Listening...",
+      "next": "Next →",
+      "ask_name": "Wonderful! 🌟 Now, what's your name, dear farmer?",
+      "your_name": "Your Name",
+      "type_name": "Type your name...",
+      "thats_me": "That's me! ✅",
+      "hi_player": "Hi, {{name}}! 😊",
+      "ready_adventure": "Ready to start your farming adventure? 🌾",
+      "build_together": "👆 Let's build your farm together!",
+      "show_me": "Show me! 🌱",
+      "fields_await": "{{name}}, the fields await!",
+      "cta_subtitle": "Master financial skills,\ngrow your farm, become a legend.",
+      "starting": "Starting...",
+      "lets_start": "Let's Start! 🚀",
+      "reaction_great_choice": "Great choice! 🌟",
+      "reaction_lovely_name": "Lovely name! 😍",
+      "error_mic_clear": "Couldn't hear you clearly. Try again? 🎤",
+      "error_mic_general": "Microphone error. Try again? 🎤"
     },
     "farm_creation": {
-      "title": "Create Your Farm",
-      "select_crop": "Select Your Crop",
-      "budget_goal": "Set Budget Goal",
-      "farm_name": "Name your farm"
+      "step_label": "Step {{current}} of {{total}}",
+      "choose_crop": "Choose Your Crop",
+      "budget_goal": "Budget Goal",
+      "name_farm": "Name Your Farm",
+      "farm_name_placeholder": "Enter farm name...",
+      "farmer_ask_name": "Farmer Kisan asks: \"What should we call your farm?\"",
+      "start_farming": "Start Farming",
+      "setting_up_farm": "Setting up your farm...",
+      "recommended": "Recommended",
+      "live_preview": "Live Preview",
+      "budget_label": "Budget: ₹{{amount}}k",
+      "live_insights": "Live Insights",
+      "water_need": "Water Need",
+      "est_profit": "Est. Profit",
+      "risk_level": "Risk Level",
+      "locating_farm": "Locating your farm...",
+      "weather": {
+        "checking_skies": "Checking the skies...",
+        "build_farm_msg": "Let's build your farm! {{emoji}} {{condition}} this week — good for {{crop}}!",
+        "big_budget_msg": "Nice! Bigger budget, better yield 🚜",
+        "great_choice_msg": "Great choice! {{emoji}} {{crop}} is a solid pick!"
+      },
+      "crops": {
+        "Rice": "Rice",
+        "Wheat": "Wheat",
+        "Cotton": "Cotton",
+        "Sugarcane": "Sugarcane"
+      },
+      "risk": {
+        "Low": "Low",
+        "Medium": "Medium",
+        "High": "High"
+      },
+      "water": {
+        "High": "High",
+        "Moderate": "Moderate",
+        "Low": "Low"
+      }
     },
     "dashboard": {
-      "financial_health": "Financial Health",
-      "milestones": "Milestones",
-      "season_history": "Season History",
-      "leaderboard": "Leaderboard"
+      "good_morning": "Good Morning 🌅",
+      "streak": "streak",
+      "default_farmer": "Farmer",
+      "default_farm": "Your Farm",
+      "msg_harvest": "Your crops are fully grown! Time to harvest! 🚜",
+      "msg_watered": "Great job watering! The crops are happy 🌿",
+      "msg_streak": "🔥 {{streak}} day streak! You're on fire!",
+      "msg_thriving": "Your crops are thriving! 🌿 Keep it up!",
+      "msg_progress": "Good progress! 🌱 Ready for today's tasks?",
+      "msg_turn_around": "Let's turn this farm around 💪 Play today!",
+      "your_farm_section": "🌾 Your Farm",
+      "harvest_now": "🚜 Harvest Now!",
+      "watered_reward": "💧 Watered (+20 XP)",
+      "water_crops": "💧 Water Crops",
+      "xp_gain": "+20 XP!",
+      "field_label": "{{crop}} Field",
+      "farm_level": "Level {{level}}",
+      "level_badge": "⚔️ Lv {{level}}",
+      "xp_progress": "{{xp}} / {{total}} XP",
+      "tasks": {
+        "answer_questions": "Answer 5 questions",
+        "water_crops": "Water your crops",
+        "check_stats": "Check season stats"
+      },
+      "financial_health": "📊 Financial Health",
+      "cash": "💰 Cash",
+      "debt": "📉 Debt",
+      "savings": "🏦 Savings",
+      "net_worth": "Net Worth",
+      "daily_tasks": "🎯 Daily Tasks",
+      "achievements": "🏅 Achievements",
+      "season_history": "📅 Season History",
+      "view_all": "View All",
+      "season_label": "Season {{season}}",
+      "continue_farming": "Continue Farming ▶️",
+      "leaderboard": "🏆 Leaderboard",
+      "new_farm": "🌱 New Farm"
     },
     "gameplay": {
-      "cash": "Cash",
-      "debt": "Debt",
-      "insurance": "Insurance",
-      "savings": "Savings",
-      "next_season": "Next Season",
-      "review_details": "Review Details"
+      "season_complete": "Season Complete!",
+      "amazing_work": "Amazing work, farmer! 🌟",
+      "view_harvest_results": "View Harvest Results 🌾",
+      "weather_forecast": "Weather Forecast",
+      "weather_forecast_desc": "The season is starting! Predictable weather is crucial for a healthy harvest. Let's see what the skies bring this season.",
+      "market_pulse": "Mandi Market Pulse",
+      "market_pulse_desc": "Market prices fluctuate based on supply and demand. Skills like Negotiation will boost your sale price at harvest!",
+      "continue": "Continue →",
+      "start_events": "Start Farm Events 🚀",
+      "event_label": "Event {{current}} of {{total}}",
+      "lesson_learned": "💡 Lesson Learned",
+      "next_event": "Next Event →",
+      "complete_season": "Complete Season 🌾",
+      "level_label": "Lv {{level}}",
+      "xp_label": "{{xp}} XP",
+      "season_label": "Season {{season}}",
+      "skills": "Skills",
+      "reaction": {
+        "correct": "Nice! You got it! 🌟",
+        "wrong": "Oops! Try again 💡"
+      },
+      "feedback": {
+        "processing": "Processing..."
+      }
+    },
+    "history": {
+      "title": "Detailed History",
+      "loading": "Loading history...",
+      "no_choices": "No choices made yet!",
+      "action_label": "Action: {{type}}",
+      "scenario_label": "Scenario: {{name}}",
+      "score_result": "Score Result: {{score}}",
+      "no_player_id": "No player ID found. Are you logged in?",
+      "failed_load": "Failed to load history."
+    },
+    "skill_tree": {
+      "title": "Skill Tree 🧠",
+      "lp_label": "{{count}} LP",
+      "unlocked": "Unlocked",
+      "not_enough_points": "Not enough points",
+      "earn_more_msg": "Answer more scenarios to earn Literacy Points!",
+      "skills": {
+        "insurance_literacy": {
+          "name": "Insurance Literacy",
+          "desc": "-25% Insurance Premium"
+        },
+        "budget_planning": {
+          "name": "Budget Planning",
+          "desc": "Avoid overdraft penalties"
+        },
+        "negotiation": {
+          "name": "Negotiation",
+          "desc": "+15% Mandi sale price"
+        },
+        "digital_payments": {
+          "name": "Digital Payments",
+          "desc": "Access quick govt subsidies"
+        },
+        "fraud_detection": {
+          "name": "Fraud Detection",
+          "desc": "Immune to scam events"
+        }
+      }
+    },
+    "harvest": {
+      "title": "Season Harvest 🌾",
+      "season_label": "Season {{season}}",
+      "crop_label": "Crop: {{crop}}",
+      "mixed": "Mixed",
+      "amazing_work": "Amazing work! 🌟",
+      "earnings": "Earnings",
+      "xp_gained_label": "XP Gained",
+      "level_label": "Level",
+      "fin_overview": "📊 Financial Overview",
+      "season_profit": "Season Profit",
+      "cash_balance": "Cash Balance",
+      "outstanding_debt": "Outstanding Debt",
+      "net_worth": "Net Worth",
+      "performance_breakdown": "🌾 Performance Breakdown",
+      "risk_profit": "Risk vs Profit",
+      "weather_impact": "Weather Impact",
+      "streak": "Streak",
+      "fin_lesson": "💡 Financial Lesson",
+      "next_season": "🚜 Next Season",
+      "starting": "Starting...",
+      "review_details": "📋 Review Details",
+      "back_dashboard": "🏡 Back to Dashboard",
+      "yield": {
+        "thriving": "Your farm is thriving! 🌾",
+        "decent": "Decent season, keep going! 💪",
+        "tough": "Tough season — learn and grow! 🌱"
+      },
+      "performance": {
+        "excellent": "Excellent",
+        "average": "Average",
+        "poor": "Poor"
+      },
+      "weather_status": {
+        "favorable": "Favorable"
+      }
+    },
+    "leaderboard": {
+      "title": "Top Farmers 🏆",
+      "back": "← Back",
+      "pts": "pts"
+    }
+  },
+  "scenarios": {
+    "monsoon_crisis": {
+      "title": "Monsoon Crisis",
+      "mc_1": {
+        "prompt": "Heavy rains are expected in 3 days. Your rice crop needs protection.",
+        "voicePrompt": "Heavy rains are expected in three days. What will you do?",
+        "options": {
+          "A": "Take crop insurance (₹3,000 premium)",
+          "B": "Borrow from moneylender",
+          "C": "Try homemade remedy (40% success)"
+        }
+      },
+      "mc_2a": {
+        "prompt": "The rains came but your insurance covered 80% of the damage. Great decision!",
+        "voicePrompt": "The insurance covered 80% of the damage. Great decision!",
+        "lesson": "[Skill Tested: Insurance Literacy] Crop insurance costs a small premium but protects you from losses 10x larger."
+      },
+      "mc_2b": {
+        "prompt": "Your crop survived but now you owe ₹8,000 at 30% interest to the moneylender.",
+        "voicePrompt": "Your crop survived, but you now owe 8,000 rupees to the moneylender.",
+        "lesson": "Moneylenders charge 25-30% interest. Formal bank loans are only 7%. Always choose formal credit."
+      },
+      "mc_2c": {
+        "prompt": "The rains destroyed 60% of your crop. Without insurance, you have no fallback.",
+        "voicePrompt": "The rains destroyed 60% of your crop. Without insurance, you have no fallback.",
+        "lesson": "Without savings or insurance, one bad season can push a family into poverty."
+      }
+    },
+    "market_price": {
+      "title": "Market Price Dilemma",
+      "mp_1": {
+        "prompt": "Your wheat harvest is ready. A middleman offers ₹1,400/quintal. The mandi (market) price is ₹1,800 but you must transport it.",
+        "voicePrompt": "Your wheat harvest is ready. A middleman offers 1,400. Mandi price is 1,800. What will you do?",
+        "options": {
+          "A": "Sell to middleman (quick, ₹1,400/q)",
+          "B": "Transport to mandi (₹1,800/q, ₹2,000 transport cost)",
+          "C": "Store and wait for better price"
+        }
+      },
+      "mp_2a": {
+        "prompt": "You sold quickly and got ₹28,000. But you left ₹8,000 on the table by not going to the mandi.",
+        "lesson": "[Skill Tested: Negotiation] Always compare prices at multiple buyers. The mandi price is publicly listed on e-NAM (National Agriculture Market app)."
+      },
+      "mp_2b": {
+        "prompt": "After ₹2,000 transport cost you earned ₹34,000 — ₹6,000 more than the middleman offer!",
+        "lesson": "Transporting to the mandi took extra effort but yielded 21% more income. Collective transport with other farmers reduces cost further."
+      },
+      "mp_2c": {
+        "prompt": "Prices fell further. You paid ₹1,500 storage and still sold for ₹1,400.",
+        "lesson": "Storing grain requires proper facilities and market intelligence. Without these, waiting often leads to losses."
+      }
+    },
+    "digital_payment": {
+      "title": "Digital Payment Challenge",
+      "dp_1": {
+        "prompt": "You receive an SMS: 'Your Kisan Credit card is blocked. Share your OTP to reactivate.' What do you do?",
+        "voicePrompt": "You received an SMS. Your card is blocked. Share your OTP to reactivate. What do you do?",
+        "options": {
+          "A": "Share the OTP immediately",
+          "B": "Ignore the SMS — call your bank directly",
+          "C": "Ask a family member for advice first"
+        }
+      },
+      "dp_2a": {
+        "prompt": "You were scammed! ₹20,000 was withdrawn from your account. Banks never ask for OTPs.",
+        "lesson": "NEVER share your OTP, PIN, or password. Banks and government schemes will NEVER ask for these. Report fraud to 1930 (National Cybercrime Helpline)."
+      },
+      "dp_2b": {
+        "prompt": "Smart! The bank confirmed it was a fraud attempt. Your account is safe.",
+        "lesson": "[Skill Tested: Fraud Detection] Always verify by calling your bank's official number (back of debit card). Real banks NEVER ask for OTP via SMS or calls."
+      },
+      "dp_2c": {
+        "prompt": "Your family member recognized it as a scam. Good thinking to ask!",
+        "lesson": "When in doubt, consult trusted people before acting. Community knowledge is a powerful shield against fraud."
+      }
     }
   },
   "prompts": {

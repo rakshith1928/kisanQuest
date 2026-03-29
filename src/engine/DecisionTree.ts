@@ -161,7 +161,15 @@ export class DecisionTree {
 
         const normalizedKeyword = keyword.toLowerCase().trim();
         return this.currentNode.options.findIndex(option => {
-            const keywords = option.voiceKeywords?.[language] || [];
+            if (!option.voiceKeywords) return false;
+            
+            // If it's an array (old format), check all keywords
+            if (Array.isArray(option.voiceKeywords)) {
+                return option.voiceKeywords.some(kw => kw.toLowerCase().trim() === normalizedKeyword);
+            }
+            
+            // If it's an object (new format), check current language
+            const keywords = option.voiceKeywords[language] || [];
             return keywords.some(kw => kw.toLowerCase().trim() === normalizedKeyword);
         });
     }

@@ -23,14 +23,14 @@
       },
       "package": "com.rakshith_2005.kisanquest"
     },
-
     "plugins": [
       "expo-sqlite"
     ],
     "extra": {
       "eas": {
-        "projectId": "85224a1b-45fd-425d-850b-fc38a6e4c883"
+        "projectId": "56182ab6-80ce-401b-a0d0-ea085f876247"
       }
-    }
+    },
+    "owner": "rachana_2005"
   }
 }

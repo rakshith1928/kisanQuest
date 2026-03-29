@@ -30,7 +30,7 @@ export const processSTT = async (req: Request, res: Response) => {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${HF_API_KEY}`,
-            'Content-Type': 'audio/wav',
+            'Content-Type': 'audio/m4a', // expo-av HIGH_QUALITY records in M4A/AAC format, not WAV
         },
         body: buffer,
     });

@@ -22,24 +22,22 @@ import { fetchLiveWeather, WeatherData } from '../services/WeatherService';
 const { width: W, height: H } = Dimensions.get('window');
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
-const CROPS = [
-  { id: 'Rice', emoji: '🌾', label: 'Rice', water: 0.9, profit: 65000, risk: 'Low', recommended: false, color: '#43A047' },
-  { id: 'Wheat', emoji: '🌿', label: 'Wheat', water: 0.6, profit: 52000, risk: 'Low', recommended: true, color: '#F9A825' },
-  { id: 'Cotton', emoji: '☁️', label: 'Cotton', water: 0.5, profit: 80000, risk: 'Medium', recommended: false, color: '#29B6F6' },
-  { id: 'Sugarcane', emoji: '🎋', label: 'Sugarcane', water: 0.95, profit: 95000, risk: 'High', recommended: false, color: '#AB47BC' },
+const getCROPS = (t: any) => [
+  { id: 'Rice', emoji: '🌾', label: t('ui.farm_creation.crops.Rice'), water: 0.9, profit: 65000, risk: 'Low', recommended: false, color: '#43A047' },
+  { id: 'Wheat', emoji: '🌿', label: t('ui.farm_creation.crops.Wheat'), water: 0.6, profit: 52000, risk: 'Low', recommended: true, color: '#F9A825' },
+  { id: 'Cotton', emoji: '☁️', label: t('ui.farm_creation.crops.Cotton'), water: 0.5, profit: 80000, risk: 'Medium', recommended: false, color: '#29B6F6' },
+  { id: 'Sugarcane', emoji: '🎋', label: t('ui.farm_creation.crops.Sugarcane'), water: 0.95, profit: 95000, risk: 'High', recommended: false, color: '#AB47BC' },
 ];
 
-// Live weather fetches will replace this static object.
-// We use WeatherData from WeatherService instead.
 const SOIL = { type: 'Red Soil', quality: 'Good', season: 'Summer', seasonEmoji: '☀️' };
 
-const BUDGET_MILESTONES = [
+const getBUDGET_MILESTONES = (t: any) => [
   { value: 10000, label: '₹10k', emoji: '🌱' },
   { value: 50000, label: '₹50k', emoji: '🚜' },
   { value: 100000, label: '₹1L', emoji: '🏡' },
 ];
 
-const riskColor = (risk: string) =>
+const getRiskColor = (risk: string) =>
   risk === 'Low' ? '#58CC02' : risk === 'Medium' ? '#FFC800' : '#FF4B4B';
 
 // ─── Floating Cloud ────────────────────────────────────────────────────────────
@@ -169,6 +167,7 @@ function FarmerCharacter({ dialogue }: { dialogue: string }) {
 
 // ─── Crop Card ─────────────────────────────────────────────────────────────────
 function CropCard({ crop, isSelected, onPress, disabled }: any) {
+  const { t } = useTranslation();
   const scale = useRef(new Animated.Value(1)).current;
   const floatY = useRef(new Animated.Value(0)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
@@ -205,7 +204,7 @@ function CropCard({ crop, isSelected, onPress, disabled }: any) {
         <Animated.View style={[styles.cropCard, { borderColor }]}>
           {crop.recommended && (
             <View style={[styles.recommendedBadge, { backgroundColor: crop.color }]}>
-              <Text style={styles.recommendedText}>⭐ Recommended</Text>
+              <Text style={styles.recommendedText}>⭐ {t('ui.farm_creation.recommended')}</Text>
             </View>
           )}
           <Text style={styles.cropEmoji}>{crop.emoji}</Text>
@@ -223,6 +222,7 @@ function CropCard({ crop, isSelected, onPress, disabled }: any) {
 
 // ─── Live Farm Preview ────────────────────────────────────────────────────────
 function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; weather: WeatherData | null }) {
+  const { t } = useTranslation();
   const budgetPct = Math.min((budget - 10000) / 190000, 1);
   const farmScale = 0.6 + budgetPct * 0.4;
   const scaleAnim = useRef(new Animated.Value(farmScale)).current;
@@ -273,8 +273,8 @@ function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; wea
         </Animated.View>
       </LinearGradient>
       <View style={styles.previewFooter}>
-        <Text style={styles.previewLabel}>Live Preview  {weather?.emoji} {weather?.condition || 'Loading...'}</Text>
-        <Text style={[styles.previewBudget, { color: crop.color }]}>Budget: ₹{(budget / 1000).toFixed(0)}k</Text>
+        <Text style={styles.previewLabel}>{t('ui.farm_creation.live_preview')}  {weather?.emoji} {weather?.condition || t('ui.farm_creation.locating_farm')}</Text>
+        <Text style={[styles.previewBudget, { color: crop.color }]}>{t('ui.farm_creation.budget_label', { amount: (budget / 1000).toFixed(0) })}</Text>
       </View>
     </View>
   );
@@ -282,6 +282,7 @@ function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; wea
 
 // ─── Insights Panel ───────────────────────────────────────────────────────────
 function InsightsPanel({ crop, visible }: { crop: any; visible: boolean }) {
+  const { t } = useTranslation();
   const slideAnim = useRef(new Animated.Value(30)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -298,32 +299,32 @@ function InsightsPanel({ crop, visible }: { crop: any; visible: boolean }) {
 
   return (
     <Animated.View style={[styles.insightsPanel, { opacity: opacityAnim, transform: [{ translateY: slideAnim }] }]}>
-      <Text style={styles.insightsTitle}>📊 Live Insights</Text>
+      <Text style={styles.insightsTitle}>📊 {t('ui.farm_creation.live_insights')}</Text>
 
       {/* Water */}
       <View style={styles.insightRow}>
-        <Text style={styles.insightLabel}>💧 Water Need</Text>
+        <Text style={styles.insightLabel}>💧 {t('ui.farm_creation.water_need')}</Text>
         <Text style={[styles.insightBadge, { backgroundColor: crop.water > 0.7 ? '#29B6F6' : '#A5D6A7' }]}>
-          {crop.water > 0.7 ? 'High' : 'Moderate'}
+          {crop.water > 0.7 ? t('ui.farm_creation.water.High') : t('ui.farm_creation.water.Moderate')}
         </Text>
       </View>
       <AnimatedBar pct={crop.water} color="#29B6F6" />
 
       {/* Profit */}
       <View style={[styles.insightRow, { marginTop: 14 }]}>
-        <Text style={styles.insightLabel}>💸 Est. Profit</Text>
+        <Text style={styles.insightLabel}>💸 {t('ui.farm_creation.est_profit')}</Text>
         <AnimatedCounter value={crop.profit} prefix="₹" style={[styles.insightBadge, { backgroundColor: '#C8E6C9', color: '#1B5E20' }]} />
       </View>
       <AnimatedBar pct={crop.profit / 100000} color="#58CC02" />
 
       {/* Risk */}
       <View style={[styles.insightRow, { marginTop: 14 }]}>
-        <Text style={styles.insightLabel}>⚠️ Risk Level</Text>
-        <Text style={[styles.insightBadge, { backgroundColor: riskColor(crop.risk) + '33', color: riskColor(crop.risk) }]}>
-          {crop.risk}
+        <Text style={styles.insightLabel}>⚠️ {t('ui.farm_creation.risk_level')}</Text>
+        <Text style={[styles.insightBadge, { backgroundColor: getRiskColor(crop.risk) + '33', color: getRiskColor(crop.risk) }]}>
+          {t(`ui.farm_creation.risk.${crop.risk}`)}
         </Text>
       </View>
-      <AnimatedBar pct={crop.risk === 'Low' ? 0.25 : crop.risk === 'Medium' ? 0.6 : 0.9} color={riskColor(crop.risk)} />
+      <AnimatedBar pct={crop.risk === 'Low' ? 0.25 : crop.risk === 'Medium' ? 0.6 : 0.9} color={getRiskColor(crop.risk)} />
     </Animated.View>
   );
 }
@@ -351,15 +352,16 @@ export default function FarmCreationScreen({ navigation }: any) {
     return () => { mounted = false; clearInterval(interval); };
   }, []);
 
-  const crop = CROPS.find(c => c.id === selectedCropId) || CROPS[0];
+  const crops = getCROPS(t);
+  const crop = crops.find((c: any) => c.id === selectedCropId) || crops[0];
 
   // Farmer dialogue logic
   const getDialogue = useCallback(() => {
-    if (!weather) return 'Checking the skies... 🌦️';
-    if (!hasChosen) return `Let's build your farm! 🌱\n${weather.emoji} ${weather.condition} this week — good for ${crop.label}!`;
-    if (budgetGoal >= 100000) return 'Nice! Bigger budget, better yield 🚜';
-    return `Great choice! ${crop.emoji} ${crop.label} is a solid pick!`;
-  }, [hasChosen, crop.id, budgetGoal, weather]);
+    if (!weather) return t('ui.farm_creation.weather.checking_skies');
+    if (!hasChosen) return t('ui.farm_creation.weather.build_farm_msg', { emoji: weather.emoji, condition: weather.condition, crop: crop.label });
+    if (budgetGoal >= 100000) return t('ui.farm_creation.weather.big_budget_msg');
+    return t('ui.farm_creation.weather.great_choice_msg', { emoji: crop.emoji, crop: crop.label });
+  }, [hasChosen, crop.id, budgetGoal, weather, t]);
 
   const [dialogue, setDialogue] = useState(getDialogue());
 
@@ -435,7 +437,7 @@ export default function FarmCreationScreen({ navigation }: any) {
           >
             {/* ── Progress Bar ─────────────────────────────────────── */}
             <View style={styles.progressRow}>
-              <Text style={styles.progressLabel}>Step 2 of 3</Text>
+              <Text style={styles.progressLabel}>{t('ui.farm_creation.step_label', { current: 2, total: 3 })}</Text>
               <View style={styles.progressTrack}>
                 <View style={[styles.progressFill, { width: '66%' }]} />
               </View>
@@ -468,15 +470,16 @@ export default function FarmCreationScreen({ navigation }: any) {
 
             {/* ── Crop Selection ─────────────────────────────────────── */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>🌱 Choose Your Crop</Text>
+              <Text style={styles.sectionTitle}>🌱 {t('ui.farm_creation.choose_crop')}</Text>
               <View style={styles.cropGrid}>
-                {CROPS.map(c => (
+                {getCROPS(t).map((c: any) => (
                   <CropCard
                     key={c.id}
                     crop={c}
                     isSelected={selectedCropId === c.id}
                     onPress={() => handleSelectCrop(c.id)}
                     disabled={loading}
+                    t={t}
                   />
                 ))}
               </View>
@@ -493,7 +496,7 @@ export default function FarmCreationScreen({ navigation }: any) {
             {/* ── Budget Slider ──────────────────────────────────────── */}
             <View style={styles.section}>
               <View style={styles.budgetHeader}>
-                <Text style={styles.sectionTitle}>💰 Budget Goal</Text>
+                <Text style={styles.sectionTitle}>💰 {t('ui.farm_creation.budget_goal')}</Text>
                 <AnimatedCounter value={budgetGoal} prefix="₹" style={styles.budgetValue} />
               </View>
 
@@ -504,14 +507,14 @@ export default function FarmCreationScreen({ navigation }: any) {
                   maximumValue={200000}
                   step={5000}
                   value={budgetGoal}
-                  onValueChange={v => { setBudgetGoal(v); if (v >= 100000) setDialogue('Nice! Bigger budget, better yield 🚜'); }}
+                  onValueChange={v => { setBudgetGoal(v); if (v >= 100000) setDialogue(t('ui.farm_creation.weather.big_budget_msg')); }}
                   minimumTrackTintColor={crop.color}
                   maximumTrackTintColor="#E0E0E0"
                   thumbTintColor="#FFC800"
                 />
                 {/* Milestones */}
                 <View style={styles.milestoneRow}>
-                  {BUDGET_MILESTONES.map(m => (
+                  {getBUDGET_MILESTONES(t).map((m: any) => (
                     <View key={m.value} style={styles.milestone}>
                       <Text style={styles.milestoneEmoji}>{m.emoji}</Text>
                       <Text style={[styles.milestoneLabel, budgetGoal >= m.value && { color: crop.color, fontWeight: '800' }]}>
@@ -540,15 +543,15 @@ export default function FarmCreationScreen({ navigation }: any) {
 
             {/* ── Farm Name ─────────────────────────────────────────── */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>✏️ Name Your Farm</Text>
-              <Text style={styles.farmerQuestion}>Farmer Kisan asks: "What should we call your farm?" 🏡</Text>
+              <Text style={styles.sectionTitle}>✏️ {t('ui.farm_creation.name_farm')}</Text>
+              <Text style={styles.farmerQuestion}>{t('ui.farm_creation.farmer_ask_name')} 🏡</Text>
 
               <View style={[styles.nameInputContainer, inputFocused && styles.nameInputFocused]}>
                 <Text style={styles.nameEmoji}>🌾</Text>
                 <TextInput
                   editable={!loading}
                   style={styles.nameInput}
-                  placeholder="Enter farm name…"
+                  placeholder={t('ui.farm_creation.farm_name_placeholder')}
                   placeholderTextColor="#BDBDBD"
                   value={farmName}
                   onChangeText={handleFarmNameChange}
@@ -579,7 +582,7 @@ export default function FarmCreationScreen({ navigation }: any) {
                   style={styles.ctaGradient}
                 >
                   <Text style={[styles.ctaText, (!isValid || loading) && styles.ctaTextDisabled]}>
-                    {loading ? 'Setting up your farm… 🚜' : 'Start Farming 🚜'}
+                    {loading ? t('ui.farm_creation.setting_up_farm') : t('ui.farm_creation.start_farming')}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>

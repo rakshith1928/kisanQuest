@@ -83,10 +83,12 @@ class VoiceManager {
 
         // Attempt cloud transcription; returns null if offline
         const transcript = await SpeechToText.transcribe(uri, this.language);
+        console.log('[VoiceManager] STT Transcript received:', transcript);
 
         let action: GameAction | null = null;
         if (transcript) {
             action = VoiceCommands.match(transcript, this.language);
+            if (!action) console.log('[VoiceManager] No matching action found for transcript:', transcript);
         }
 
         if (action && this.onActionCallback) {

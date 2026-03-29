@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { analyticsService } from '../services/analyticsService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HistoryScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const [timeline, setTimeline] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export default function HistoryScreen({ navigation }: any) {
       // Let's assume we want to just see the general timeline for now, or player specific:
       const playerId = await AsyncStorage.getItem('playerId');
       if (!playerId) {
-          setError("No player ID found. Are you logged in?");
+          setError(t('ui.history.no_player_id'));
           setLoading(false);
           return;
       }
@@ -34,7 +36,7 @@ export default function HistoryScreen({ navigation }: any) {
       setTimeline((data as any).events || data);
     } catch (err: any) {
       console.error('Failed to fetch history:', err);
-      setError(err.message || "Failed to load history.");
+      setError(err.message || t('ui.history.failed_load'));
     } finally {
       setLoading(false);
     }
@@ -46,31 +48,31 @@ export default function HistoryScreen({ navigation }: any) {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Text style={{fontSize: 24}}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Detailed History</Text>
+        <Text style={styles.title}>{t('ui.history.title')}</Text>
         <View style={{width: 32}} />
       </View>
       
       <ScrollView contentContainerStyle={styles.scroll}>
         {loading ? (
-            <Text style={styles.infoText}>Loading history...</Text>
+            <Text style={styles.infoText}>{t('ui.history.loading')}</Text>
         ) : error ? (
             <Text style={[styles.infoText, {color: '#b02500'}]}>{error}</Text>
         ) : timeline.length === 0 ? (
-            <Text style={styles.infoText}>No choices made yet!</Text>
+            <Text style={styles.infoText}>{t('ui.history.no_choices')}</Text>
         ) : (
           timeline.map((event, index) => {
               const date = new Date(event.timestamp || event.createdAt || Date.now());
               return (
                 <View key={index} style={styles.historyCard}>
                   <View style={styles.historyHeader}>
-                    <Text style={styles.eventType}>Action: {event.eventType}</Text>
+                    <Text style={styles.eventType}>{t('ui.history.action_label', { type: event.eventType })}</Text>
                     <Text style={styles.dateText}>{date.toLocaleDateString()} {date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
                   </View>
                   
                   {event.eventData && (
                     <View style={styles.dataContainer}>
-                      {event.eventData.scenario && <Text style={styles.dataText}>Scenario: <Text style={{fontWeight: '700'}}>{event.eventData.scenario}</Text></Text>}
-                      {event.eventData.financialHealth !== undefined && <Text style={styles.dataText}>Score Result: <Text style={{fontWeight: '700', color: '#0a6a1d'}}>{event.eventData.financialHealth}</Text></Text>}
+                      {event.eventData.scenario && <Text style={styles.dataText}>{t('ui.history.scenario_label', { name: event.eventData.scenario })}</Text>}
+                      {event.eventData.financialHealth !== undefined && <Text style={styles.dataText}>{t('ui.history.score_result', { score: event.eventData.financialHealth })}</Text>}
                     </View>
                   )}
                 </View>

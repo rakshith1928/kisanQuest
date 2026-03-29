@@ -1,55 +1,34 @@
 {
   "id": "market_price",
-  "title": "Market Price Dilemma",
+  "title": "scenarios.market_price.title",
   "season": "Rabi",
   "theme": "Budgeting & Negotiation",
   "nodes": [
     {
       "id": "mp_1",
-      "prompt": "Your wheat harvest is ready. A middleman offers ₹1,400/quintal. The mandi (market) price is ₹1,800 but you must transport it.",
-      "voicePrompt": "गेहूं तैयार है। बिचौलिया ₹1,400 दे रहा है, मंडी में ₹1,800 मिलेंगे। क्या करेंगे?",
+      "prompt": "scenarios.market_price.mp_1.prompt",
+      "voicePrompt": "scenarios.market_price.mp_1.voicePrompt",
       "options": [
         {
           "id": "A",
-          "label": "Sell to middleman (quick, ₹1,400/q)",
-          "voiceKeywords": [
-            "middleman",
-            "bicholia",
-            "बिचौलिया",
-            "here"
-          ],
+          "label": "scenarios.market_price.mp_1.options.A",
+          "voiceKeywords": [ "middleman", "bicholia", "बिचौलिया", "here" ],
           "nextNode": "mp_2a",
-          "financialImpact": {
-            "cash": 28000
-          }
+          "financialImpact": { "cash": 28000 }
         },
         {
           "id": "B",
-          "label": "Transport to mandi (₹1,800/q, ₹2,000 transport cost)",
-          "voiceKeywords": [
-            "mandi",
-            "मंडी",
-            "market",
-            "transport"
-          ],
+          "label": "scenarios.market_price.mp_1.options.B",
+          "voiceKeywords": [ "mandi", "मंडी", "market", "transport" ],
           "nextNode": "mp_2b",
-          "financialImpact": {
-            "cash": 34000
-          }
+          "financialImpact": { "cash": 34000 }
         },
         {
           "id": "C",
-          "label": "Store and wait for better price",
-          "voiceKeywords": [
-            "store",
-            "wait",
-            "ruko",
-            "रुको"
-          ],
+          "label": "scenarios.market_price.mp_1.options.C",
+          "voiceKeywords": [ "store", "wait", "ruko", "रुको" ],
           "nextNode": "mp_2c",
-          "financialImpact": {
-            "cash": -1500
-          },
+          "financialImpact": { "cash": -1500 },
           "successProbability": 0.5
         }
       ]
@@ -58,30 +37,28 @@
       "id": "mp_2a",
       "type": "outcome",
       "result": "neutral",
-      "prompt": "You sold quickly and got ₹28,000. But you left ₹8,000 on the table by not going to the mandi.",
+      "prompt": "scenarios.market_price.mp_2a.prompt",
       "financialImpact": {},
       "financialScoreDelta": 0,
-      "lesson": "[Skill Tested: Negotiation] Always compare prices at multiple buyers. The mandi price is publicly listed on e-NAM (National Agriculture Market app)."
+      "lesson": "scenarios.market_price.mp_2a.lesson"
     },
     {
       "id": "mp_2b",
       "type": "outcome",
       "result": "success",
-      "prompt": "After ₹2,000 transport cost you earned ₹34,000 — ₹6,000 more than the middleman offer!",
+      "prompt": "scenarios.market_price.mp_2b.prompt",
       "financialImpact": {},
       "financialScoreDelta": 10,
-      "lesson": "Transporting to the mandi took extra effort but yielded 21% more income. Collective transport with other farmers reduces cost further."
+      "lesson": "scenarios.market_price.mp_2b.lesson"
     },
     {
       "id": "mp_2c",
       "type": "outcome",
       "result": "risky",
-      "prompt": "Prices fell further. You paid ₹1,500 storage and still sold for ₹1,400.",
-      "financialImpact": {
-        "cash": -1500
-      },
+      "prompt": "scenarios.market_price.mp_2c.prompt",
+      "financialImpact": { "cash": -1500 },
       "financialScoreDelta": -8,
-      "lesson": "Storing grain requires proper facilities and market intelligence. Without these, waiting often leads to losses."
+      "lesson": "scenarios.market_price.mp_2c.lesson"
     }
   ]
 }
