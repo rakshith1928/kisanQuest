@@ -22,8 +22,9 @@ KisanQuest is built on a modern React Native stack using Expo:
 You can easily install the KisanQuest prototype directly on your Android device without needing to set up a development environment.
 
 ### Steps to Install:
-1. Open the following link on your Android mobile device:
-   **[Download KisanQuest Android APK](https://expo.dev/accounts/rachana_2005/projects/kisanquest/builds/1817b746-a39b-4181-8af7-58dd21e63c0a)**
+1. Open one of the following links on your Android mobile device:
+   - **[Official GitHub Release (v1.0.0)](https://github.com/rakshith1928/kisanQuest/releases/tag/v1.0.0)** *(Recommended)*
+   - **[Expo Direct Download](https://expo.dev/accounts/rachana_2005/projects/kisanquest/builds/1817b746-a39b-4181-8af7-58dd21e63c0a)**
 2. Click the **"Install"** or **"Download"** button on the Expo page to download the `.apk` file.
 3. Once downloaded, tap the file to install it. *(Note: You may need to enable "Install from Unknown Sources" in your device settings).*
 4. Launch the app and start your farming adventure!
