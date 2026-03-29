@@ -78,3 +78,13 @@ server/dist/
 .stitch/
 #raw_ip.txt
 "Implementation Plan"
+
+# EAS Build local and binaries
+.eas/
+*.apk
+*.aab
+*.ipa
+*.keystore
+
+# local properties (Android)
+local.properties
