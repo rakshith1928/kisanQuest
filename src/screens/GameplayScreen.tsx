@@ -1,291 +1,422 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  Animated, Easing, Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import LottieView from 'lottie-react-native';
-import { TranslatedText } from '../components/TranslatedText';
+import { LinearGradient } from 'expo-linear-gradient';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
 
-const screenWidth = Dimensions.get('window').width;
+const { width: W } = Dimensions.get('window');
+const XP_TO_NEXT = 1000;
+const MAX_HEARTS = 3;
 
-const xpToNextLevel = 1000;
+// ─── Farmer Reaction ──────────────────────────────────────────────────────────
+function FarmerReaction({ type, visible }: { type: 'correct' | 'wrong' | 'idle'; visible: boolean }) {
+  const scale = useRef(new Animated.Value(0)).current;
+  const bounce = useRef(new Animated.Value(0)).current;
 
-function getWeatherIcon(type: string | undefined) {
-  switch (type) {
-    case 'good_monsoon': return '🌧️';
-    case 'drought': return '☀️';
-    case 'flood': return '🌊';
-    case 'good_winter': return '❄️';
-    case 'cold_wave': return '🥶';
-    case 'unseasonal_rain': return '⛈️';
-    default: return '🌤️';
-  }
+  useEffect(() => {
+    if (visible) {
+      scale.setValue(0);
+      Animated.spring(scale, { toValue: 1, friction: 4, tension: 80, useNativeDriver: true }).start();
+      Animated.loop(Animated.sequence([
+        Animated.timing(bounce, { toValue: -6, duration: 300, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(bounce, { toValue: 0,  duration: 300, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ])).start();
+    } else {
+      scale.setValue(0);
+    }
+  }, [visible, type]);
+
+  if (!visible) return null;
+
+  const isCorrect = type === 'correct';
+  const msg = isCorrect ? 'Nice! You got it! 🌟' : 'Oops! Try again 💡';
+  const bg  = isCorrect ? '#E8F5E9' : '#FFF3E0';
+  const bdr = isCorrect ? '#A5D6A7' : '#FFCC80';
+
+  return (
+    <Animated.View style={[styles.reactionCard, { backgroundColor: bg, borderColor: bdr, transform: [{ scale }, { translateY: bounce }] }]}>
+      <Text style={styles.reactionEmoji}>{isCorrect ? '🧑‍🌾✨' : '🧑‍🌾💭'}</Text>
+      <Text style={[styles.reactionText, { color: isCorrect ? '#2E7D32' : '#E65100' }]}>{msg}</Text>
+    </Animated.View>
+  );
 }
 
-const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }: any) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const handlePressIn = () => { if (!disabled) Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start(); };
-  const handlePressOut = () => {
-    if (!disabled) {
-      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
-      onPress && onPress();
-    }
-  };
+// ─── Floating XP Toast ────────────────────────────────────────────────────────
+function XPToast({ xp, visible }: { xp: number; visible: boolean }) {
+  const y   = useRef(new Animated.Value(0)).current;
+  const op  = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!visible) return;
+    y.setValue(0); op.setValue(1);
+    Animated.parallel([
+      Animated.timing(y,  { toValue: -60, duration: 900, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.sequence([Animated.delay(500), Animated.timing(op, { toValue: 0, duration: 400, useNativeDriver: true })]),
+    ]).start();
+  }, [visible]);
+  if (!visible) return null;
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }], opacity: disabled ? 0.6 : 1 }}>
-      <TouchableOpacity activeOpacity={1} onPressIn={handlePressIn} onPressOut={handlePressOut} style={[styles.btnBase, styles[`btn${variant}` as keyof typeof styles], style]}>
-        {children}
+    <Animated.View style={[styles.xpToast, { opacity: op, transform: [{ translateY: y }] }]}>
+      <Text style={styles.xpToastText}>+{xp} XP ✨</Text>
+    </Animated.View>
+  );
+}
+
+// ─── Option Answer Card ───────────────────────────────────────────────────────
+function OptionCard({ label, onPress, state, disabled }: {
+  label: string; onPress: () => void;
+  state: 'idle' | 'correct' | 'wrong'; disabled: boolean;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const shakeX = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (state === 'correct') {
+      Animated.sequence([
+        Animated.timing(scale, { toValue: 1.07, duration: 120, useNativeDriver: true }),
+        Animated.spring(scale, { toValue: 1, friction: 3, useNativeDriver: true }),
+      ]).start();
+    }
+    if (state === 'wrong') {
+      Animated.sequence([
+        Animated.timing(shakeX, { toValue: 10,  duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeX, { toValue: -10, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeX, { toValue: 8,   duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeX, { toValue: -8,  duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeX, { toValue: 0,   duration: 50, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [state]);
+
+  const bg  = state === 'correct' ? '#E8F5E9' : state === 'wrong' ? '#FFEBEE' : '#FFFFFF';
+  const bdr = state === 'correct' ? '#66BB6A' : state === 'wrong' ? '#EF9A9A' : '#E0E0E0';
+
+  return (
+    <Animated.View style={{ transform: [{ scale }, { translateX: shakeX }] }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={onPress}
+        disabled={disabled}
+        style={[styles.optionCard, { backgroundColor: bg, borderColor: bdr }]}
+      >
+        {state === 'correct' && <Text style={styles.optionIcon}>✅</Text>}
+        {state === 'wrong'   && <Text style={styles.optionIcon}>❌</Text>}
+        {state === 'idle'    && <View style={styles.optionRadio} />}
+        <Text style={[styles.optionLabel, state === 'correct' && { color: '#2E7D32', fontWeight: '900' }, state === 'wrong' && { color: '#C62828' }]}>
+          {label}
+        </Text>
       </TouchableOpacity>
     </Animated.View>
   );
-};
+}
 
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function GameplayScreen({ navigation }: any) {
-  const { t } = useTranslation();
-  const [gameState, setGameState] = useState(gameEngine.getState());
+  const [gameState, setGameState]   = useState(gameEngine.getState());
   const [lastOutcome, setLastOutcome] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const node = gameEngine.getCurrentNode();
+  const [chosenOption, setChosenOption] = useState<string | null>(null);
+  const [reactionType, setReactionType] = useState<'correct' | 'wrong' | 'idle'>('idle');
+  const [showReaction, setShowReaction] = useState(false);
+  const [showXP, setShowXP]           = useState(false);
+  const [hearts, setHearts]           = useState(MAX_HEARTS);
+  const [showConfetti, setShowConfetti] = useState(false);
 
-  const xpProgressAnim = useRef(new Animated.Value(0)).current;
+  const node = gameEngine.getCurrentNode();
+  const xpAnim = useRef(new Animated.Value(0)).current;
+  const cardScale = useRef(new Animated.Value(1)).current;
+  const cardFade  = useRef(new Animated.Value(1)).current;
+  const confettiRef = useRef<any>(null);
 
   useEffect(() => {
-    const unsubscribe = gameEngine.getStateMachine().onStateChange(() => {
-      setGameState(gameEngine.getState());
-    });
-
-    return unsubscribe;
+    const unsub = gameEngine.getStateMachine().onStateChange(() => setGameState(gameEngine.getState()));
+    return unsub;
   }, []);
 
   useEffect(() => {
-    // Animate XP bar whenever XP changes
-    const currentExp = gameState.player.score.xp % xpToNextLevel;
-    const percentage = (currentExp / xpToNextLevel) * 100;
-    
-    Animated.spring(xpProgressAnim, {
-      toValue: percentage,
-      useNativeDriver: false,
-    }).start();
+    const xpPct = ((gameState.player.score.xp % XP_TO_NEXT) / XP_TO_NEXT) * 100;
+    Animated.spring(xpAnim, { toValue: xpPct, useNativeDriver: false }).start();
   }, [gameState.player.score.xp]);
 
+  // Auto-advance early phases
   useEffect(() => {
     const p = gameState.phase;
-    if (p === 'SEASON_START' || p === 'ONBOARDING' || p === 'FARM_CREATION') {
-        try {
-            const sm = gameEngine.getStateMachine();
-            if (p === 'ONBOARDING') sm.transition('FARM_CREATION');
-            if (p === 'ONBOARDING' || p === 'FARM_CREATION') sm.transition('SEASON_START');
-            
-            if (!gameEngine.getState().scenario) {
-                gameEngine.loadRandomScenario().then(() => {
-                    sm.transition('WEATHER_REVEAL');
-                    setGameState(gameEngine.getState());
-                });
-            } else {
-                sm.transition('WEATHER_REVEAL');
-                setGameState(gameEngine.getState());
-            }
-        } catch(e) { console.warn("Auto-transition failed", e); }
+    if (['SEASON_START', 'ONBOARDING', 'FARM_CREATION'].includes(p as string)) {
+      try {
+        const sm = gameEngine.getStateMachine();
+        if (p === 'ONBOARDING') sm.transition('FARM_CREATION');
+        if (p === 'ONBOARDING' || p === 'FARM_CREATION') sm.transition('SEASON_START');
+        if (!gameEngine.getState().scenario) {
+          gameEngine.loadRandomScenario().then(() => { sm.transition('WEATHER_REVEAL'); setGameState(gameEngine.getState()); });
+        } else { sm.transition('WEATHER_REVEAL'); setGameState(gameEngine.getState()); }
+      } catch (e) { console.warn('Auto-transition failed', e); }
     } else if (!gameState.scenario && ['WEATHER_REVEAL', 'MARKET_UPDATE', 'DECISION_POINT'].includes(p as string)) {
-        gameEngine.loadRandomScenario().then(() => setGameState(gameEngine.getState()));
+      gameEngine.loadRandomScenario().then(() => setGameState(gameEngine.getState()));
     }
   }, [gameState.phase, gameState.scenario]);
 
-  const handleAdvancePhase = (nextPhase: any) => {
+  const advancePhase = (next: any) => {
+    try { gameEngine.getStateMachine().transition(next); setGameState(gameEngine.getState()); } catch (e) {}
+  };
+
+  // Bounce card on new question
+  const bounceCard = useCallback(() => {
+    cardScale.setValue(0.92); cardFade.setValue(0);
+    Animated.parallel([
+      Animated.spring(cardScale, { toValue: 1, friction: 5, useNativeDriver: true }),
+      Animated.timing(cardFade,  { toValue: 1, duration: 250, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const handleChoice = (optId: string, optIndex: number) => {
     if (isProcessing) return;
-    try {
-        gameEngine.getStateMachine().transition(nextPhase);
-        setGameState(gameEngine.getState());
-    } catch (e) {
-        console.log("Phase transition error", e);
+    setIsProcessing(true);
+    setChosenOption(optId);
+
+    const outcome = gameEngine.processDecision(optId) || {};
+    setLastOutcome(outcome);
+
+    const correct = ((outcome as any).healthDelta || 0) >= 0;
+    setReactionType(correct ? 'correct' : 'wrong');
+    setShowReaction(true);
+    if (correct) {
+      setShowXP(true);
+      confettiRef.current?.start();
+      setShowConfetti(false);
+    } else {
+      setHearts(h => Math.max(0, h - 1));
+    }
+
+    setTimeout(() => {
+      setShowReaction(false);
+      setShowXP(false);
+      const result = gameEngine.decisionTree.chooseOption(optIndex);
+      if (result?.isEnd) {
+        if (gameEngine.getState().eventsCompleted < 5) {
+          gameEngine.loadRandomScenario().then(() => {
+            setGameState(gameEngine.getState());
+            setChosenOption(null);
+            setIsProcessing(false);
+            setLastOutcome(null);
+            bounceCard();
+          });
+          return;
+        } else {
+          gameEngine.getStateMachine().transition('HARVEST_REVIEW');
+        }
+      }
+      setGameState(gameEngine.getState());
+      setChosenOption(null);
+      setIsProcessing(false);
+      setLastOutcome(null);
+      bounceCard();
+    }, 2200);
+  };
+
+  const handleNextAfterOutcome = () => {
+    if (gameEngine.getState().eventsCompleted < 5) {
+      gameEngine.loadRandomScenario().then(() => { setGameState(gameEngine.getState()); bounceCard(); });
+    } else {
+      gameEngine.getStateMachine().transition('HARVEST_REVIEW');
+      setGameState(gameEngine.getState());
     }
   };
 
-  const currentPhase = gameState.phase;
+  const xpWidth = xpAnim.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] });
+  const phase   = gameState.phase;
+  const evDone  = gameEngine.getState().eventsCompleted;
 
-  if (currentPhase === 'HARVEST_REVIEW') {
+  // Harvest redirect
+  if (phase === 'HARVEST_REVIEW') {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
-        <Text style={styles.eventTitle}>Season Complete 🎉</Text>
-        <ScaleButton variant="primary" style={{ marginTop: 24, paddingHorizontal: 32 }} onPress={() => navigation.replace('Harvest', { outcome: lastOutcome })}>
-          <Text style={styles.btnTextPrimary}>View Harvest Results</Text>
-        </ScaleButton>
-      </View>
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ConfettiCannon count={200} origin={{ x: W / 2, y: -20 }} fadeOut autoStart />
+        <Text style={{ fontSize: 64, marginBottom: 16 }}>🎉</Text>
+        <Text style={styles.harvestTitle}>Season Complete!</Text>
+        <Text style={styles.harvestSub}>Amazing work, farmer! 🌟</Text>
+        <TouchableOpacity
+          style={styles.harvestBtn}
+          onPress={() => navigation.replace('Harvest', { outcome: lastOutcome })}
+        >
+          <Text style={styles.harvestBtnText}>View Harvest Results 🌾</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     );
   }
 
-  const renderWeatherReveal = () => (
-      <View style={styles.eventCard}>
-         <Text style={styles.eventTitle}>Weather Forecast ☁️</Text>
-         <Text style={styles.eventDescription}>The season is starting. Predictable weather is crucial for a healthy harvest. Let's see what the skies bring.</Text>
-         <ScaleButton onPress={() => handleAdvancePhase('MARKET_UPDATE')} variant="primary" style={{marginTop: 24}}>
-             <Text style={styles.btnTextPrimary}>Continue →</Text>
-         </ScaleButton>
-      </View>
+  // ── Weather Reveal ──────────────────────────────────────────────────────────
+  const renderWeather = () => (
+    <LinearGradient colors={['#1565C0', '#42A5F5', '#B3E5FC']} style={styles.phaseCard}>
+      <Text style={styles.phaseBigEmoji}>🌤️</Text>
+      <Text style={styles.phaseTitle}>Weather Forecast</Text>
+      <Text style={styles.phaseDesc}>
+        The season is starting! Predictable weather is crucial for a healthy harvest.
+        Let's see what the skies bring this season.
+      </Text>
+      <TouchableOpacity style={styles.phaseBtn} onPress={() => advancePhase('MARKET_UPDATE')}>
+        <Text style={styles.phaseBtnText}>Continue →</Text>
+      </TouchableOpacity>
+    </LinearGradient>
   );
 
-  const renderMarketUpdate = () => (
-      <View style={[styles.eventCard, { backgroundColor: '#E5F3FF' }]}>
-         <Text style={[styles.eventTitle, {color: '#1CB0F6'}]}>Mandi Market Pulse 📈</Text>
-         <Text style={[styles.eventDescription, {color: '#4B4B4B'}]}>Market prices fluctuate based on supply and demand. Unlocked skills like Negotiation will boost your final sale price at Harvest.</Text>
-         <ScaleButton onPress={() => handleAdvancePhase('DECISION_POINT')} variant="secondary" style={{marginTop: 24}}>
-             <Text style={styles.btnTextSecondary}>Start Farm Events →</Text>
-         </ScaleButton>
-      </View>
+  // ── Market Update ───────────────────────────────────────────────────────────
+  const renderMarket = () => (
+    <LinearGradient colors={['#1B5E20', '#388E3C', '#A5D6A7']} style={styles.phaseCard}>
+      <Text style={styles.phaseBigEmoji}>📈</Text>
+      <Text style={styles.phaseTitle}>Mandi Market Pulse</Text>
+      <Text style={styles.phaseDesc}>
+        Market prices fluctuate based on supply and demand. Skills like Negotiation will boost your sale price at harvest!
+      </Text>
+      <TouchableOpacity style={[styles.phaseBtn, { backgroundColor: '#FFC800' }]} onPress={() => advancePhase('DECISION_POINT')}>
+        <Text style={[styles.phaseBtnText, { color: '#1B3D01' }]}>Start Farm Events 🚀</Text>
+      </TouchableOpacity>
+    </LinearGradient>
   );
 
-  const renderDecisionPoint = () => (
-      <View style={styles.eventCard}>
-          <Text style={styles.eventTitle}>{node?.options && node.options.length > 0 ? "Farm Event" : "Event Outcome 💡"}</Text>
-          <Text style={styles.eventDescription}>{node?.prompt}</Text>
+  // ── Decision Point ──────────────────────────────────────────────────────────
+  const renderDecision = () => {
+    const hasOptions = node?.options && node.options.length > 0;
+    const isOutcome  = (node as any)?.type === 'outcome';
 
-          {/* Render the lesson if it's an outcome node */}
-          {(node as any)?.lesson && (
-              <View style={[styles.outcomeBanner, { backgroundColor: '#FFF0D3', borderColor: '#FFC800' }]}>
-                  <Text style={[styles.outcomeMessage, { color: '#D3A500', marginBottom: 8 }]}>💡 Lesson Learned</Text>
-                  <Text style={{ fontSize: 16, color: '#4B4B4B', fontWeight: '600', textAlign: 'center', lineHeight: 22 }}>
-                      {(node as any).lesson}
+    return (
+      <View>
+        {/* Progress Bar */}
+        <View style={styles.progressRow}>
+          <Text style={styles.progressLabel}>Event {Math.min(evDone + 1, 5)} of 5</Text>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${(Math.min(evDone, 5) / 5) * 100}%` }]} />
+          </View>
+          <View style={styles.heartsRow}>
+            {Array.from({ length: MAX_HEARTS }).map((_, i) => (
+              <Text key={i} style={{ fontSize: 16, opacity: i < hearts ? 1 : 0.25 }}>❤️</Text>
+            ))}
+          </View>
+        </View>
+
+        {/* Question Card */}
+        <Animated.View style={[styles.questionCard, { transform: [{ scale: cardScale }], opacity: cardFade }]}>
+          {/* floating animation indicator */}
+          <LinearGradient colors={['#F1F8E9', '#FFFFFF']} style={styles.questionGradient}>
+            <Text style={styles.questionEmoji}>🧠</Text>
+            <Text style={styles.questionText}>{node?.prompt || '...'}</Text>
+          </LinearGradient>
+        </Animated.View>
+
+        {/* Lesson */}
+        {(node as any)?.lesson && (
+          <View style={styles.lessonBanner}>
+            <Text style={styles.lessonTitle}>💡 Lesson Learned</Text>
+            <Text style={styles.lessonBody}>{(node as any).lesson}</Text>
+          </View>
+        )}
+
+        {/* Outcome feedback */}
+        {lastOutcome?.message && (
+          <View style={[styles.outcomeBanner, { borderColor: (lastOutcome.healthDelta || 0) >= 0 ? '#66BB6A' : '#EF9A9A' }]}>
+            <Text style={[styles.outcomeMsg, { color: (lastOutcome.healthDelta || 0) >= 0 ? '#2E7D32' : '#C62828' }]}>
+              {lastOutcome.message}
+            </Text>
+            <View style={styles.outcomeStats}>
+              {lastOutcome.financialChanges?.cash !== undefined && (
+                <View style={[styles.outcomeStat, { backgroundColor: lastOutcome.financialChanges.cash >= 0 ? '#E8F5E9' : '#FFEBEE' }]}>
+                  <Text style={[styles.outcomeStatText, { color: lastOutcome.financialChanges.cash >= 0 ? '#2E7D32' : '#C62828' }]}>
+                    {lastOutcome.financialChanges.cash > 0 ? '+' : ''}₹{lastOutcome.financialChanges.cash}
                   </Text>
+                </View>
+              )}
+              <View style={[styles.outcomeStat, { backgroundColor: '#E3F2FD' }]}>
+                <Text style={[styles.outcomeStatText, { color: '#1565C0' }]}>+{lastOutcome.literacyPoints || 0} LP</Text>
               </View>
-          )}
-
-          {lastOutcome?.message && (
-            <View style={styles.outcomeBanner}>
-              <Text style={styles.outcomeMessage}>{lastOutcome.message}</Text>
-              <View style={styles.outcomeStatsRow}>
-                {lastOutcome.financialChanges?.cash !== undefined && (
-                  <Text style={[styles.outcomeStatText, {color: lastOutcome.financialChanges.cash >= 0 ? '#58CC02' : '#FF4B4B'}]}>
-                    Cash: {lastOutcome.financialChanges.cash > 0 ? '+' : ''}{lastOutcome.financialChanges.cash}
-                  </Text>
-                )}
-                {lastOutcome.literacyPoints !== undefined && (
-                  <Text style={[styles.outcomeStatText, {color: '#1CB0F6'}]}>
-                    +{lastOutcome.literacyPoints} LP
-                  </Text>
-                )}
-                <Text style={[styles.outcomeStatText, {color: '#FFC800'}]}>+150 XP</Text>
+              <View style={[styles.outcomeStat, { backgroundColor: '#FFF9C4' }]}>
+                <Text style={[styles.outcomeStatText, { color: '#F57F17' }]}>+150 XP</Text>
               </View>
             </View>
-          )}
-
-          <View style={styles.actionButtons}>
-            {node?.options && node.options.length > 0 ? (
-                node.options.map((opt: any, index: number) => {
-                   // Cycle variants for duolingo aesthetic
-                   const variant = index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary";
-                   return (
-                     <ScaleButton
-                        key={opt.id || index}
-                        disabled={isProcessing}
-                        variant={variant}
-                        onPress={() => {
-                            if (isProcessing) return;
-                            setIsProcessing(true);
-                            const outcome = gameEngine.processDecision(opt.id) || {};
-                            setLastOutcome(outcome);
-                            
-                            setTimeout(() => {
-                               // Next node or map to Harvest if scenario tree is complete
-                               const result = gameEngine.decisionTree.chooseOption(index);
-                               if (result?.isEnd) {
-                                   if (gameEngine.getState().eventsCompleted < 5) {
-                                       gameEngine.loadRandomScenario().then(() => {
-                                           setGameState(gameEngine.getState());
-                                           setIsProcessing(false);
-                                           setLastOutcome(null);
-                                       });
-                                       return;
-                                   } else {
-                                       gameEngine.getStateMachine().transition('HARVEST_REVIEW');
-                                   }
-                               }
-                               setGameState(gameEngine.getState());
-                               setIsProcessing(false);
-                               setLastOutcome(null);
-                            }, 2500); // slightly longer wait to read the outcome banner
-                        }}
-                     >
-                        <Text style={styles[`btnText${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles]}>
-                            {isProcessing ? 'Processing...' : opt.label}
-                        </Text>
-                     </ScaleButton>
-                   );
-                })
-            ) : (
-                <ScaleButton
-                    variant="primary"
-                    onPress={() => {
-                        if (gameEngine.getState().eventsCompleted < 5) {
-                            gameEngine.loadRandomScenario().then(() => {
-                                setGameState(gameEngine.getState());
-                            });
-                        } else {
-                            gameEngine.getStateMachine().transition('HARVEST_REVIEW');
-                            setGameState(gameEngine.getState());
-                        }
-                    }}
-                >
-                    <Text style={styles.btnTextPrimary}>
-                        {gameEngine.getState().eventsCompleted < 3 ? "Next Event →" : "Complete Season →"}
-                    </Text>
-                </ScaleButton>
-            )}
           </View>
-      </View>
-  );
+        )}
 
-  const xpWidth = xpProgressAnim.interpolate({
-      inputRange: [0, 100],
-      outputRange: ['0%', '100%']
-  });
+        {/* Farmer Reaction */}
+        <FarmerReaction type={reactionType} visible={showReaction} />
+        <XPToast xp={150} visible={showXP} />
+
+        {/* Options / Next */}
+        <View style={styles.optionsGrid}>
+          {hasOptions ? (
+            (node?.options ?? []).map((opt: any, i: number) => {
+              const st = chosenOption === null ? 'idle'
+                : chosenOption === opt.id
+                  ? ((lastOutcome?.healthDelta || 0) >= 0 ? 'correct' : 'wrong')
+                  : 'idle';
+              return (
+                <OptionCard
+                  key={opt.id || i}
+                  label={isProcessing ? (chosenOption === opt.id ? 'Processing...' : opt.label) : opt.label}
+                  state={st}
+                  disabled={isProcessing}
+                  onPress={() => handleChoice(opt.id, i)}
+                />
+              );
+            })
+          ) : (
+            <TouchableOpacity style={styles.nextBtn} onPress={handleNextAfterOutcome}>
+              <Text style={styles.nextBtnText}>{evDone < 3 ? 'Next Event →' : 'Complete Season 🌾'}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* RPG Top Bar */}
+      <ConfettiCannon ref={confettiRef} count={80} origin={{ x: W / 2, y: 100 }} autoStart={false} fadeOut />
+
+      {/* ── Top Bar ─────────────────────────────────────────── */}
       <View style={styles.topBar}>
-          <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>Lvl {gameState.player.score.level}</Text>
-          </View>
-          <View style={styles.xpBarContainer}>
-             <Animated.View style={[styles.xpBarFill, { width: xpWidth }]} />
-             <Text style={styles.xpTextOverlay}>{gameState.player.score.xp % xpToNextLevel} / {xpToNextLevel}</Text>
-          </View>
-          <View style={styles.streakBadge}>
-              <Text style={styles.streakText}>🔥 {gameState.player.score.streak}</Text>
-          </View>
+        <View style={styles.levelPill}>
+          <Text style={styles.levelText}>⚔️ Lv {gameState.player.score.level}</Text>
+        </View>
+        <View style={styles.xpTrack}>
+          <Animated.View style={[styles.xpFill, { width: xpWidth }]} />
+          <Text style={styles.xpOverlay}>{gameState.player.score.xp % XP_TO_NEXT} XP</Text>
+        </View>
+        <View style={styles.streakPill}>
+          <Text style={styles.streakText}>🔥 {gameState.player.score.streak}</Text>
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Text style={styles.seasonText}>
-            Season {gameState.player.farm.season}
-          </Text>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {/* ── Finance Strip ────────────────────────────────────── */}
+        <View style={styles.financeStrip}>
+          <View style={[styles.finChip, { backgroundColor: '#E8F5E9' }]}>
+            <Text style={styles.finLabel}>💰 Cash</Text>
+            <Text style={[styles.finValue, { color: '#2E7D32' }]}>₹{gameState.player.finances.cash.toLocaleString('en-IN')}</Text>
+          </View>
+          <View style={[styles.finChip, { backgroundColor: '#FFEBEE' }]}>
+            <Text style={styles.finLabel}>📉 Debt</Text>
+            <Text style={[styles.finValue, { color: '#C62828' }]}>₹{gameState.player.finances.debt.toLocaleString('en-IN')}</Text>
+          </View>
+          <View style={[styles.finChip, { backgroundColor: '#FFF9C4' }]}>
+            <Text style={styles.finLabel}>🏦 Savings</Text>
+            <Text style={[styles.finValue, { color: '#F57F17' }]}>₹{gameState.player.finances.savings.toLocaleString('en-IN')}</Text>
+          </View>
+        </View>
+
+        {/* ── Phase Content ──────────────────────────────────────── */}
+        {phase === 'WEATHER_REVEAL' && renderWeather()}
+        {phase === 'MARKET_UPDATE'  && renderMarket()}
+        {phase === 'DECISION_POINT' && renderDecision()}
+
+        {/* ── Season + Skills Header ────────────────────────────── */}
+        <View style={styles.footer}>
+          <Text style={styles.seasonLabel}>Season {gameState.player.farm.season}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('SkillTree')} style={styles.skillBtn}>
-             <Text style={styles.skillBtnText}>🧠 Skills</Text>
+            <Text style={styles.skillBtnText}>🧠 Skills</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Financial Status Bar */}
-        <View style={styles.statusBar}>
-          <View style={[styles.statItem, { backgroundColor: '#F2FBF1', borderColor: '#58CC02' }]}>
-            <TranslatedText tKey="ui.gameplay.cash" style={[styles.statLabel, { color: '#58CC02' }]} />
-            <Text style={[styles.statValue, { color: '#46A302' }]}>₹{gameState.player.finances.cash}</Text>
-          </View>
-          <View style={[styles.statItem, { backgroundColor: '#FFF4F4', borderColor: '#FF4B4B' }]}>
-            <TranslatedText tKey="ui.gameplay.debt" style={[styles.statLabel, { color: '#FF4B4B' }]} />
-            <Text style={[styles.statValue, { color: '#DA2C2C' }]}>₹{gameState.player.finances.debt}</Text>
-          </View>
-          <View style={[styles.statItem, { backgroundColor: '#FFF0D3', borderColor: '#FFC800' }]}>
-            <TranslatedText tKey="ui.gameplay.savings" style={[styles.statLabel, { color: '#FFC800' }]} />
-            <Text style={[styles.statValue, { color: '#D3A500' }]}>₹{gameState.player.finances.savings}</Text>
-          </View>
-        </View>
-
-        {/* Dynamic Phase Content */}
-        {currentPhase === 'WEATHER_REVEAL' && renderWeatherReveal()}
-        {currentPhase === 'MARKET_UPDATE' && renderMarketUpdate()}
-        {currentPhase === 'DECISION_POINT' && renderDecisionPoint()}
 
       </ScrollView>
     </SafeAreaView>
@@ -293,42 +424,88 @@ export default function GameplayScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F6F9FA' },
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, backgroundColor: '#FFFFFF', borderBottomWidth: 2, borderBottomColor: '#E5E5E5' },
-  levelBadge: { backgroundColor: '#E5F3FF', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 2, borderColor: '#1CB0F6' },
-  levelText: { color: '#1CB0F6', fontWeight: '800', fontSize: 14 },
-  xpBarContainer: { flex: 1, height: 20, backgroundColor: '#E5E5E5', borderRadius: 10, marginHorizontal: 12, overflow: 'hidden', justifyContent: 'center' },
-  xpBarFill: { position: 'absolute', height: '100%', backgroundColor: '#FFC800', borderRadius: 10 },
-  xpTextOverlay: { textAlign: 'center', fontSize: 11, fontWeight: '800', color: '#4B4B4B', zIndex: 1 },
-  streakBadge: { backgroundColor: '#FFF4F4', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 2, borderColor: '#FF4B4B' },
-  streakText: { color: '#FF4B4B', fontWeight: '800', fontSize: 14 },
-  
-  scroll: { flexGrow: 1, padding: 24, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  seasonText: { fontSize: 32, fontWeight: '800', color: '#4B4B4B' },
-  skillBtn: { backgroundColor: '#E5F3FF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, borderWidth: 2, borderColor: '#1CB0F6' },
-  skillBtnText: { color: '#1CB0F6', fontWeight: '800', fontSize: 16 },
-  
-  statusBar: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 },
-  statItem: { flex: 1, padding: 12, borderRadius: 16, marginHorizontal: 4, alignItems: 'center', borderWidth: 2 },
-  statLabel: { fontSize: 12, fontWeight: '800', marginBottom: 4, textTransform: 'uppercase' },
-  statValue: { fontSize: 16, fontWeight: '800' },
-  
-  eventCard: { backgroundColor: '#FFFFFF', borderRadius: 28, padding: 28, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, borderWidth: 2, borderColor: '#E5E5E5' },
-  eventTitle: { fontSize: 24, fontWeight: '800', color: '#4B4B4B', marginBottom: 12 },
-  eventDescription: { fontSize: 18, color: '#777777', lineHeight: 26, marginBottom: 28, fontWeight: '600' },
-  actionButtons: { gap: 16 },
-  
-  outcomeBanner: { alignItems: 'center', marginBottom: 24, padding: 16, backgroundColor: '#F2FBF1', borderRadius: 20, borderWidth: 2, borderColor: '#58CC02' },
-  outcomeMessage: { fontSize: 18, color: '#46A302', fontWeight: '800', marginBottom: 12, textAlign: 'center' },
-  outcomeStatsRow: { flexDirection: 'row', gap: 16, flexWrap: 'wrap', justifyContent: 'center' },
-  outcomeStatText: { fontSize: 15, fontWeight: '800' },
-  
-  btnBase: { borderRadius: 20, paddingVertical: 18, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, paddingHorizontal: 24 },
-  btnPrimary: { backgroundColor: '#58CC02', borderBottomColor: '#46A302' },
-  btnSecondary: { backgroundColor: '#E5F3FF', borderBottomColor: '#BCE4FF', borderWidth: 2, borderColor: '#1CB0F6', borderBottomWidth: 4 },
-  btnTertiary: { backgroundColor: '#FFFFFF', borderBottomColor: '#E5E5E5', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 4 },
-  btnTextPrimary: { color: '#1B3D01', fontSize: 18, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  btnTextSecondary: { color: '#1CB0F6', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 },
-  btnTextTertiary: { color: '#AFAFAF', fontSize: 18, fontWeight: '800', textTransform: 'uppercase',  letterSpacing: 0.5 }
+  container: { flex: 1, backgroundColor: '#F1F8E9' },
+
+  // Top bar
+  topBar: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: '#FFFFFF', borderBottomWidth: 2, borderBottomColor: '#E8F5E9' },
+  levelPill: { backgroundColor: '#1565C0', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  levelText: { color: '#FFF', fontWeight: '800', fontSize: 12 },
+  xpTrack: { flex: 1, height: 18, backgroundColor: '#E8F5E9', borderRadius: 9, overflow: 'hidden', justifyContent: 'center' },
+  xpFill: { position: 'absolute', height: '100%', backgroundColor: '#FFC800', borderRadius: 9 },
+  xpOverlay: { textAlign: 'center', fontSize: 10, fontWeight: '800', color: '#37474F', zIndex: 1 },
+  streakPill: { backgroundColor: '#FFEBEE', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1.5, borderColor: '#FFCDD2' },
+  streakText: { color: '#C62828', fontWeight: '800', fontSize: 12 },
+
+  scroll: { padding: 16, paddingBottom: 40 },
+
+  // Finance strip
+  financeStrip: { flexDirection: 'row', gap: 8, marginBottom: 18 },
+  finChip: { flex: 1, borderRadius: 14, padding: 10, alignItems: 'center' },
+  finLabel: { fontSize: 10, fontWeight: '700', color: '#78909C', marginBottom: 3 },
+  finValue: { fontSize: 12, fontWeight: '900' },
+
+  // Phase cards (weather/market)
+  phaseCard: { borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.10, shadowRadius: 12, elevation: 5 },
+  phaseBigEmoji: { fontSize: 56, marginBottom: 12 },
+  phaseTitle: { fontSize: 24, fontWeight: '900', color: '#FFFFFF', marginBottom: 10 },
+  phaseDesc: { fontSize: 15, color: 'rgba(255,255,255,0.9)', fontWeight: '600', textAlign: 'center', lineHeight: 22, marginBottom: 24 },
+  phaseBtn: { backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 28, borderBottomWidth: 3, borderBottomColor: 'rgba(0,0,0,0.1)' },
+  phaseBtnText: { fontSize: 16, fontWeight: '900', color: '#1565C0' },
+
+  // Progress bar
+  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  progressLabel: { fontSize: 12, fontWeight: '800', color: '#78909C', width: 68 },
+  progressTrack: { flex: 1, height: 10, backgroundColor: '#C8E6C9', borderRadius: 5, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: '#43A047', borderRadius: 5 },
+  heartsRow: { flexDirection: 'row', gap: 2 },
+
+  // Question Card
+  questionCard: { borderRadius: 24, overflow: 'hidden', marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.10, shadowRadius: 14, elevation: 6 },
+  questionGradient: { padding: 24, alignItems: 'center' },
+  questionEmoji: { fontSize: 44, marginBottom: 12 },
+  questionText: { fontSize: 19, fontWeight: '800', color: '#2E3A23', textAlign: 'center', lineHeight: 28 },
+
+  // Lesson banner
+  lessonBanner: { backgroundColor: '#FFF9C4', borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1.5, borderColor: '#F9A825' },
+  lessonTitle: { fontSize: 14, fontWeight: '800', color: '#F57F17', marginBottom: 4 },
+  lessonBody: { fontSize: 14, fontWeight: '600', color: '#5D4037', lineHeight: 20 },
+
+  // Outcome banner
+  outcomeBanner: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 2 },
+  outcomeMsg: { fontSize: 15, fontWeight: '800', textAlign: 'center', marginBottom: 10 },
+  outcomeStats: { flexDirection: 'row', justifyContent: 'center', gap: 8, flexWrap: 'wrap' },
+  outcomeStat: { borderRadius: 10, paddingHorizontal: 12, paddingVertical: 4 },
+  outcomeStatText: { fontSize: 13, fontWeight: '800' },
+
+  // Reaction
+  reactionCard: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, padding: 12, marginBottom: 16, borderWidth: 1.5 },
+  reactionEmoji: { fontSize: 28 },
+  reactionText: { fontSize: 15, fontWeight: '800', flex: 1 },
+
+  // XP Toast
+  xpToast: { position: 'absolute', top: 100, alignSelf: 'center', backgroundColor: '#FFC800', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  xpToastText: { fontSize: 16, fontWeight: '900', color: '#1B3D01' },
+
+  // Option cards
+  optionsGrid: { gap: 12, marginBottom: 20 },
+  optionCard: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 18, padding: 16, borderWidth: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
+  optionRadio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2.5, borderColor: '#B0BEC5' },
+  optionIcon: { fontSize: 22 },
+  optionLabel: { flex: 1, fontSize: 16, fontWeight: '700', color: '#37474F', lineHeight: 22 },
+
+  // Next button (for outcome-only nodes)
+  nextBtn: { backgroundColor: '#43A047', borderRadius: 18, paddingVertical: 18, alignItems: 'center', borderBottomWidth: 4, borderBottomColor: '#2E7D32' },
+  nextBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '900' },
+
+  // Footer
+  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
+  seasonLabel: { fontSize: 22, fontWeight: '900', color: '#2E3A23' },
+  skillBtn: { backgroundColor: '#E3F2FD', paddingHorizontal: 16, paddingVertical: 9, borderRadius: 14, borderWidth: 2, borderColor: '#90CAF9' },
+  skillBtnText: { color: '#1565C0', fontWeight: '800', fontSize: 14 },
+
+  // Harvest redirect
+  harvestTitle: { fontSize: 30, fontWeight: '900', color: '#2E3A23', marginBottom: 8 },
+  harvestSub: { fontSize: 17, fontWeight: '600', color: '#558B2F', marginBottom: 32 },
+  harvestBtn: { backgroundColor: '#43A047', borderRadius: 20, paddingVertical: 18, paddingHorizontal: 40, borderBottomWidth: 5, borderBottomColor: '#2E7D32' },
+  harvestBtnText: { color: '#FFFFFF', fontSize: 18, fontWeight: '900' },
 });

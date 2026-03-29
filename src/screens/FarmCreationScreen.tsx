@@ -22,20 +22,20 @@ const { width: W, height: H } = Dimensions.get('window');
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const CROPS = [
-  { id: 'Rice',      emoji: '🌾', label: 'Rice',      water: 0.9, profit: 65000, risk: 'Low',    recommended: false, color: '#43A047' },
-  { id: 'Wheat',     emoji: '🌿', label: 'Wheat',     water: 0.6, profit: 52000, risk: 'Low',    recommended: true,  color: '#F9A825' },
-  { id: 'Cotton',    emoji: '☁️', label: 'Cotton',    water: 0.5, profit: 80000, risk: 'Medium', recommended: false, color: '#29B6F6' },
-  { id: 'Sugarcane', emoji: '🎋', label: 'Sugarcane', water: 0.95,profit: 95000, risk: 'High',   recommended: false, color: '#AB47BC' },
+  { id: 'Rice', emoji: '🌾', label: 'Rice', water: 0.9, profit: 65000, risk: 'Low', recommended: false, color: '#43A047' },
+  { id: 'Wheat', emoji: '🌿', label: 'Wheat', water: 0.6, profit: 52000, risk: 'Low', recommended: true, color: '#F9A825' },
+  { id: 'Cotton', emoji: '☁️', label: 'Cotton', water: 0.5, profit: 80000, risk: 'Medium', recommended: false, color: '#29B6F6' },
+  { id: 'Sugarcane', emoji: '🎋', label: 'Sugarcane', water: 0.95, profit: 95000, risk: 'High', recommended: false, color: '#AB47BC' },
 ];
 
-const WEATHER = { condition: 'Sunny', temp: '32°C', emoji: '☀️',  gradient: ['#1565C0','#42A5F5','#A5D6A7'] as const };
+const WEATHER = { condition: 'Sunny', temp: '32°C', emoji: '☀️', gradient: ['#1565C0', '#42A5F5', '#A5D6A7'] as const };
 
 const SOIL = { type: 'Red Soil', quality: 'Good', season: 'Summer', seasonEmoji: '☀️' };
 
 const BUDGET_MILESTONES = [
-  { value: 10000,  label: '₹10k', emoji: '🌱' },
-  { value: 50000,  label: '₹50k', emoji: '🚜' },
-  { value: 100000, label: '₹1L',  emoji: '🏡' },
+  { value: 10000, label: '₹10k', emoji: '🌱' },
+  { value: 50000, label: '₹50k', emoji: '🚜' },
+  { value: 100000, label: '₹1L', emoji: '🏡' },
 ];
 
 const riskColor = (risk: string) =>
@@ -48,7 +48,7 @@ function Cloud({ style }: { style: any }) {
     Animated.loop(
       Animated.sequence([
         Animated.timing(anim, { toValue: W + 80, duration: 14000, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: -80,    duration: 0,      useNativeDriver: true }),
+        Animated.timing(anim, { toValue: -80, duration: 0, useNativeDriver: true }),
       ])
     ).start();
   }, []);
@@ -101,24 +101,24 @@ function AnimatedBar({ pct, color }: { pct: number; color: string }) {
 
 // ─── Farmer Character ─────────────────────────────────────────────────────────
 function FarmerCharacter({ dialogue }: { dialogue: string }) {
-  const bounceY  = useRef(new Animated.Value(0)).current;
-  const waveRot  = useRef(new Animated.Value(0)).current;
-  const blinkOp  = useRef(new Animated.Value(1)).current;
-  const dlOpacity= useRef(new Animated.Value(0)).current;
-  const dlSlide  = useRef(new Animated.Value(10)).current;
-  const prevDl   = useRef('');
+  const bounceY = useRef(new Animated.Value(0)).current;
+  const waveRot = useRef(new Animated.Value(0)).current;
+  const blinkOp = useRef(new Animated.Value(1)).current;
+  const dlOpacity = useRef(new Animated.Value(0)).current;
+  const dlSlide = useRef(new Animated.Value(10)).current;
+  const prevDl = useRef('');
 
   useEffect(() => {
     // bounce
     Animated.loop(Animated.sequence([
       Animated.timing(bounceY, { toValue: -6, duration: 750, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(bounceY, { toValue: 0,  duration: 750, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(bounceY, { toValue: 0, duration: 750, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ])).start();
     // wave
     Animated.loop(Animated.sequence([
-      Animated.timing(waveRot, { toValue:  1, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(waveRot, { toValue: 1, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       Animated.timing(waveRot, { toValue: -1, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(waveRot, { toValue:  0, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(waveRot, { toValue: 0, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       Animated.delay(1500),
     ])).start();
     // blink
@@ -135,7 +135,7 @@ function FarmerCharacter({ dialogue }: { dialogue: string }) {
     dlOpacity.setValue(0); dlSlide.setValue(10);
     Animated.parallel([
       Animated.timing(dlOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(dlSlide,   { toValue: 0, duration: 300, easing: Easing.out(Easing.back(1.5)), useNativeDriver: true }),
+      Animated.timing(dlSlide, { toValue: 0, duration: 300, easing: Easing.out(Easing.back(1.5)), useNativeDriver: true }),
     ]).start();
   }, [dialogue]);
 
@@ -168,17 +168,17 @@ function FarmerCharacter({ dialogue }: { dialogue: string }) {
 
 // ─── Crop Card ─────────────────────────────────────────────────────────────────
 function CropCard({ crop, isSelected, onPress, disabled }: any) {
-  const scale    = useRef(new Animated.Value(1)).current;
-  const floatY   = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const floatY = useRef(new Animated.Value(0)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
-  const loopRef  = useRef<Animated.CompositeAnimation | null>(null);
+  const loopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
     Animated.timing(glowAnim, { toValue: isSelected ? 1 : 0, duration: 250, useNativeDriver: false }).start();
     if (isSelected) {
       loopRef.current = Animated.loop(Animated.sequence([
         Animated.timing(floatY, { toValue: -5, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(floatY, { toValue:  0, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(floatY, { toValue: 0, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       ]));
       loopRef.current.start();
     } else {
@@ -225,8 +225,8 @@ function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; wea
   const budgetPct = Math.min((budget - 10000) / 190000, 1);
   const farmScale = 0.6 + budgetPct * 0.4;
   const scaleAnim = useRef(new Animated.Value(farmScale)).current;
-  const rainOp    = useRef(new Animated.Value(0)).current;
-  const rainY     = useRef(new Animated.Value(-10)).current;
+  const rainOp = useRef(new Animated.Value(0)).current;
+  const rainY = useRef(new Animated.Value(-10)).current;
 
   useEffect(() => {
     Animated.spring(scaleAnim, { toValue: farmScale, friction: 6, useNativeDriver: true }).start();
@@ -329,11 +329,11 @@ function InsightsPanel({ crop, visible }: { crop: any; visible: boolean }) {
 export default function FarmCreationScreen({ navigation }: any) {
   const { t } = useTranslation();
   const [selectedCropId, setSelectedCropId] = useState('Wheat');
-  const [farmName, setFarmName]             = useState('');
-  const [budgetGoal, setBudgetGoal]         = useState(50000);
-  const [loading, setLoading]               = useState(false);
-  const [inputFocused, setInputFocused]     = useState(false);
-  const [hasChosen, setHasChosen]           = useState(false);
+  const [farmName, setFarmName] = useState('');
+  const [budgetGoal, setBudgetGoal] = useState(50000);
+  const [loading, setLoading] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const [hasChosen, setHasChosen] = useState(false);
 
   const crop = CROPS.find(c => c.id === selectedCropId) || CROPS[0];
 
@@ -361,7 +361,7 @@ export default function FarmCreationScreen({ navigation }: any) {
   useEffect(() => {
     const loop = Animated.loop(Animated.sequence([
       Animated.timing(ctaPulse, { toValue: 1.035, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(ctaPulse, { toValue: 1,     duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(ctaPulse, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ]));
     if (isValid && !loading) loop.start(); else loop.stop();
     return () => loop.stop();
@@ -389,7 +389,7 @@ export default function FarmCreationScreen({ navigation }: any) {
     setLoading(true);
     setTimeout(() => {
       gameEngine.initGame({
-        farm:     { name: farmName.trim(), crop: selectedCropId, season: 1 },
+        farm: { name: farmName.trim(), crop: selectedCropId, season: 1 },
         finances: { ...gameEngine.getState().player.finances, cash: budgetGoal },
       });
       const sm = gameEngine.getStateMachine();
