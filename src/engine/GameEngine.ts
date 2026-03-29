@@ -196,6 +196,14 @@ export class GameEngine {
     }
 
     /**
+     * Add XP directly (e.g. from daily tasks like watering) and recalculate level
+     */
+    addXP(amount: number): void {
+        this.playerState.score.xp += amount;
+        this.playerState.score.level = Math.floor(this.playerState.score.xp / 1000) + 1;
+    }
+
+    /**
      * Advance to next season
      */
     advanceSeason(): void {

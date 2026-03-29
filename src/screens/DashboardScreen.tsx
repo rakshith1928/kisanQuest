@@ -127,26 +127,67 @@ function FarmerCompanion({ message }: { message: string }) {
 }
 
 // ─── Animated Farm Visualization ──────────────────────────────────────────────
-function FarmVisualization({ crop, level }: { crop: string | null; level: number }) {
+function FarmVisualization({ crop, level, isWatered, onWater, onHarvest }: { crop: string | null; level: number; isWatered: boolean; onWater: () => void; onHarvest: () => void }) {
   const CROP_STAGE = level < 2 ? '🌱' : level < 4 ? '🌿' : '🌾';
+  const canHarvest = level >= 4;
+
   const sunScale = useRef(new Animated.Value(1)).current;
+  const rainY = useRef(new Animated.Value(-100)).current;
+  const xpOp = useRef(new Animated.Value(0)).current;
+  const xpY = useRef(new Animated.Value(10)).current;
+
+  const handleWaterPress = () => {
+    if (isWatered) return;
+    onWater();
+    // rain animation
+    rainY.setValue(-60);
+    Animated.timing(rainY, { toValue: 120, duration: 600, easing: Easing.linear, useNativeDriver: true }).start();
+    // XP reward float
+    xpOp.setValue(0); xpY.setValue(10);
+    Animated.parallel([
+      Animated.timing(xpOp, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(xpY, { toValue: -20, duration: 800, easing: Easing.out(Easing.ease), useNativeDriver: true })
+    ]).start(() => Animated.timing(xpOp, { toValue: 0, duration: 300, useNativeDriver: true }).start());
+  };
+
   useEffect(() => {
     Animated.loop(Animated.sequence([
       Animated.timing(sunScale, { toValue: 1.08, duration: 1200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       Animated.timing(sunScale, { toValue: 1,    duration: 1200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ])).start();
   }, []);
+
   return (
     <LinearGradient colors={['#87CEEB', '#A5D6A7', '#558B2F']} style={styles.farmViz}>
       <Animated.Text style={[styles.vizSun, { transform: [{ scale: sunScale }] }]}>🌞</Animated.Text>
       <FloatingCrop emoji="☁️" style={styles.vizCloud1} delay={0} />
       <FloatingCrop emoji="☁️" style={styles.vizCloud2} delay={800} />
+      
+      {/* Rainfall overlay */}
+      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: rainY }] }]} pointerEvents="none">
+         <Text style={{ fontSize: 32, opacity: 0.8, textAlign: 'center', marginTop: -20 }}>💧  💧  💧</Text>
+         <Text style={{ fontSize: 32, opacity: 0.8, textAlign: 'center', marginTop: 10 }}> 💧   💧 </Text>
+      </Animated.View>
+
       <View style={styles.vizCropRow}>
         {[0,1,2,3,4,5,6,7].map(i => (
           <FloatingCrop key={i} emoji={CROP_STAGE} style={styles.vizCropEmoji} delay={i * 120} />
         ))}
       </View>
+      
       <View style={styles.vizGround}>
+        {canHarvest ? (
+          <TouchableOpacity onPress={onHarvest} style={[styles.waterBtn, { backgroundColor: '#FFB300', borderColor: '#FF8F00' }]}>
+            <Text style={styles.waterBtnText}>🚜 Harvest Now!</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={handleWaterPress} disabled={isWatered} style={[styles.waterBtn, isWatered && { opacity: 0.6 }]}>
+            <Text style={styles.waterBtnText}>{isWatered ? '💧 Watered (+20 XP)' : '💧 Water Crops'}</Text>
+          </TouchableOpacity>
+        )}
+        <Animated.Text style={[styles.waterXpText, { opacity: xpOp, transform: [{ translateY: xpY }] }]}>
+          +20 XP!
+        </Animated.Text>
         <Text style={styles.vizCropLabel}>
           {crop ? `${crop} Field` : 'Your Farm'} · Level {level}
         </Text>
@@ -213,6 +254,7 @@ export default function DashboardScreen({ navigation }: any) {
   const [gameState, setGameState] = useState(gameEngine.getState());
   const [showConfetti, setShowConfetti]   = useState(false);
   const [doneTasks, setDoneTasks]         = useState<string[]>([]);
+  const [wateredToday, setWateredToday]   = useState(false);
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -236,13 +278,28 @@ export default function DashboardScreen({ navigation }: any) {
   const scoreColor = score > 70 ? '#58CC02' : score > 40 ? '#FFC800' : '#FF4B4B';
 
   const farmerMsg = useCallback(() => {
+    if (player.score.level >= 4) return "Your crops are fully grown! Time to harvest! 🚜";
+    if (wateredToday) return "Great job watering! The crops are happy 🌿";
     if (player.score.streak >= 5) return `🔥 ${player.score.streak} day streak! You're on fire!`;
     if (score > 70) return "Your crops are thriving! 🌿 Keep it up!";
     if (score > 40) return "Good progress! 🌱 Ready for today's tasks?";
     return "Let's turn this farm around 💪 Play today!";
-  }, [score, player.score.streak]);
+  }, [score, player.score.streak, wateredToday, player.score.level]);
 
   const handleTaskDone = (id: string) => setDoneTasks(p => [...p, id]);
+
+  const handleWater = () => {
+    setWateredToday(true);
+    if (!doneTasks.includes('w')) {
+      handleTaskDone('w');
+    }
+    gameEngine.addXP(20);
+    setGameState({ ...gameEngine.getState() });
+  };
+
+  const handleHarvest = () => {
+    navigation.navigate('Harvest');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -278,7 +335,13 @@ export default function DashboardScreen({ navigation }: any) {
         {/* ── Farm Visualization ─────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🌾 Your Farm</Text>
-          <FarmVisualization crop={player.farm?.crop} level={player.score.level} />
+          <FarmVisualization 
+            crop={player.farm?.crop} 
+            level={player.score.level} 
+            isWatered={wateredToday}
+            onWater={handleWater}
+            onHarvest={handleHarvest}
+          />
         </View>
 
         {/* ── Financial Health ────────────────────────────────── */}
@@ -458,10 +521,13 @@ const styles = StyleSheet.create({
   vizSun: { position: 'absolute', top: 10, right: 14, fontSize: 32 },
   vizCloud1: { position: 'absolute', top: 12, left: 20, fontSize: 22, opacity: 0.8 },
   vizCloud2: { position: 'absolute', top: 24, left: 70, fontSize: 16, opacity: 0.6 },
-  vizCropRow: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingBottom: 40 },
+  vizCropRow: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingBottom: 60 },
   vizCropEmoji: { fontSize: 22 },
-  vizGround: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(46,125,50,0.85)', paddingVertical: 8, alignItems: 'center' },
-  vizCropLabel: { color: '#FFFFFF', fontWeight: '800', fontSize: 13, letterSpacing: 0.4 },
+  vizGround: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(46,125,50,0.85)', paddingVertical: 12, paddingBottom: 16, alignItems: 'center' },
+  vizCropLabel: { color: '#FFFFFF', fontWeight: '800', fontSize: 13, letterSpacing: 0.4, marginTop: 6 },
+  waterBtn: { backgroundColor: '#29B6F6', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 16, borderWidth: 2, borderColor: '#0288D1', alignSelf: 'center', zIndex: 10 },
+  waterBtnText: { color: '#FFFFFF', fontWeight: '900', fontSize: 13 },
+  waterXpText: { position: 'absolute', bottom: 50, color: '#FFD54F', fontSize: 24, fontWeight: '900', textShadowColor: '#000', textShadowRadius: 4, textShadowOffset: {width: 0, height: 2} },
 
   // Sections
   section: { marginBottom: 22 },

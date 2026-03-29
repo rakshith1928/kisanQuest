@@ -17,6 +17,7 @@ import Slider from '@react-native-community/slider';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import gameEngine from '../engine/GameEngine';
+import { fetchLiveWeather, WeatherData } from '../services/WeatherService';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -28,8 +29,8 @@ const CROPS = [
   { id: 'Sugarcane', emoji: '🎋', label: 'Sugarcane', water: 0.95, profit: 95000, risk: 'High', recommended: false, color: '#AB47BC' },
 ];
 
-const WEATHER = { condition: 'Sunny', temp: '32°C', emoji: '☀️', gradient: ['#1565C0', '#42A5F5', '#A5D6A7'] as const };
-
+// Live weather fetches will replace this static object.
+// We use WeatherData from WeatherService instead.
 const SOIL = { type: 'Red Soil', quality: 'Good', season: 'Summer', seasonEmoji: '☀️' };
 
 const BUDGET_MILESTONES = [
@@ -221,7 +222,7 @@ function CropCard({ crop, isSelected, onPress, disabled }: any) {
 }
 
 // ─── Live Farm Preview ────────────────────────────────────────────────────────
-function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; weather: typeof WEATHER }) {
+function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; weather: WeatherData | null }) {
   const budgetPct = Math.min((budget - 10000) / 190000, 1);
   const farmScale = 0.6 + budgetPct * 0.4;
   const scaleAnim = useRef(new Animated.Value(farmScale)).current;
@@ -233,7 +234,7 @@ function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; wea
   }, [farmScale]);
 
   useEffect(() => {
-    if (weather.condition === 'Rainy') {
+    if (weather?.condition === 'Rainy') {
       Animated.loop(Animated.sequence([
         Animated.timing(rainY, { toValue: 20, duration: 600, useNativeDriver: true }),
         Animated.timing(rainY, { toValue: -10, duration: 0, useNativeDriver: true }),
@@ -247,17 +248,19 @@ function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; wea
   const rows = Math.max(2, Math.round(2 + budgetPct * 2));
   const cols = 4;
 
+  const isRain = weather?.condition === 'Rainy' || weather?.condition === 'Stormy';
+
   return (
     <View style={styles.previewCard}>
-      <LinearGradient colors={['#87CEEB', '#A5D6A7']} style={styles.previewGradient}>
+      <LinearGradient colors={weather ? weather.gradient : ['#87CEEB', '#A5D6A7']} style={styles.previewGradient}>
         {/* Rain overlay */}
-        {weather.condition === 'Rainy' && (
+        {isRain && (
           <Animated.Text style={[styles.rainEmoji, { opacity: rainOp, transform: [{ translateY: rainY }] }]}>
             🌧️
           </Animated.Text>
         )}
         {/* Sunshine */}
-        {weather.condition === 'Sunny' && <Text style={styles.previewSun}>🌞</Text>}
+        {weather?.condition === 'Sunny' && <Text style={styles.previewSun}>🌞</Text>}
         {/* Crop grid */}
         <Animated.View style={[styles.previewFarm, { transform: [{ scale: scaleAnim }] }]}>
           {Array.from({ length: rows }).map((_, r) => (
@@ -270,7 +273,7 @@ function FarmPreview({ crop, budget, weather }: { crop: any; budget: number; wea
         </Animated.View>
       </LinearGradient>
       <View style={styles.previewFooter}>
-        <Text style={styles.previewLabel}>Live Preview  {weather.emoji} {weather.condition}</Text>
+        <Text style={styles.previewLabel}>Live Preview  {weather?.emoji} {weather?.condition || 'Loading...'}</Text>
         <Text style={[styles.previewBudget, { color: crop.color }]}>Budget: ₹{(budget / 1000).toFixed(0)}k</Text>
       </View>
     </View>
@@ -328,6 +331,7 @@ function InsightsPanel({ crop, visible }: { crop: any; visible: boolean }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function FarmCreationScreen({ navigation }: any) {
   const { t } = useTranslation();
+  const [weather, setWeather] = useState<WeatherData | null>(null);
   const [selectedCropId, setSelectedCropId] = useState('Wheat');
   const [farmName, setFarmName] = useState('');
   const [budgetGoal, setBudgetGoal] = useState(50000);
@@ -335,14 +339,27 @@ export default function FarmCreationScreen({ navigation }: any) {
   const [inputFocused, setInputFocused] = useState(false);
   const [hasChosen, setHasChosen] = useState(false);
 
+  // Poll live weather
+  useEffect(() => {
+    let mounted = true;
+    const fetchIt = async () => {
+      const data = await fetchLiveWeather();
+      if (mounted) setWeather(data);
+    };
+    fetchIt();
+    const interval = setInterval(fetchIt, 10 * 60 * 1000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, []);
+
   const crop = CROPS.find(c => c.id === selectedCropId) || CROPS[0];
 
   // Farmer dialogue logic
   const getDialogue = useCallback(() => {
-    if (!hasChosen) return `Let's build your farm! 🌱\n${WEATHER.emoji} ${WEATHER.condition} this week — good for ${crop.label}!`;
+    if (!weather) return 'Checking the skies... 🌦️';
+    if (!hasChosen) return `Let's build your farm! 🌱\n${weather.emoji} ${weather.condition} this week — good for ${crop.label}!`;
     if (budgetGoal >= 100000) return 'Nice! Bigger budget, better yield 🚜';
     return `Great choice! ${crop.emoji} ${crop.label} is a solid pick!`;
-  }, [hasChosen, crop.id, budgetGoal]);
+  }, [hasChosen, crop.id, budgetGoal, weather]);
 
   const [dialogue, setDialogue] = useState(getDialogue());
 
@@ -428,20 +445,26 @@ export default function FarmCreationScreen({ navigation }: any) {
             <FarmerCharacter dialogue={dialogue} />
 
             {/* ── Weather Hero Card ─────────────────────────────────── */}
-            <LinearGradient colors={WEATHER.gradient} style={styles.weatherCard}>
-              <Cloud style={styles.cloud1} />
-              <Cloud style={styles.cloud2} />
-              <View style={styles.weatherContent}>
-                <View>
-                  <Text style={styles.weatherTemp}>{WEATHER.temp}</Text>
-                  <Text style={styles.weatherCondition}>{WEATHER.emoji} {WEATHER.condition}</Text>
+            {weather ? (
+              <LinearGradient colors={weather.gradient} style={styles.weatherCard}>
+                <Cloud style={styles.cloud1} />
+                <Cloud style={styles.cloud2} />
+                <View style={styles.weatherContent}>
+                  <View>
+                    <Text style={styles.weatherTemp}>{weather.temp}</Text>
+                    <Text style={styles.weatherCondition}>{weather.emoji} {weather.condition}</Text>
+                  </View>
+                  <Text style={styles.weatherBigEmoji}>{weather.emoji === '☀️' ? '🌞' : weather.emoji}</Text>
                 </View>
-                <Text style={styles.weatherBigEmoji}>{WEATHER.emoji === '☀️' ? '🌞' : '🌧️'}</Text>
+                <Text style={styles.weatherHint}>
+                  {weather.hint}
+                </Text>
+              </LinearGradient>
+            ) : (
+              <View style={[styles.weatherCard, { backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ color: '#78909C', fontWeight: 'bold' }}>Locating your farm...</Text>
               </View>
-              <Text style={styles.weatherHint}>
-                {WEATHER.condition === 'Sunny' ? '☀️ Looks sunny this week — great for planting!' : '🌧️ Rain ahead — consider water-heavy crops!'}
-              </Text>
-            </LinearGradient>
+            )}
 
             {/* ── Crop Selection ─────────────────────────────────────── */}
             <View style={styles.section}>
@@ -464,7 +487,7 @@ export default function FarmCreationScreen({ navigation }: any) {
 
             {/* ── Live Farm Preview ──────────────────────────────────── */}
             <View style={styles.section}>
-              <FarmPreview crop={crop} budget={budgetGoal} weather={WEATHER} />
+              <FarmPreview crop={crop} budget={budgetGoal} weather={weather} />
             </View>
 
             {/* ── Budget Slider ──────────────────────────────────────── */}
