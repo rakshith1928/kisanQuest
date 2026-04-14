@@ -200,17 +200,37 @@ function DialogueBubble({ text }: { text: string }) {
   const slideAnim = useRef(new Animated.Value(20)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const [isPlaying, setIsPlaying] = useState(false);
+  const speakIdRef = useRef(0);
 
   const handleSpeak = async () => {
     if (isPlaying) {
+      speakIdRef.current++;
       VoiceManager.stopSpeaking();
       setIsPlaying(false);
       return;
     }
+
+    speakIdRef.current++;
+    VoiceManager.stopSpeaking();
+
+    const id = speakIdRef.current;
     setIsPlaying(true);
-    await VoiceManager.speak(text);
-    setIsPlaying(false);
+
+    try {
+      await VoiceManager.speak(text);
+    } finally {
+      if (speakIdRef.current === id) {
+        setIsPlaying(false);
+      }
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      speakIdRef.current++;
+      VoiceManager.stopSpeaking();
+    };
+  }, []);
 
   useEffect(() => {
     setDisplayed('');

@@ -75,18 +75,38 @@ function FarmerCompanion({ message }: { message: string }) {
   const msgY = useRef(new Animated.Value(8)).current;
   const prevMsg = useRef('');
   const [isPlaying, setIsPlaying] = useState(false);
+  const speakIdRef = useRef(0);
 
   const { t } = useTranslation();
   const handleSpeak = async () => {
     if (isPlaying) {
+      speakIdRef.current++;
       VoiceManager.stopSpeaking();
       setIsPlaying(false);
       return;
     }
+
+    speakIdRef.current++;
+    VoiceManager.stopSpeaking();
+
+    const id = speakIdRef.current;
     setIsPlaying(true);
-    await VoiceManager.speak(message);
-    setIsPlaying(false);
+
+    try {
+      await VoiceManager.speak(message);
+    } finally {
+      if (speakIdRef.current === id) {
+        setIsPlaying(false);
+      }
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      speakIdRef.current++;
+      VoiceManager.stopSpeaking();
+    };
+  }, []);
 
   useEffect(() => {
     Animated.loop(Animated.sequence([

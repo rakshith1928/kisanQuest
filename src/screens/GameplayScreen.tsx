@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import VoiceManager from '../voice/VoiceManager';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Gameplay'>;
 
@@ -140,15 +141,45 @@ export default function GameplayScreen({ navigation }: Props) {
   const cardFade  = useRef(new Animated.Value(1)).current;
   const confettiRef = useRef<any>(null);
 
-  // Auto-speak voicePrompt on node change
-  useEffect(() => {
+  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const speakIdRef = useRef(0);
+
+  const handleSpeakPrompt = async () => {
     const vp = node?.voicePrompt;
-    if (vp) {
-      VoiceManager.stopSpeaking().then(() => {
-        VoiceManager.speak(t(vp));
-      });
+    if (!vp) return;
+
+    if (isPlayingVoice) {
+      speakIdRef.current++;
+      VoiceManager.stopSpeaking();
+      setIsPlayingVoice(false);
+      return;
     }
-    return () => { VoiceManager.stopSpeaking(); };
+
+    const text = t(vp);
+
+    speakIdRef.current++;
+    VoiceManager.stopSpeaking();
+
+    const id = speakIdRef.current;
+    setIsPlayingVoice(true);
+
+    try {
+      await VoiceManager.speak(text);
+    } finally {
+      if (speakIdRef.current === id) {
+        setIsPlayingVoice(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    speakIdRef.current++;
+    setIsPlayingVoice(false);
+
+    return () => {
+      speakIdRef.current++;
+      VoiceManager.stopSpeaking();
+    };
   }, [node?.id, gameState.player.language]);
 
   useEffect(() => {
@@ -320,7 +351,12 @@ export default function GameplayScreen({ navigation }: Props) {
           {/* floating animation indicator */}
           <LinearGradient colors={['#F1F8E9', '#FFFFFF']} style={styles.questionGradient}>
             <Text style={styles.questionEmoji}>🧠</Text>
-            <Text style={styles.questionText}>{t(node?.prompt || '...')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={[styles.questionText, { flex: 1 }]}>{t(node?.prompt || '...')}</Text>
+              <TouchableOpacity onPress={handleSpeakPrompt} style={{ padding: 8, marginLeft: 8 }}>
+                <Ionicons name={isPlayingVoice ? "volume-high" : "volume-medium-outline"} size={28} color="#43A047" />
+              </TouchableOpacity>
+            </View>
           </LinearGradient>
         </Animated.View>
 
