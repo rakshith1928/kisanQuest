@@ -246,73 +246,73 @@
     "monsoon_crisis": {
       "title": "Monsoon Crisis",
       "mc_1": {
-        "prompt": "Heavy rains are expected in 3 days. Your rice crop needs protection.",
-        "voicePrompt": "Heavy rains are expected in three days. What will you do?",
+        "prompt": "Heavy rains are expected in 3 days. Your rice crop is at 90% risk of total loss. Insurance deadline is TODAY.",
+        "voicePrompt": "Heavy rains in 3 days. 90 percent risk of crop loss. Insurance deadline is today. What will you do?",
         "options": {
-          "A": "Take crop insurance (₹3,000 premium)",
-          "B": "Borrow from moneylender",
-          "C": "Try homemade remedy (40% success)"
+          "A": "Buy crop insurance (₹6,000 premium — painful but safe)",
+          "B": "Take instant cash from moneylender (₹10,000, no questions asked)",
+          "C": "Skip insurance, hope the rains are light (30% chance)"
         }
       },
       "mc_2a": {
-        "prompt": "The rains came but your insurance covered 80% of the damage. Great decision!",
-        "voicePrompt": "The insurance covered 80% of the damage. Great decision!",
-        "lesson": "[Skill Tested: Insurance Literacy] Crop insurance costs a small premium but protects you from losses 10x larger."
+        "prompt": "The rains came but your insurance covered 80% of the damage. You spent ₹6,000 but saved ₹48,000. Great decision!",
+        "voicePrompt": "Insurance covered 80% of the damage. You spent 6,000 but saved 48,000!",
+        "lesson": "[Skill Tested: Insurance Literacy] Crop insurance costs a painful premium upfront but protects you from catastrophic losses 10x larger."
       },
       "mc_2b": {
-        "prompt": "Your crop survived but now you owe ₹8,000 at 30% interest to the moneylender.",
-        "voicePrompt": "Your crop survived, but you now owe 8,000 rupees to the moneylender.",
-        "lesson": "Moneylenders charge 25-30% interest. Formal bank loans are only 7%. Always choose formal credit."
+        "prompt": "The moneylender gave you ₹10,000 fast — but now you owe ₹15,000 at 40% interest. The debt trap begins.",
+        "voicePrompt": "The moneylender gave 10,000 but now you owe 15,000 at 40% interest. Debt trap!",
+        "lesson": "Moneylenders charge 30-40% interest. That ₹10,000 becomes ₹15,000 in months. Formal bank loans are only 7%. NEVER borrow from informal lenders."
       },
       "mc_2c": {
-        "prompt": "The rains destroyed 60% of your crop. Without insurance, you have no fallback.",
-        "voicePrompt": "The rains destroyed 60% of your crop. Without insurance, you have no fallback.",
-        "lesson": "Without savings or insurance, one bad season can push a family into poverty."
+        "prompt": "The rains were brutal. 70% of your crop destroyed. No insurance, no savings, no backup. You're starting from zero.",
+        "voicePrompt": "70% of your crop is destroyed. No insurance. You are starting from zero.",
+        "lesson": "Gambling on the weather is the #1 reason farmers fall into poverty. ₹6,000 insurance could have saved ₹50,000."
       }
     },
     "market_price": {
       "title": "Market Price Dilemma",
       "mp_1": {
-        "prompt": "Your wheat harvest is ready. A middleman offers ₹1,400/quintal. The mandi (market) price is ₹1,800 but you must transport it.",
-        "voicePrompt": "Your wheat harvest is ready. A middleman offers 1,400. Mandi price is 1,800. What will you do?",
+        "prompt": "Your wheat harvest is ready. A middleman offers ₹1,100/quintal cash at your door. Mandi price is ₹2,000/q but transport costs ₹4,500 upfront and takes 2 days. Rat risk if you store.",
+        "voicePrompt": "Wheat ready. Middleman offers 1,100 at your door. Mandi is 2,000 but transport costs 4,500. What will you do?",
         "options": {
-          "A": "Sell to middleman (quick, ₹1,400/q)",
-          "B": "Transport to mandi (₹1,800/q, ₹2,000 transport cost)",
-          "C": "Store and wait for better price"
+          "A": "Sell to middleman (safe, ₹1,100/q — no risk)",
+          "B": "Pay ₹4,500 upfront to transport to mandi (₹2,000/q)",
+          "C": "Store in barn and wait for higher prices"
         }
       },
       "mp_2a": {
-        "prompt": "You sold quickly and got ₹28,000. But you left ₹8,000 on the table by not going to the mandi.",
-        "voicePrompt": "You sold quickly but lost 8,000 by not going to the mandi.",
-        "lesson": "[Skill Tested: Negotiation] Always compare prices at multiple buyers. The mandi price is publicly listed on e-NAM (National Agriculture Market app)."
+        "prompt": "You sold at ₹1,100/q and got ₹22,000. Safe, but the middleman exploited you. You lost ₹12,000 potential profit.",
+        "voicePrompt": "You got 22,000. Safe but the middleman took advantage. You lost 12,000 in potential profit.",
+        "lesson": "[Skill Tested: Negotiation] Middlemen profit by buying low from desperate farmers. Always check mandi prices on the e-NAM app before accepting any offer."
       },
       "mp_2b": {
-        "prompt": "After ₹2,000 transport cost you earned ₹34,000 — ₹6,000 more than the middleman offer!",
-        "voicePrompt": "You earned 34,000 after transport — much better than the middleman offer!",
-        "lesson": "Transporting to the mandi took extra effort but yielded 21% more income. Collective transport with other farmers reduces cost further."
+        "prompt": "The mandi paid ₹2,000/q! After ₹4,500 transport you earned ₹34,000 — ₹12,000 more than the middleman!",
+        "voicePrompt": "Mandi paid 2,000 per quintal! After transport you earned 34,000. Great decision!",
+        "lesson": "Transport to the mandi is scary upfront, but yielded 55% more income. Collective transport with other farmers cuts costs further."
       },
       "mp_2c": {
-        "prompt": "Prices fell further. You paid ₹1,500 storage and still sold for ₹1,400.",
-        "voicePrompt": "Prices fell and you paid for storage. Waiting led to a loss.",
-        "lesson": "Storing grain requires proper facilities and market intelligence. Without these, waiting often leads to losses."
+        "prompt": "Rats ate 20% of stored grain. Storage fees cost ₹3,500. Prices dropped and you sold for less than the middleman offered.",
+        "voicePrompt": "Rats ate your grain, storage cost 3,500, and prices dropped. Total disaster.",
+        "lesson": "Without proper storage (cold storage or government warehouses), waiting is a gamble. Rats and moisture destroy 10-15% of stored grain in India."
       }
     },
     "savings_challenge": {
       "title": "Savings Challenge",
       "sc_1": {
-        "prompt": "The season ends with ₹12,000 profit. A new phone costs ₹8,000. Your emergency fund is ₹0. What do you do?",
-        "voicePrompt": "The season ends with 12,000 profit. A new phone costs 8,000. Your emergency fund is zero. What do you do?",
+        "prompt": "Season profit: ₹15,000. Your brother demands ₹10,000 for his wedding — guilt-tripping you hard. Your emergency fund is ₹0. What do you do?",
+        "voicePrompt": "You made 15,000 profit. Brother wants 10,000 for wedding. Emergency fund is zero. What do you do?",
         "options": {
-          "A": "Buy the phone now (₹8,000)",
-          "B": "Save all ₹12,000 as emergency fund",
-          "C": "Save ₹10,000, spend ₹2,000 on family"
+          "A": "Give ₹10,000 to your brother (keep family happy)",
+          "B": "Refuse and save the full ₹15,000 as emergency fund",
+          "C": "Give ₹6,000, save ₹6,000, spend ₹3,000 on essentials"
         },
-        "options_C_voicePrompt": "Save 10,000, spend 2,000 on family"
+        "options_C_voicePrompt": "Give 6,000 to brother, save 6,000, spend 3,000"
       },
       "sc_2a": {
-        "prompt": "Next season your child needed medicine costing ₹5,000. With only ₹4,000 left, you had to borrow.",
-        "voicePrompt": "You had no savings left for the emergency and had to take a loan.",
-        "lesson": "An emergency fund of 3-6 months of expenses prevents taking loans during crises. Save before you spend."
+        "prompt": "Next season, your child fell sick. Medicine costs ₹8,000. You have only ₹5,000. You must borrow from a moneylender at 30% interest.",
+        "voicePrompt": "Your child is sick. Medicine costs 8,000. You only have 5,000. You must borrow at 30 percent interest.",
+        "lesson": "Social pressure to spend is the #1 enemy of savings. An emergency fund of 3-6 months prevents you from falling into a debt trap when life hits hard."
       },
       "sc_2b": {
         "prompt": "Next season your child needed medicine. Your emergency fund covered it. No debt needed!",
@@ -342,9 +342,9 @@
         "lesson": "Kisan Credit Card offers loans at 7% p.a. (4% with subsidy). It is the cheapest and most farmer-friendly credit option in India."
       },
       "lt_2b": {
-        "prompt": "After a bad harvest, you can't repay ₹39,000. Interest compounds. Two seasons later you owe ₹65,000.",
-        "voicePrompt": "Oh no! The moneylender's high interest has trapped you in debt.",
-        "lesson": "Informal moneylender debt often traps families for generations. Always opt for formal banking credit, even if it takes longer to process."
+        "prompt": "After a bad harvest, you can't repay ₹55,000. Interest compounds at 40%. Two seasons later you owe ₹90,000. The moneylender threatens to seize your land.",
+        "voicePrompt": "You can't repay 55,000. Interest compounds. You now owe 90,000. The moneylender threatens your land.",
+        "lesson": "Informal moneylender debt traps families for GENERATIONS. ₹30,000 became ₹90,000 in 2 seasons. KCC bank loan for the same amount costs only ₹32,100."
       },
       "lt_2c": {
         "prompt": "SHG loan at 12% was manageable. You repaid ₹33,600. Better than a moneylender!",
@@ -358,8 +358,8 @@
         "prompt": "The PM-Kisan subsidy of ₹2,000 has been announced. How will you receive it?",
         "voicePrompt": "The PM-Kisan subsidy of 2,000 has been announced. How will you receive it?",
         "options": {
-          "A": "Direct Benefit Transfer (DBT) to bank account",
-          "B": "Ask a local agent to collect it for ₹200 fee"
+          "A": "Direct Benefit Transfer (DBT) to your bank account — free",
+          "B": "Ask a local agent to collect it (₹500 fee, 'for processing')"
         }
       },
       "ds_2a": {
@@ -368,9 +368,9 @@
         "lesson": "[Skill Tested: Digital Payments] Linking your mobile and Aadhaar to your bank ensures instant, zero-fee direct government transfers."
       },
       "ds_2b": {
-        "prompt": "The agent took a ₹200 cut. You only received ₹1,800 and had to wait 3 days.",
-        "voicePrompt": "The agent took a cut of your money. Next time use direct transfer.",
-        "lesson": "[Skill Tested: Digital Payments] Relying on middlemen for government funds introduces unnecessary fees and delays."
+        "prompt": "The agent took a ₹500 cut. You only received ₹1,500 — and he might have stolen your Aadhaar details too.",
+        "voicePrompt": "The agent took 500 of your money and may have stolen your identity details.",
+        "lesson": "[Skill Tested: Digital Payments] Agents steal 25-50% of subsidies. They also harvest Aadhaar data for future scams. Always use DBT directly."
       }
     },
     "harvest_bargain": {
@@ -385,9 +385,9 @@
         }
       },
       "hb_2a": {
-        "prompt": "You got ₹27,500 quickly but missed ₹3,500 extra by not waiting 30 days.",
-        "voicePrompt": "You got 27,500 quickly, but missed the extra 3,500 from the cooperative.",
-        "lesson": "[Skill Tested: Negotiation] Cooperative selling usually yields 10–15% more than private traders. Plan your cash needs to afford the wait."
+        "prompt": "You got ₹24,000 quickly but the cooperative paid others ₹31,000. You lost ₹7,000 to impatience.",
+        "voicePrompt": "You got 24,000 but the cooperative paid others 31,000. You lost 7,000.",
+        "lesson": "[Skill Tested: Negotiation] Private traders exploit urgency. Cooperatives give 10-30% more. Plan your finances so you can wait 30 days."
       },
       "hb_2b": {
         "prompt": "Great patience! The cooperative paid ₹31,000 — ₹3,500 more than the trader offered.",
@@ -433,15 +433,15 @@
         "prompt": "The weather forecast shows 90% chance of flash floods next week. Your sugarcane crop worth ₹60,000 is standing in the field. The insurance deadline is TODAY.",
         "voicePrompt": "Weather forecast shows 90 percent chance of floods. Your 60,000 crop is at risk. Insurance deadline is today.",
         "options": {
-          "A": "Buy insurance now (₹1,800 premium, 2% of crop value)",
-          "B": "Skip insurance, harvest early to save what you can",
-          "C": "Do nothing and hope the forecast is wrong"
+          "A": "Buy insurance NOW (₹4,500 premium — it hurts, but 90% flood risk)",
+          "B": "Skip insurance, harvest early to salvage what you can",
+          "C": "Do nothing — forecasts are wrong all the time, right?"
         }
       },
       "fi_2a": {
-        "prompt": "The floods came. Insurance paid ₹48,000 (80% of crop value). You only paid ₹1,800!",
-        "voicePrompt": "The floods came. Insurance paid 48,000. You were protected!",
-        "lesson": "[Skill Tested: Insurance Literacy] Under PMFBY, farmers pay just 1.5-2% premium. The government subsidises the rest. ₹1,800 protected a ₹60,000 crop — a 33x return on protection!"
+        "prompt": "The floods came. Insurance paid ₹48,000 (80% of crop value). You paid ₹4,500 and saved ₹43,500. Smart move!",
+        "voicePrompt": "Floods came. Insurance paid 48,000. You paid 4,500. Saved 43,500!",
+        "lesson": "[Skill Tested: Insurance Literacy] Under PMFBY, ₹4,500 protected a ₹60,000 crop — a 10x return on protection! Always insure before the deadline."
       },
       "fi_2b": {
         "prompt": "You harvested early and got ₹25,000 — only 42% of the potential value due to immature crop.",
@@ -449,9 +449,9 @@
         "lesson": "[Skill Tested: Insurance Literacy] Early harvesting due to panic often results in lower quality and price. Insurance allows you to wait for optimal harvest timing without fear."
       },
       "fi_2c": {
-        "prompt": "The floods destroyed 95% of your crop. With no insurance, you lost ₹57,000 and still owe harvest loans.",
-        "voicePrompt": "The floods destroyed 95 percent of your crop. You lost 57,000 and still owe loans.",
-        "lesson": "[Skill Tested: Insurance Literacy] One uninsured flood can wipe out years of savings. PMFBY enrolment is now linked to Kisan Credit Cards — always enrol before the deadline."
+        "prompt": "The floods destroyed 95% of your crop. No insurance. You lost everything — ₹60,000 crop gone and now ₹30,000 in debt from harvest loans.",
+        "voicePrompt": "Total loss. 95 percent crop destroyed. 60,000 gone. 30,000 debt. You gambled and lost.",
+        "lesson": "[Skill Tested: Insurance Literacy] Hoping for the best is NOT a financial strategy. ₹4,500 insurance could have saved you from ₹90,000 in total losses."
       }
     },
     "upi_payment": {
@@ -484,18 +484,18 @@
     "fake_scheme": {
       "title": "Too Good To Be True",
       "fs_1": {
-        "prompt": "A man visits your village claiming to offer a government scheme: 'Pay ₹2,000 registration fee and get ₹50,000 subsidy in 1 week!' He shows an official-looking certificate. What do you do?",
-        "voicePrompt": "A man offers a government scheme: pay 2,000 now, get 50,000 in a week. It looks official. What do you do?",
+        "prompt": "A man visits your village: 'Pay ₹5,000 registration fee and get ₹1,00,000 subsidy in 1 week!' He has a fake certificate and uniform. He says 'Hurry, only 5 slots left!' What do you do?",
+        "voicePrompt": "A man says pay 5,000 now, get 1 lakh in a week. He seems official. Only 5 slots left. What do you do?",
         "options": {
-          "A": "Pay the ₹2,000 registration fee",
-          "B": "Ask him to show official government website link",
+          "A": "Pay ₹5,000 quickly before slots fill up",
+          "B": "Ask him to show official .gov.in website proof",
           "C": "Call local bank or gram panchayat to verify first"
         }
       },
       "fs_2a": {
-        "prompt": "He disappeared with your ₹2,000. The 'scheme' was completely fake. You were scammed.",
-        "voicePrompt": "He disappeared with your money. The scheme was a scam.",
-        "lesson": "[Skill Tested: Fraud Detection] No legitimate government scheme ever asks for ADVANCE payment. Real schemes have a documented application process on official .gov.in websites."
+        "prompt": "He vanished with your ₹5,000. The 'scheme' was a scam run across 10 villages. You lost your seed money for next season.",
+        "voicePrompt": "He vanished with 5,000. It was a scam. You lost your seed money for next season.",
+        "lesson": "[Skill Tested: Fraud Detection] 'Hurry, limited slots' is a classic pressure tactic. NO government scheme asks for advance cash. Report to cybercrime helpline: 1930."
       },
       "fs_2b": {
         "prompt": "He couldn't provide a valid .gov.in URL and left quickly! You saved ₹2,000 from a classic scam.",
@@ -520,9 +520,9 @@
         }
       },
       "dp_2a": {
-        "prompt": "You were scammed! ₹20,000 was withdrawn from your account. Banks never ask for OTPs.",
-        "voicePrompt": "You were scammed! Banks never ask for O T P. Your account is at risk.",
-        "lesson": "NEVER share your OTP, PIN, or password. Banks and government schemes will NEVER ask for these. Report fraud to 1930 (National Cybercrime Helpline)."
+        "prompt": "₹35,000 was instantly withdrawn. Your entire season's savings — GONE. Banks NEVER ask for OTPs via phone or SMS.",
+        "voicePrompt": "35,000 instantly stolen from your account. Your entire savings gone. Banks never ask for O T P.",
+        "lesson": "NEVER share your OTP, PIN, or password with ANYONE. Banks will NEVER call asking for OTP. Report fraud immediately to 1930 (National Cybercrime Helpline)."
       },
       "dp_2b": {
         "prompt": "Smart! The bank confirmed it was a fraud attempt. Your account is safe.",
@@ -554,11 +554,31 @@
   },
   "voice_keywords": {
     "commands": {
-      "CHOOSE_INSURANCE": ["insurance", "buy insurance", "protect crop"],
-      "TAKE_LOAN": ["loan", "borrow money", "take a loan"],
-      "SAVE": ["save", "keep money", "save money"],
-      "SELL_NOW": ["sell", "sell now", "sell crop"],
-      "WAIT": ["wait", "hold", "keep"]
+      "CHOOSE_INSURANCE": [
+        "insurance",
+        "buy insurance",
+        "protect crop"
+      ],
+      "TAKE_LOAN": [
+        "loan",
+        "borrow money",
+        "take a loan"
+      ],
+      "SAVE": [
+        "save",
+        "keep money",
+        "save money"
+      ],
+      "SELL_NOW": [
+        "sell",
+        "sell now",
+        "sell crop"
+      ],
+      "WAIT": [
+        "wait",
+        "hold",
+        "keep"
+      ]
     }
   }
 }
