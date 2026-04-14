@@ -9,6 +9,10 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import gameEngine from '../engine/GameEngine';
 import { useTranslation } from 'react-i18next';
 import VoiceManager from '../voice/VoiceManager';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Gameplay'>;
 
 const { width: W } = Dimensions.get('window');
 const XP_TO_NEXT = 1000;
@@ -118,7 +122,7 @@ function OptionCard({ label, onPress, state, disabled }: {
 }
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function GameplayScreen({ navigation }: any) {
+export default function GameplayScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [gameState, setGameState]   = useState(gameEngine.getState());
   const [lastOutcome, setLastOutcome] = useState<any>(null);

@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
 const { width: W } = Dimensions.get('window');
 
 const SCHEME_KEYS = ['pm_kisan', 'pmfby', 'kcc', 'soil_health', 'pm_kmy'];
@@ -27,7 +30,9 @@ const SCHEME_URLS: Record<string, string> = {
   pm_kmy: 'https://maandhan.in/pmkmy',
 };
 
-export default function SchemesScreen({ navigation }: any) {
+type Props = NativeStackScreenProps<RootStackParamList, 'Schemes'>;
+
+export default function SchemesScreen({ navigation }: Props) {
   const { t } = useTranslation();
 
   return (

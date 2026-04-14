@@ -21,7 +21,7 @@ const badgeIcons: Record<string, string> = {
 
 const DAILY_TASKS = (t: any) => [
   { id: 'q', emoji: '🎮', label: t('ui.dashboard.tasks.answer_questions'), xp: 50 },
-  { id: 'w', emoji: '💧', label: t('ui.dashboard.tasks.water_crops'),   xp: 20 },
+  { id: 'w', emoji: '💧', label: t('ui.dashboard.tasks.water_crops'), xp: 20 },
   { id: 'c', emoji: '📊', label: t('ui.dashboard.tasks.check_stats'), xp: 15 },
 ];
 
@@ -43,7 +43,7 @@ function CircularScore({ score, color }: { score: number; color: string }) {
           originX={hc} originY={hc} rotation="-90" />
       </Svg>
       <View style={StyleSheet.absoluteFillObject} pointerEvents="none"
-        // centering overlay
+      // centering overlay
       >
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ fontSize: 36, fontWeight: '900', color }}>{score}</Text>
@@ -60,7 +60,7 @@ function FloatingCrop({ emoji, style, delay = 0 }: { emoji: string; style: any; 
   useEffect(() => {
     Animated.loop(Animated.sequence([
       Animated.timing(y, { toValue: -8, duration: 1600, delay, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(y, { toValue: 0,  duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(y, { toValue: 0, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ])).start();
   }, []);
   return <Animated.Text style={[style, { transform: [{ translateY: y }] }]}>{emoji}</Animated.Text>;
@@ -69,10 +69,10 @@ function FloatingCrop({ emoji, style, delay = 0 }: { emoji: string; style: any; 
 // ─── Farmer Companion ─────────────────────────────────────────────────────────
 function FarmerCompanion({ message }: { message: string }) {
   const bounce = useRef(new Animated.Value(0)).current;
-  const wave   = useRef(new Animated.Value(0)).current;
-  const blink  = useRef(new Animated.Value(1)).current;
-  const msgOp  = useRef(new Animated.Value(0)).current;
-  const msgY   = useRef(new Animated.Value(8)).current;
+  const wave = useRef(new Animated.Value(0)).current;
+  const blink = useRef(new Animated.Value(1)).current;
+  const msgOp = useRef(new Animated.Value(0)).current;
+  const msgY = useRef(new Animated.Value(8)).current;
   const prevMsg = useRef('');
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -91,12 +91,12 @@ function FarmerCompanion({ message }: { message: string }) {
   useEffect(() => {
     Animated.loop(Animated.sequence([
       Animated.timing(bounce, { toValue: -5, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(bounce, { toValue: 0,  duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(bounce, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ])).start();
     Animated.loop(Animated.sequence([
-      Animated.timing(wave, { toValue: 1,  duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(wave, { toValue: 1, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       Animated.timing(wave, { toValue: -1, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(wave, { toValue: 0,  duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(wave, { toValue: 0, duration: 350, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       Animated.delay(2000),
     ])).start();
     Animated.loop(Animated.sequence([
@@ -112,7 +112,7 @@ function FarmerCompanion({ message }: { message: string }) {
     msgOp.setValue(0); msgY.setValue(8);
     Animated.parallel([
       Animated.timing(msgOp, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(msgY,  { toValue: 0, duration: 300, easing: Easing.out(Easing.back(1.2)), useNativeDriver: true }),
+      Animated.timing(msgY, { toValue: 0, duration: 300, easing: Easing.out(Easing.back(1.2)), useNativeDriver: true }),
     ]).start();
   }, [message]);
 
@@ -173,7 +173,7 @@ function FarmVisualization({ crop, level, isWatered, onWater, onHarvest }: { cro
   useEffect(() => {
     Animated.loop(Animated.sequence([
       Animated.timing(sunScale, { toValue: 1.08, duration: 1200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(sunScale, { toValue: 1,    duration: 1200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(sunScale, { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ])).start();
   }, []);
 
@@ -182,19 +182,19 @@ function FarmVisualization({ crop, level, isWatered, onWater, onHarvest }: { cro
       <Animated.Text style={[styles.vizSun, { transform: [{ scale: sunScale }] }]}>🌞</Animated.Text>
       <FloatingCrop emoji="☁️" style={styles.vizCloud1} delay={0} />
       <FloatingCrop emoji="☁️" style={styles.vizCloud2} delay={800} />
-      
+
       {/* Rainfall overlay */}
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: rainY }] }]} pointerEvents="none">
-         <Text style={{ fontSize: 32, opacity: 0.8, textAlign: 'center', marginTop: -20 }}>💧  💧  💧</Text>
-         <Text style={{ fontSize: 32, opacity: 0.8, textAlign: 'center', marginTop: 10 }}> 💧   💧 </Text>
+        <Text style={{ fontSize: 32, opacity: 0.8, textAlign: 'center', marginTop: -20 }}>💧  💧  💧</Text>
+        <Text style={{ fontSize: 32, opacity: 0.8, textAlign: 'center', marginTop: 10 }}> 💧   💧 </Text>
       </Animated.View>
 
       <View style={styles.vizCropRow}>
-        {[0,1,2,3,4,5,6,7].map(i => (
+        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
           <FloatingCrop key={i} emoji={CROP_STAGE} style={styles.vizCropEmoji} delay={i * 120} />
         ))}
       </View>
-      
+
       <View style={styles.vizGround}>
         {canHarvest ? (
           <TouchableOpacity onPress={onHarvest} style={[styles.waterBtn, { backgroundColor: '#FFB300', borderColor: '#FF8F00' }]}>
@@ -270,13 +270,18 @@ function DailyTaskCard({ task, done, onDone }: any) {
   );
 }
 
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Dashboard'>;
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function DashboardScreen({ navigation }: any) {
+export default function DashboardScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
-  const [showConfetti, setShowConfetti]   = useState(false);
-  const [doneTasks, setDoneTasks]         = useState<string[]>([]);
-  const [wateredToday, setWateredToday]   = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [doneTasks, setDoneTasks] = useState<string[]>([]);
+  const [wateredToday, setWateredToday] = useState(false);
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -292,11 +297,11 @@ export default function DashboardScreen({ navigation }: any) {
     return () => { if (unsub) unsub(); };
   }, []);
 
-  const player   = gameState.player;
+  const player = gameState.player;
   const farmName = player.farm?.name || t('ui.dashboard.default_farm');
   const netWorth = player.finances.cash + player.finances.savings - player.finances.debt;
   const rawScore = Math.floor((netWorth / 50000) * 100);
-  const score    = Math.min(100, Math.max(0, rawScore));
+  const score = Math.min(100, Math.max(0, rawScore));
   const scoreColor = score > 70 ? '#58CC02' : score > 40 ? '#FFC800' : '#FF4B4B';
 
   const farmerMsg = useCallback(() => {
@@ -320,7 +325,7 @@ export default function DashboardScreen({ navigation }: any) {
   };
 
   const handleHarvest = () => {
-    navigation.navigate('Harvest');
+    navigation.navigate('Harvest', {});
   };
 
   return (
@@ -333,163 +338,163 @@ export default function DashboardScreen({ navigation }: any) {
       <ConfettiCannon ref={cannonRef} count={40} origin={{ x: W / 2, y: H * 0.4 }} autoStart={false} fadeOut />
 
       <Animated.View style={{ flex: 1, opacity: fadeIn }}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* ── Header ─────────────────────────────────────────── */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>{t('ui.dashboard.good_morning')}</Text>
-            <Text style={styles.playerName}>{player.name || t('ui.dashboard.default_farmer')}</Text>
-            <Text style={styles.farmName}>{farmName}</Text>
-          </View>
-          <View style={styles.streakPill}>
-            <Text style={styles.streakText}>🔥 {player.score.streak}</Text>
-            <Text style={styles.streakSub}>{t('ui.dashboard.streak')}</Text>
-          </View>
-        </View>
-
-        {/* ── XP Bar ─────────────────────────────────────────── */}
-        <XPBar xp={player.score.xp} level={player.score.level} />
-
-        {/* ── Farmer Companion ───────────────────────────────── */}
-        <FarmerCompanion message={farmerMsg()} />
-
-        {/* ── Farm Visualization ─────────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('ui.dashboard.your_farm_section')}</Text>
-          <FarmVisualization 
-            crop={player.farm?.crop} 
-            level={player.score.level} 
-            isWatered={wateredToday}
-            onWater={handleWater}
-            onHarvest={handleHarvest}
-          />
-        </View>
-
-        {/* ── Financial Health ────────────────────────────────── */}
-        <View style={[styles.section, styles.healthCard]}>
-          <Text style={styles.sectionTitle}>{t('ui.dashboard.financial_health')}</Text>
-          <View style={{ alignItems: 'center' }}>
-            <CircularScore score={score} color={scoreColor} />
-          </View>
-          <View style={styles.statRow}>
-            <View style={[styles.statChip, { backgroundColor: '#E8F5E9' }]}>
-              <Text style={styles.statChipLabel}>{t('ui.dashboard.cash')}</Text>
-              <Text style={[styles.statChipValue, { color: '#2E7D32' }]}>
-                ₹{player.finances.cash.toLocaleString('en-IN')}
-              </Text>
+          {/* ── Header ─────────────────────────────────────────── */}
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.greeting}>{t('ui.dashboard.good_morning')}</Text>
+              <Text style={styles.playerName}>{player.name || t('ui.dashboard.default_farmer')}</Text>
+              <Text style={styles.farmName}>{farmName}</Text>
             </View>
-            <View style={[styles.statChip, { backgroundColor: '#FFF3E0' }]}>
-              <Text style={styles.statChipLabel}>{t('ui.dashboard.debt')}</Text>
-              <Text style={[styles.statChipValue, { color: '#E65100' }]}>
-                ₹{player.finances.debt.toLocaleString('en-IN')}
-              </Text>
-            </View>
-            <View style={[styles.statChip, { backgroundColor: '#E3F2FD' }]}>
-              <Text style={styles.statChipLabel}>{t('ui.dashboard.savings')}</Text>
-              <Text style={[styles.statChipValue, { color: '#1565C0' }]}>
-                ₹{player.finances.savings.toLocaleString('en-IN')}
-              </Text>
+            <View style={styles.streakPill}>
+              <Text style={styles.streakText}>🔥 {player.score.streak}</Text>
+              <Text style={styles.streakSub}>{t('ui.dashboard.streak')}</Text>
             </View>
           </View>
-          <View style={styles.netWorthRow}>
-            <Text style={styles.netWorthLabel}>{t('ui.dashboard.net_worth')}</Text>
-            <Text style={[styles.netWorthValue, { color: scoreColor }]}>
-              ₹{netWorth.toLocaleString('en-IN')}
-            </Text>
-          </View>
-        </View>
 
-        {/* ── Daily Tasks ─────────────────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('ui.dashboard.daily_tasks')}</Text>
-          {DAILY_TASKS(t).map(task => (
-            <DailyTaskCard
-              key={task.id}
-              task={task}
-              done={doneTasks.includes(task.id)}
-              onDone={handleTaskDone}
-            />
-          ))}
-        </View>
+          {/* ── XP Bar ─────────────────────────────────────────── */}
+          <XPBar xp={player.score.xp} level={player.score.level} />
 
-        {/* ── Badges ──────────────────────────────────────────── */}
-        {player.score.badges.length > 0 && (
+          {/* ── Farmer Companion ───────────────────────────────── */}
+          <FarmerCompanion message={farmerMsg()} />
+
+          {/* ── Farm Visualization ─────────────────────────────── */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('ui.dashboard.achievements')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 6 }}>
-              {player.score.badges.map((b: string) => (
-                <View key={b} style={styles.badgeItem}>
-                  <View style={styles.badgeCircle}><Text style={{ fontSize: 28 }}>{badgeIcons[b] || '🏅'}</Text></View>
-                  <Text style={styles.badgeLabel}>{b}</Text>
-                </View>
-              ))}
-            </ScrollView>
+            <Text style={styles.sectionTitle}>{t('ui.dashboard.your_farm_section')}</Text>
+            <FarmVisualization
+              crop={player.farm?.crop}
+              level={player.score.level}
+              isWatered={wateredToday}
+              onWater={handleWater}
+              onHarvest={handleHarvest}
+            />
           </View>
-        )}
 
-        {/* ── Season History ───────────────────────────────────── */}
-        {player.seasonHistory.length > 0 && (
+          {/* ── Financial Health ────────────────────────────────── */}
+          <View style={[styles.section, styles.healthCard]}>
+            <Text style={styles.sectionTitle}>{t('ui.dashboard.financial_health')}</Text>
+            <View style={{ alignItems: 'center' }}>
+              <CircularScore score={score} color={scoreColor} />
+            </View>
+            <View style={styles.statRow}>
+              <View style={[styles.statChip, { backgroundColor: '#E8F5E9' }]}>
+                <Text style={styles.statChipLabel}>{t('ui.dashboard.cash')}</Text>
+                <Text style={[styles.statChipValue, { color: '#2E7D32' }]}>
+                  ₹{player.finances.cash.toLocaleString('en-IN')}
+                </Text>
+              </View>
+              <View style={[styles.statChip, { backgroundColor: '#FFF3E0' }]}>
+                <Text style={styles.statChipLabel}>{t('ui.dashboard.debt')}</Text>
+                <Text style={[styles.statChipValue, { color: '#E65100' }]}>
+                  ₹{player.finances.debt.toLocaleString('en-IN')}
+                </Text>
+              </View>
+              <View style={[styles.statChip, { backgroundColor: '#E3F2FD' }]}>
+                <Text style={styles.statChipLabel}>{t('ui.dashboard.savings')}</Text>
+                <Text style={[styles.statChipValue, { color: '#1565C0' }]}>
+                  ₹{player.finances.savings.toLocaleString('en-IN')}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.netWorthRow}>
+              <Text style={styles.netWorthLabel}>{t('ui.dashboard.net_worth')}</Text>
+              <Text style={[styles.netWorthValue, { color: scoreColor }]}>
+                ₹{netWorth.toLocaleString('en-IN')}
+              </Text>
+            </View>
+          </View>
+
+          {/* ── Daily Tasks ─────────────────────────────────────── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('ui.dashboard.daily_tasks')}</Text>
+            {DAILY_TASKS(t).map(task => (
+              <DailyTaskCard
+                key={task.id}
+                task={task}
+                done={doneTasks.includes(task.id)}
+                onDone={handleTaskDone}
+              />
+            ))}
+          </View>
+
+          {/* ── Badges ──────────────────────────────────────────── */}
+          {player.score.badges.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('ui.dashboard.achievements')}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 6 }}>
+                {player.score.badges.map((b: string) => (
+                  <View key={b} style={styles.badgeItem}>
+                    <View style={styles.badgeCircle}><Text style={{ fontSize: 28 }}>{badgeIcons[b] || '🏅'}</Text></View>
+                    <Text style={styles.badgeLabel}>{b}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* ── Season History ───────────────────────────────────── */}
+          {player.seasonHistory.length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.rowBetween}>
+                <Text style={styles.sectionTitle}>{t('ui.dashboard.season_history')}</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('History')} style={styles.viewAllBtn}>
+                  <Text style={styles.viewAllText}>{t('ui.dashboard.view_all')}</Text>
+                </TouchableOpacity>
+              </View>
+              {player.seasonHistory.slice(-2).map((h: any, i: number) => {
+                const profit = h.finances.cash - h.finances.debt;
+                return (
+                  <View key={i} style={styles.historyRow}>
+                    <View style={[styles.historyDot, { backgroundColor: profit >= 0 ? '#58CC02' : '#FF4B4B' }]} />
+                    <Text style={styles.historyLabel}>{t('ui.dashboard.season_label', { season: h.season })}</Text>
+                    <Text style={[styles.historyValue, { color: profit >= 0 ? '#58CC02' : '#FF4B4B' }]}>
+                      {profit >= 0 ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* ── Featured Schemes ──────────────────────────────────── */}
           <View style={styles.section}>
             <View style={styles.rowBetween}>
-              <Text style={styles.sectionTitle}>{t('ui.dashboard.season_history')}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('History')} style={styles.viewAllBtn}>
+              <Text style={styles.sectionTitle}>{t('ui.dashboard.govt_schemes')}</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Schemes')} style={styles.viewAllBtn}>
                 <Text style={styles.viewAllText}>{t('ui.dashboard.view_all')}</Text>
               </TouchableOpacity>
             </View>
-            {player.seasonHistory.slice(-2).map((h: any, i: number) => {
-              const profit = h.finances.cash - h.finances.debt;
-              return (
-                <View key={i} style={styles.historyRow}>
-                  <View style={[styles.historyDot, { backgroundColor: profit >= 0 ? '#58CC02' : '#FF4B4B' }]} />
-                  <Text style={styles.historyLabel}>{t('ui.dashboard.season_label', { season: h.season })}</Text>
-                  <Text style={[styles.historyValue, { color: profit >= 0 ? '#58CC02' : '#FF4B4B' }]}>
-                    {profit >= 0 ? '+' : '-'}₹{Math.abs(profit).toLocaleString('en-IN')}
-                  </Text>
-                </View>
-              );
-            })}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 4 }}>
+              {['pm_kisan', 'pmfby', 'kcc'].map(key => (
+                <TouchableOpacity key={key} onPress={() => navigation.navigate('Schemes')} style={styles.schemeMiniCard}>
+                  <Text style={styles.schemeEmoji}>{key === 'pm_kisan' ? '💰' : key === 'pmfby' ? '🛡️' : '💳'}</Text>
+                  <Text numberOfLines={1} style={styles.schemeMiniTitle}>{t(`ui.schemes.list.${key}.name`)}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        )}
-        
-        {/* ── Featured Schemes ──────────────────────────────────── */}
-        <View style={styles.section}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.sectionTitle}>{t('ui.dashboard.govt_schemes')}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Schemes')} style={styles.viewAllBtn}>
-              <Text style={styles.viewAllText}>{t('ui.dashboard.view_all')}</Text>
+
+          {/* ── CTA Buttons ─────────────────────────────────────── */}
+          <View style={styles.ctaGroup}>
+            <PulseButton onPress={() => navigation.navigate('Gameplay')} color={['#58CC02', '#43A047']}>
+              <Text style={styles.ctaTextPrimary}>{t('ui.dashboard.continue_farming')}</Text>
+            </PulseButton>
+
+            <TouchableOpacity onPress={() => navigation.navigate('Schemes')} style={styles.secondaryBtn}>
+              <Text style={styles.secondaryBtnText}>{t('ui.dashboard.govt_schemes')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => { gameEngine.reset(); navigation.reset({ index: 0, routes: [{ name: 'FarmCreation' }] }); }}
+              style={styles.tertiaryBtn}
+            >
+              <Text style={styles.tertiaryBtnText}>{t('ui.dashboard.new_farm')}</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 4 }}>
-            {['pm_kisan', 'pmfby', 'kcc'].map(key => (
-              <TouchableOpacity key={key} onPress={() => navigation.navigate('Schemes')} style={styles.schemeMiniCard}>
-                <Text style={styles.schemeEmoji}>{key === 'pm_kisan' ? '💰' : key === 'pmfby' ? '🛡️' : '💳'}</Text>
-                <Text numberOfLines={1} style={styles.schemeMiniTitle}>{t(`ui.schemes.list.${key}.name`)}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
 
-        {/* ── CTA Buttons ─────────────────────────────────────── */}
-        <View style={styles.ctaGroup}>
-          <PulseButton onPress={() => navigation.navigate('Gameplay')} color={['#58CC02', '#43A047']}>
-            <Text style={styles.ctaTextPrimary}>{t('ui.dashboard.continue_farming')}</Text>
-          </PulseButton>
-
-          <TouchableOpacity onPress={() => navigation.navigate('Schemes')} style={styles.secondaryBtn}>
-            <Text style={styles.secondaryBtnText}>{t('ui.dashboard.govt_schemes')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => { gameEngine.reset(); navigation.reset({ index: 0, routes: [{ name: 'FarmCreation' }] }); }}
-            style={styles.tertiaryBtn}
-          >
-            <Text style={styles.tertiaryBtnText}>{t('ui.dashboard.new_farm')}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ height: 32 }} />
-      </ScrollView>
+          <View style={{ height: 32 }} />
+        </ScrollView>
       </Animated.View>
     </SafeAreaView>
   );
@@ -502,7 +507,7 @@ function PulseButton({ onPress, color, children }: any) {
   useEffect(() => {
     Animated.loop(Animated.sequence([
       Animated.timing(pulse, { toValue: 1.03, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      Animated.timing(pulse, { toValue: 1,    duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
     ])).start();
   }, []);
   return (
@@ -567,7 +572,7 @@ const styles = StyleSheet.create({
   vizCropLabel: { color: '#FFFFFF', fontWeight: '800', fontSize: 13, letterSpacing: 0.4, marginTop: 6 },
   waterBtn: { backgroundColor: '#29B6F6', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 16, borderWidth: 2, borderColor: '#0288D1', alignSelf: 'center', zIndex: 10 },
   waterBtnText: { color: '#FFFFFF', fontWeight: '900', fontSize: 13 },
-  waterXpText: { position: 'absolute', bottom: 50, color: '#FFD54F', fontSize: 24, fontWeight: '900', textShadowColor: '#000', textShadowRadius: 4, textShadowOffset: {width: 0, height: 2} },
+  waterXpText: { position: 'absolute', bottom: 50, color: '#FFD54F', fontSize: 24, fontWeight: '900', textShadowColor: '#000', textShadowRadius: 4, textShadowOffset: { width: 0, height: 2 } },
 
   // Sections
   section: { marginBottom: 22 },
@@ -614,7 +619,7 @@ const styles = StyleSheet.create({
   secondaryBtnText: { color: '#1565C0', fontSize: 16, fontWeight: '800' },
   tertiaryBtn: { backgroundColor: '#FFF8E1', borderRadius: 16, height: 52, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 4, borderBottomColor: '#FFE082' },
   tertiaryBtnText: { color: '#F57F17', fontSize: 16, fontWeight: '800' },
-  
+
   // Scheme mini cards
   schemeMiniCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 12, width: 140, alignItems: 'center', borderWidth: 1.5, borderColor: '#E0E0E0', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
   schemeEmoji: { fontSize: 24, marginBottom: 4 },

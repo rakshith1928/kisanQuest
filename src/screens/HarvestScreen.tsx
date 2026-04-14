@@ -108,8 +108,13 @@ function SummaryCard({ icon, label, value, color, bg }: any) {
   );
 }
 
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Harvest'>;
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function HarvestScreen({ navigation, route }: any) {
+export default function HarvestScreen({ navigation, route }: Props) {
   const { t } = useTranslation();
   const [gameState, setGameState]     = useState(gameEngine.getState());
   const [loading, setLoading]         = useState(false);

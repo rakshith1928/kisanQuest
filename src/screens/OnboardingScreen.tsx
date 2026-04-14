@@ -388,8 +388,13 @@ function ProgressDots({ total, current }: { total: number; current: number }) {
   );
 }
 
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
+
 // ─── Main Screen ─────────────────────────────────────────────────────────────
-export default function OnboardingScreen({ navigation }: any) {
+export default function OnboardingScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
   const [step, setStep] = useState(0);
   const [selectedLang, setSelectedLang] = useState<string>(i18n.language || 'hi');

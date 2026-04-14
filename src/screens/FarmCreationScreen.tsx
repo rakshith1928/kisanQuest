@@ -329,8 +329,13 @@ function InsightsPanel({ crop, visible }: { crop: any; visible: boolean }) {
   );
 }
 
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'FarmCreation'>;
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function FarmCreationScreen({ navigation }: any) {
+export default function FarmCreationScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [selectedCropId, setSelectedCropId] = useState('Wheat');

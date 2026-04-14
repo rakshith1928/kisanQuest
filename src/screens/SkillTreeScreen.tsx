@@ -3,6 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Alert }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import gameEngine from '../engine/GameEngine';
 import { useTranslation } from 'react-i18next';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'SkillTree'>;
 
 const getSKILLS = (t: any) => [
   { id: 'Insurance Literacy', icon: '🛡️', cost: 50, desc: t('ui.skill_tree.skills.insurance_literacy.desc'), name: t('ui.skill_tree.skills.insurance_literacy.name') },
@@ -12,7 +16,15 @@ const getSKILLS = (t: any) => [
   { id: 'Fraud Detection', icon: '🕵️', cost: 300, desc: t('ui.skill_tree.skills.fraud_detection.desc'), name: t('ui.skill_tree.skills.fraud_detection.name') },
 ];
 
-const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }: any) => {
+interface ScaleButtonProps {
+  onPress?: () => void;
+  disabled?: boolean;
+  style?: any;
+  children: React.ReactNode;
+  variant?: 'primary' | 'disabled';
+}
+
+const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }: ScaleButtonProps) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handlePressIn = () => { if (!disabled) Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start(); };
   const handlePressOut = () => {
@@ -30,7 +42,7 @@ const ScaleButton = ({ onPress, disabled, style, children, variant = "primary" }
   );
 };
 
-export default function SkillTreeScreen({ navigation }: any) {
+export default function SkillTreeScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [gameState, setGameState] = useState(gameEngine.getState());
 
@@ -40,12 +52,8 @@ export default function SkillTreeScreen({ navigation }: any) {
   }, []);
 
   const handleUnlock = (skillId: string, cost: number) => {
-    const state = gameEngine.getState();
-    if (state.player.score.literacyPoints >= cost) {
-      state.player.score.literacyPoints -= cost;
-      state.player.score.unlockedSkills.push(skillId);
-      // Force update by triggering state machine or manual update (Game Engine needs to be robust)
-      setGameState({ ...state }); // local re-render
+    if (gameEngine.unlockSkill(skillId, cost)) {
+      setGameState({ ...gameEngine.getState() }); // local re-render
     } else {
       Alert.alert(t('ui.skill_tree.not_enough_points'), t('ui.skill_tree.earn_more_msg'));
     }

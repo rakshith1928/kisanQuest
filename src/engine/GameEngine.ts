@@ -205,6 +205,18 @@ export class GameEngine {
     }
 
     /**
+     * Attempt to unlock a skill, securely adjusting score
+     */
+    unlockSkill(skillId: string, cost: number): boolean {
+        if (this.playerState.score.literacyPoints >= cost && !this.playerState.score.unlockedSkills.includes(skillId)) {
+            this.playerState.score.literacyPoints -= cost;
+            this.playerState.score.unlockedSkills.push(skillId);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Advance to next season
      */
     advanceSeason(): void {

@@ -5,7 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { analyticsService } from '../services/analyticsService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function HistoryScreen({ navigation }: any) {
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
+
+export default function HistoryScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [timeline, setTimeline] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
