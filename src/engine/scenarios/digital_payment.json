@@ -14,21 +14,24 @@
           "label": "scenarios.digital_payment.dp_1.options.A",
           "voiceKeywords": [ "share", "batao", "बताओ", "dedo" ],
           "nextNode": "dp_2a",
-          "financialImpact": { "cash": -20000 }
+          "financialImpact": { "cash": -35000 },
+          "healthDelta": -15
         },
         {
           "id": "B",
           "label": "scenarios.digital_payment.dp_1.options.B",
           "voiceKeywords": [ "ignore", "call", "bank", "bank call", "nahi" ],
           "nextNode": "dp_2b",
-          "financialImpact": {}
+          "financialImpact": {},
+          "healthDelta": 10
         },
         {
           "id": "C",
           "label": "scenarios.digital_payment.dp_1.options.C",
           "voiceKeywords": [ "family", "ghar", "घर", "ask", "puchna" ],
           "nextNode": "dp_2c",
-          "financialImpact": {}
+          "financialImpact": {},
+          "healthDelta": 5
         }
       ]
     },

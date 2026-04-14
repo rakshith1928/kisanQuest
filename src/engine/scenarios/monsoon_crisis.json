@@ -14,14 +14,16 @@
           "label": "scenarios.monsoon_crisis.mc_1.options.A",
           "voiceKeywords": [ "insurance", "bima", "बीमा" ],
           "nextNode": "mc_2a",
-          "financialImpact": { "cash": -3000, "insurance": true }
+          "financialImpact": { "cash": -6000, "insurance": true },
+          "healthDelta": 5
         },
         {
           "id": "B",
           "label": "scenarios.monsoon_crisis.mc_1.options.B",
           "voiceKeywords": [ "loan", "karj", "कर्ज़", "borrow" ],
           "nextNode": "mc_2b",
-          "financialImpact": { "cash": 5000, "debt": 8000 }
+          "financialImpact": { "cash": 10000, "debt": 15000 },
+          "healthDelta": -10
         },
         {
           "id": "C",
@@ -29,7 +31,8 @@
           "voiceKeywords": [ "remedy", "gharelu", "घरेलू", "try" ],
           "nextNode": "mc_2c",
           "financialImpact": { "cash": 0 },
-          "successProbability": 0.4
+          "successProbability": 0.3,
+          "healthDelta": -5
         }
       ]
     },

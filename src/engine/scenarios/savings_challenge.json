@@ -14,14 +14,16 @@
           "label": "scenarios.savings_challenge.sc_1.options.A",
           "voiceKeywords": ["phone", "buy", "khreedo", "खरीदो"],
           "nextNode": "sc_2a",
-          "financialImpact": { "cash": -8000 }
+          "financialImpact": { "cash": -10000 },
+          "healthDelta": -10
         },
         {
           "id": "B",
           "label": "scenarios.savings_challenge.sc_1.options.B",
           "voiceKeywords": ["save", "bachao", "बचाओ", "emergency"],
           "nextNode": "sc_2b",
-          "financialImpact": { "savings": 12000 }
+          "financialImpact": { "savings": 12000 },
+          "healthDelta": 10
         },
         {
           "id": "C",
@@ -29,7 +31,8 @@
           "voicePrompt": "scenarios.savings_challenge.sc_1.options.C_voicePrompt",
           "voiceKeywords": ["balance", "split", "family", "both"],
           "nextNode": "sc_2c",
-          "financialImpact": { "savings": 10000, "cash": -2000 }
+          "financialImpact": { "savings": 6000, "cash": -6000 },
+          "healthDelta": -3
         }
       ]
     },

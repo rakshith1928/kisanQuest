@@ -12,49 +12,26 @@
         {
           "id": "A",
           "label": "scenarios.loan_trap.lt_1.options.A",
-          "voiceKeywords": [
-            "bank",
-            "kcc",
-            "kisan",
-            "किसान",
-            "formal"
-          ],
+          "voiceKeywords": [ "bank", "kcc", "kisan", "किसान", "formal" ],
           "nextNode": "lt_2a",
-          "financialImpact": {
-            "cash": 30000,
-            "debt": 32100
-          }
+          "financialImpact": { "cash": 30000, "debt": 32100 },
+          "healthDelta": 10
         },
         {
           "id": "B",
           "label": "scenarios.loan_trap.lt_1.options.B",
-          "voiceKeywords": [
-            "moneylender",
-            "sahukar",
-            "साहूकार",
-            "instant"
-          ],
+          "voiceKeywords": [ "moneylender", "sahukar", "साहूकार", "instant" ],
           "nextNode": "lt_2b",
-          "financialImpact": {
-            "cash": 30000,
-            "debt": 39000
-          }
+          "financialImpact": { "cash": 30000, "debt": 55000 },
+          "healthDelta": -10
         },
         {
           "id": "C",
           "label": "scenarios.loan_trap.lt_1.options.C",
-          "voiceKeywords": [
-            "shg",
-            "group",
-            "samuh",
-            "समूह",
-            "women"
-          ],
+          "voiceKeywords": [ "shg", "group", "samuh", "समूह", "women" ],
           "nextNode": "lt_2c",
-          "financialImpact": {
-            "cash": 30000,
-            "debt": 33600
-          }
+          "financialImpact": { "cash": 30000, "debt": 36000 },
+          "healthDelta": 3
         }
       ]
     },

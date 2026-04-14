@@ -13,19 +13,22 @@
           "id": "A",
           "label": "scenarios.harvest_bargain.hb_1.options.A",
           "nextNode": "hb_2a",
-          "financialImpact": { "cash": 27500 }
+          "financialImpact": { "cash": 24000 },
+          "healthDelta": -5
         },
         {
           "id": "B",
           "label": "scenarios.harvest_bargain.hb_1.options.B",
           "nextNode": "hb_2b",
-          "financialImpact": { "cash": 31000 }
+          "financialImpact": { "cash": 31000 },
+          "healthDelta": 10
         },
         {
           "id": "C",
           "label": "scenarios.harvest_bargain.hb_1.options.C",
           "nextNode": "hb_2c",
-          "financialImpact": { "cash": 29000 }
+          "financialImpact": { "cash": 28000 },
+          "healthDelta": 3
         }
       ]
     },

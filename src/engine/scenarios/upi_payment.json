@@ -13,19 +13,22 @@
           "id": "A",
           "label": "scenarios.upi_payment.up_1.options.A",
           "nextNode": "up_2a",
-          "financialImpact": { "cash": 44000 }
+          "financialImpact": { "cash": 42000 },
+          "healthDelta": -2
         },
         {
           "id": "B",
           "label": "scenarios.upi_payment.up_1.options.B",
           "nextNode": "up_2b",
-          "financialImpact": { "cash": 45000 }
+          "financialImpact": { "cash": 45000 },
+          "healthDelta": 8
         },
         {
           "id": "C",
           "label": "scenarios.upi_payment.up_1.options.C",
           "nextNode": "up_2c",
-          "financialImpact": { "cash": 45000 }
+          "financialImpact": { "cash": 41000 },
+          "healthDelta": -5
         }
       ]
     },

@@ -13,19 +13,22 @@
           "id": "A",
           "label": "scenarios.equipment_loan.eq_1.options.A",
           "nextNode": "eq_2a",
-          "financialImpact": { "debt": 480000 }
+          "financialImpact": { "debt": 480000 },
+          "healthDelta": -10
         },
         {
           "id": "B",
           "label": "scenarios.equipment_loan.eq_1.options.B",
           "nextNode": "eq_2b",
-          "financialImpact": { "cash": -3000 }
+          "financialImpact": { "cash": -3000 },
+          "healthDelta": 10
         },
         {
           "id": "C",
           "label": "scenarios.equipment_loan.eq_1.options.C",
           "nextNode": "eq_2c",
-          "financialImpact": { "cash": -40000, "savings": -40000 }
+          "financialImpact": { "cash": -40000, "savings": -40000 },
+          "healthDelta": 5
         }
       ]
     },

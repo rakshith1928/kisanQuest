@@ -12,31 +12,18 @@
         {
           "id": "A",
           "label": "scenarios.digital_subsidy.ds_1.options.A",
-          "voiceKeywords": [
-            "bank",
-            "dbt",
-            "direct",
-            "khata",
-            "खाता"
-          ],
+          "voiceKeywords": [ "bank", "dbt", "direct", "khata", "खाता" ],
           "nextNode": "ds_2a",
-          "financialImpact": {
-            "cash": 2000
-          }
+          "financialImpact": { "cash": 2000 },
+          "healthDelta": 10
         },
         {
           "id": "B",
           "label": "scenarios.digital_subsidy.ds_1.options.B",
-          "voiceKeywords": [
-            "agent",
-            "fee",
-            "local",
-            "एजेंट"
-          ],
+          "voiceKeywords": [ "agent", "fee", "local", "एजेंट" ],
           "nextNode": "ds_2b",
-          "financialImpact": {
-            "cash": 1800
-          }
+          "financialImpact": { "cash": 1500 },
+          "healthDelta": -8
         }
       ]
     },

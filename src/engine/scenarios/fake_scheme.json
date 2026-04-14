@@ -13,19 +13,22 @@
           "id": "A",
           "label": "scenarios.fake_scheme.fs_1.options.A",
           "nextNode": "fs_2a",
-          "financialImpact": { "cash": -2000 }
+          "financialImpact": { "cash": -5000 },
+          "healthDelta": -15
         },
         {
           "id": "B",
           "label": "scenarios.fake_scheme.fs_1.options.B",
           "nextNode": "fs_2b",
-          "financialImpact": {}
+          "financialImpact": {},
+          "healthDelta": 10
         },
         {
           "id": "C",
           "label": "scenarios.fake_scheme.fs_1.options.C",
           "nextNode": "fs_2c",
-          "financialImpact": {}
+          "financialImpact": {},
+          "healthDelta": 15
         }
       ]
     },

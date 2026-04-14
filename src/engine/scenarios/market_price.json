@@ -14,22 +14,25 @@
           "label": "scenarios.market_price.mp_1.options.A",
           "voiceKeywords": [ "middleman", "bicholia", "बिचौलिया", "here" ],
           "nextNode": "mp_2a",
-          "financialImpact": { "cash": 28000 }
+          "financialImpact": { "cash": 22000 },
+          "healthDelta": -2
         },
         {
           "id": "B",
           "label": "scenarios.market_price.mp_1.options.B",
           "voiceKeywords": [ "mandi", "मंडी", "market", "transport" ],
           "nextNode": "mp_2b",
-          "financialImpact": { "cash": 34000 }
+          "financialImpact": { "cash": 34000 },
+          "healthDelta": 8
         },
         {
           "id": "C",
           "label": "scenarios.market_price.mp_1.options.C",
           "voiceKeywords": [ "store", "wait", "ruko", "रुको" ],
           "nextNode": "mp_2c",
-          "financialImpact": { "cash": -1500 },
-          "successProbability": 0.5
+          "financialImpact": { "cash": -3500 },
+          "successProbability": 0.2,
+          "healthDelta": -8
         }
       ]
     },

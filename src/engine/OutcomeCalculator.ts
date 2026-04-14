@@ -39,6 +39,7 @@ interface ScenarioOption {
     financialImpact?: FinancialImpact;
     outcome?: string;
     lesson?: string;
+    healthDelta?: number;
 }
 
 interface ScenarioNode {
@@ -211,6 +212,12 @@ export class OutcomeCalculator {
      * Assess decision quality (returns -10 to +10 health score delta)
      */
     private _assessDecisionQuality(option: ScenarioOption, playerState: FullPlayerState): number {
+        // If the scenario JSON explicitly defines a healthDelta, use it directly.
+        // This is how we mark specific options as "wrong" (-10) or "right" (+10).
+        if (option.healthDelta !== undefined) {
+            return option.healthDelta;
+        }
+
         let score = 0;
         const impact = option.financialImpact || {};
 
@@ -220,11 +227,14 @@ export class OutcomeCalculator {
         if ((impact.debt || 0) < 0) score += 2; // paying off debt
 
         // Negative: high debt, no insurance
-        if ((impact.debt || 0) > 5000) score -= 3;
-        if ((impact.debt || 0) > 0 && playerState.finances.debt > 10000) score -= 4;
+        if ((impact.debt || 0) > 2000) score -= 5;
+        if ((impact.debt || 0) > 0 && playerState.finances.debt > 5000) score -= 7;
+
+        // Doing nothing in a crisis is risky
+        if (Object.keys(impact).length === 0) score -= 2;
 
         // Clamp to range
-        return Math.max(-10, Math.min(10, score));
+        return Math.max(-15, Math.min(15, score));
     }
 
     /**
